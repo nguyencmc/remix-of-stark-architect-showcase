@@ -14,6 +14,256 @@ export type Database = {
   }
   public: {
     Tables: {
+      book_bookmarks: {
+        Row: {
+          book_id: string | null
+          created_at: string
+          id: string
+          position: number
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          book_id?: string | null
+          created_at?: string
+          id?: string
+          position: number
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          book_id?: string | null
+          created_at?: string
+          id?: string
+          position?: number
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_bookmarks_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      book_categories: {
+        Row: {
+          book_count: number | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          icon_url: string | null
+          id: string
+          is_featured: boolean | null
+          name: string
+          slug: string
+        }
+        Insert: {
+          book_count?: number | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          icon_url?: string | null
+          id?: string
+          is_featured?: boolean | null
+          name: string
+          slug: string
+        }
+        Update: {
+          book_count?: number | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          icon_url?: string | null
+          id?: string
+          is_featured?: boolean | null
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      book_chapters: {
+        Row: {
+          book_id: string | null
+          chapter_order: number | null
+          created_at: string
+          id: string
+          position: number
+          title: string
+        }
+        Insert: {
+          book_id?: string | null
+          chapter_order?: number | null
+          created_at?: string
+          id?: string
+          position: number
+          title: string
+        }
+        Update: {
+          book_id?: string | null
+          chapter_order?: number | null
+          created_at?: string
+          id?: string
+          position?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_chapters_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      book_highlights: {
+        Row: {
+          book_id: string | null
+          color: string | null
+          created_at: string
+          end_position: number
+          highlighted_text: string
+          id: string
+          start_position: number
+          user_id: string
+        }
+        Insert: {
+          book_id?: string | null
+          color?: string | null
+          created_at?: string
+          end_position: number
+          highlighted_text: string
+          id?: string
+          start_position: number
+          user_id: string
+        }
+        Update: {
+          book_id?: string | null
+          color?: string | null
+          created_at?: string
+          end_position?: number
+          highlighted_text?: string
+          id?: string
+          start_position?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_highlights_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      book_notes: {
+        Row: {
+          book_id: string | null
+          content: string
+          created_at: string
+          id: string
+          position: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          book_id?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          position: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          position?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_notes_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      books: {
+        Row: {
+          author_name: string | null
+          category_id: string | null
+          content: string | null
+          cover_url: string | null
+          created_at: string
+          creator_id: string | null
+          description: string | null
+          difficulty: string | null
+          id: string
+          is_featured: boolean | null
+          page_count: number | null
+          rating: number | null
+          read_count: number | null
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_name?: string | null
+          category_id?: string | null
+          content?: string | null
+          cover_url?: string | null
+          created_at?: string
+          creator_id?: string | null
+          description?: string | null
+          difficulty?: string | null
+          id?: string
+          is_featured?: boolean | null
+          page_count?: number | null
+          rating?: number | null
+          read_count?: number | null
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string | null
+          category_id?: string | null
+          content?: string | null
+          cover_url?: string | null
+          created_at?: string
+          creator_id?: string | null
+          description?: string | null
+          difficulty?: string | null
+          id?: string
+          is_featured?: boolean | null
+          page_count?: number | null
+          rating?: number | null
+          read_count?: number | null
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "books_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "book_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_answers: {
         Row: {
           content: string
@@ -755,6 +1005,148 @@ export type Database = {
           },
         ]
       }
+      flashcard_decks: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          tags: string[] | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          tags?: string[] | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          tags?: string[] | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      flashcard_reviews: {
+        Row: {
+          due_at: string
+          ease: number
+          flashcard_id: string
+          id: string
+          interval_days: number
+          last_grade: number | null
+          repetitions: number
+          reviewed_at: string | null
+          user_id: string
+        }
+        Insert: {
+          due_at?: string
+          ease?: number
+          flashcard_id: string
+          id?: string
+          interval_days?: number
+          last_grade?: number | null
+          repetitions?: number
+          reviewed_at?: string | null
+          user_id: string
+        }
+        Update: {
+          due_at?: string
+          ease?: number
+          flashcard_id?: string
+          id?: string
+          interval_days?: number
+          last_grade?: number | null
+          repetitions?: number
+          reviewed_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flashcard_reviews_flashcard_id_fkey"
+            columns: ["flashcard_id"]
+            isOneToOne: false
+            referencedRelation: "user_flashcards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flashcard_sets: {
+        Row: {
+          card_count: number | null
+          category: string | null
+          created_at: string
+          creator_id: string | null
+          description: string | null
+          id: string
+          is_public: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          card_count?: number | null
+          category?: string | null
+          created_at?: string
+          creator_id?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          card_count?: number | null
+          category?: string | null
+          created_at?: string
+          creator_id?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      flashcards: {
+        Row: {
+          back_text: string
+          card_order: number | null
+          created_at: string
+          front_text: string
+          id: string
+          set_id: string | null
+        }
+        Insert: {
+          back_text: string
+          card_order?: number | null
+          created_at?: string
+          front_text: string
+          id?: string
+          set_id?: string | null
+        }
+        Update: {
+          back_text?: string
+          card_order?: number | null
+          created_at?: string
+          front_text?: string
+          id?: string
+          set_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flashcards_set_id_fkey"
+            columns: ["set_id"]
+            isOneToOne: false
+            referencedRelation: "flashcard_sets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_attachments: {
         Row: {
           created_at: string
@@ -837,6 +1229,145 @@ export type Database = {
             columns: ["lesson_id"]
             isOneToOne: false
             referencedRelation: "course_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      podcast_bookmarks: {
+        Row: {
+          created_at: string
+          id: string
+          label: string | null
+          podcast_id: string
+          time_seconds: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          podcast_id: string
+          time_seconds: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          podcast_id?: string
+          time_seconds?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "podcast_bookmarks_podcast_id_fkey"
+            columns: ["podcast_id"]
+            isOneToOne: false
+            referencedRelation: "podcasts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      podcast_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number | null
+          icon_url: string | null
+          id: string
+          is_featured: boolean | null
+          name: string
+          podcast_count: number | null
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          icon_url?: string | null
+          id?: string
+          is_featured?: boolean | null
+          name: string
+          podcast_count?: number | null
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          icon_url?: string | null
+          id?: string
+          is_featured?: boolean | null
+          name?: string
+          podcast_count?: number | null
+          slug?: string
+        }
+        Relationships: []
+      }
+      podcasts: {
+        Row: {
+          audio_url: string | null
+          category_id: string | null
+          created_at: string
+          creator_id: string | null
+          description: string | null
+          difficulty: string | null
+          duration_seconds: number | null
+          episode_number: number | null
+          host_name: string | null
+          id: string
+          is_featured: boolean | null
+          listen_count: number | null
+          slug: string
+          thumbnail_url: string | null
+          title: string
+          transcript: string | null
+          updated_at: string
+        }
+        Insert: {
+          audio_url?: string | null
+          category_id?: string | null
+          created_at?: string
+          creator_id?: string | null
+          description?: string | null
+          difficulty?: string | null
+          duration_seconds?: number | null
+          episode_number?: number | null
+          host_name?: string | null
+          id?: string
+          is_featured?: boolean | null
+          listen_count?: number | null
+          slug: string
+          thumbnail_url?: string | null
+          title: string
+          transcript?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audio_url?: string | null
+          category_id?: string | null
+          created_at?: string
+          creator_id?: string | null
+          description?: string | null
+          difficulty?: string | null
+          duration_seconds?: number | null
+          episode_number?: number | null
+          host_name?: string | null
+          id?: string
+          is_featured?: boolean | null
+          listen_count?: number | null
+          slug?: string
+          thumbnail_url?: string | null
+          title?: string
+          transcript?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "podcasts_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "podcast_categories"
             referencedColumns: ["id"]
           },
         ]
@@ -960,6 +1491,53 @@ export type Database = {
           },
         ]
       }
+      user_book_progress: {
+        Row: {
+          book_id: string | null
+          completed_at: string | null
+          created_at: string
+          current_position: number | null
+          id: string
+          is_completed: boolean | null
+          last_read_at: string | null
+          total_time_seconds: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          book_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_position?: number | null
+          id?: string
+          is_completed?: boolean | null
+          last_read_at?: string | null
+          total_time_seconds?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          book_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          current_position?: number | null
+          id?: string
+          is_completed?: boolean | null
+          last_read_at?: string | null
+          total_time_seconds?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_book_progress_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_course_enrollments: {
         Row: {
           completed_at: string | null
@@ -1045,6 +1623,126 @@ export type Database = {
             columns: ["lesson_id"]
             isOneToOne: false
             referencedRelation: "course_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_flashcard_progress: {
+        Row: {
+          created_at: string
+          flashcard_id: string | null
+          id: string
+          is_remembered: boolean | null
+          last_reviewed_at: string | null
+          review_count: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          flashcard_id?: string | null
+          id?: string
+          is_remembered?: boolean | null
+          last_reviewed_at?: string | null
+          review_count?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          flashcard_id?: string | null
+          id?: string
+          is_remembered?: boolean | null
+          last_reviewed_at?: string | null
+          review_count?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_flashcard_progress_flashcard_id_fkey"
+            columns: ["flashcard_id"]
+            isOneToOne: false
+            referencedRelation: "flashcards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_flashcards: {
+        Row: {
+          back: string
+          created_at: string
+          deck_id: string
+          front: string
+          hint: string | null
+          id: string
+          source_id: string | null
+          source_type: string | null
+        }
+        Insert: {
+          back: string
+          created_at?: string
+          deck_id: string
+          front: string
+          hint?: string | null
+          id?: string
+          source_id?: string | null
+          source_type?: string | null
+        }
+        Update: {
+          back?: string
+          created_at?: string
+          deck_id?: string
+          front?: string
+          hint?: string | null
+          id?: string
+          source_id?: string | null
+          source_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_flashcards_deck_id_fkey"
+            columns: ["deck_id"]
+            isOneToOne: false
+            referencedRelation: "flashcard_decks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_podcast_progress: {
+        Row: {
+          completed: boolean | null
+          created_at: string
+          current_time_seconds: number
+          id: string
+          last_played_at: string | null
+          podcast_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string
+          current_time_seconds?: number
+          id?: string
+          last_played_at?: string | null
+          podcast_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string
+          current_time_seconds?: number
+          id?: string
+          last_played_at?: string | null
+          podcast_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_podcast_progress_podcast_id_fkey"
+            columns: ["podcast_id"]
+            isOneToOne: false
+            referencedRelation: "podcasts"
             referencedColumns: ["id"]
           },
         ]
