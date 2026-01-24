@@ -10,6 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
+import { createAuditLog } from '@/hooks/useAuditLogs';
 import { ArrowLeft, Shield, Save, Loader2, Users, GraduationCap, UserCheck, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -153,6 +154,9 @@ const PermissionManagement = () => {
         }
       });
 
+      // Get permission names for logging
+      const getPermissionName = (id: string) => permissions.find(p => p.id === id)?.name || id;
+
       // Remove permissions
       for (const item of toRemove) {
         const { error } = await supabase
@@ -161,6 +165,16 @@ const PermissionManagement = () => {
           .eq('role', item.role)
           .eq('permission_id', item.permission_id);
         if (error) throw error;
+
+        // Log permission removal
+        await createAuditLog(
+          'permission_revoked',
+          'role_permission',
+          item.permission_id,
+          { role: item.role, permission: getPermissionName(item.permission_id) },
+          null,
+          { role: item.role }
+        );
       }
 
       // Add permissions
@@ -169,6 +183,18 @@ const PermissionManagement = () => {
           .from('role_permissions')
           .insert(toAdd);
         if (error) throw error;
+
+        // Log permission grants
+        for (const item of toAdd) {
+          await createAuditLog(
+            'permission_granted',
+            'role_permission',
+            item.permission_id,
+            null,
+            { role: item.role, permission: getPermissionName(item.permission_id) },
+            { role: item.role }
+          );
+        }
       }
 
       toast({
