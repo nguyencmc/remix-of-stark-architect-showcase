@@ -120,7 +120,7 @@ export function useExamSession({
       let correct = 0;
       const attemptData = questions.map((q) => {
         const answer = answers[q.id];
-        const isCorrect = answer?.selected === q.answer;
+        const isCorrect = answer?.selected === q.correct_answer;
         if (isCorrect) correct++;
 
         return {

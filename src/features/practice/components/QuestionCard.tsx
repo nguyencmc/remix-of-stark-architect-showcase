@@ -19,7 +19,26 @@ interface QuestionCardProps {
   onSelectAnswer: (choiceId: string) => void;
 }
 
-const CHOICE_LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+interface Choice {
+  id: string;
+  text: string;
+}
+
+// Helper to convert question options to choices array
+function getChoicesFromQuestion(question: PracticeQuestion): Choice[] {
+  const choices: Choice[] = [];
+  
+  if (question.option_a) choices.push({ id: 'A', text: question.option_a });
+  if (question.option_b) choices.push({ id: 'B', text: question.option_b });
+  if (question.option_c) choices.push({ id: 'C', text: question.option_c });
+  if (question.option_d) choices.push({ id: 'D', text: question.option_d });
+  if (question.option_e) choices.push({ id: 'E', text: question.option_e });
+  if (question.option_f) choices.push({ id: 'F', text: question.option_f });
+  
+  return choices;
+}
+
+const CHOICE_LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 export function QuestionCard({
   question,
@@ -34,13 +53,15 @@ export function QuestionCard({
   const [isCreatingFlashcard, setIsCreatingFlashcard] = useState(false);
   const [flashcardCreated, setFlashcardCreated] = useState(false);
 
-  const getDifficultyBadge = (difficulty: number) => {
-    if (difficulty <= 2) return { label: 'Dễ', variant: 'secondary' as const };
-    if (difficulty === 3) return { label: 'Trung bình', variant: 'default' as const };
-    return { label: 'Khó', variant: 'destructive' as const };
+  const getDifficultyBadge = (difficulty: string | null) => {
+    if (!difficulty) return { label: 'Trung bình', variant: 'default' as const };
+    if (difficulty === 'easy') return { label: 'Dễ', variant: 'secondary' as const };
+    if (difficulty === 'hard') return { label: 'Khó', variant: 'destructive' as const };
+    return { label: 'Trung bình', variant: 'default' as const };
   };
 
   const difficultyInfo = getDifficultyBadge(question.difficulty);
+  const choices = getChoicesFromQuestion(question);
 
   const handleCreateFlashcard = async () => {
     if (!user) {
@@ -51,12 +72,12 @@ export function QuestionCard({
     setIsCreatingFlashcard(true);
     try {
       // Find correct answer text
-      const correctChoice = question.choices.find(c => c.id === question.answer);
-      const correctAnswerText = correctChoice ? correctChoice.text : String(question.answer);
+      const correctChoice = choices.find(c => c.id === question.correct_answer);
+      const correctAnswerText = correctChoice ? correctChoice.text : question.correct_answer;
 
       await createFlashcardFromQuestion(
         user.id,
-        question.prompt,
+        question.question_text,
         correctAnswerText,
         question.explanation || null,
         question.id
@@ -82,7 +103,7 @@ export function QuestionCard({
             </span>
             <Badge variant={difficultyInfo.variant}>{difficultyInfo.label}</Badge>
           </div>
-          {question.tags.length > 0 && (
+          {question.tags && question.tags.length > 0 && (
             <div className="flex gap-1 flex-wrap">
               {question.tags.slice(0, 3).map((tag) => (
                 <Badge key={tag} variant="outline" className="text-xs">
@@ -94,12 +115,23 @@ export function QuestionCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Question prompt */}
-        <div className="text-lg font-medium leading-relaxed">{question.prompt}</div>
+        {/* Question image */}
+        {question.question_image && (
+          <div className="flex justify-center">
+            <img 
+              src={question.question_image} 
+              alt="Question" 
+              className="max-w-full max-h-64 rounded-lg object-contain"
+            />
+          </div>
+        )}
+
+        {/* Question text */}
+        <div className="text-lg font-medium leading-relaxed">{question.question_text}</div>
 
         {/* Choices */}
         <div className="space-y-3">
-          {question.choices.map((choice, index) => (
+          {choices.map((choice, index) => (
             <ChoiceItem
               key={choice.id}
               id={choice.id}
@@ -108,7 +140,7 @@ export function QuestionCard({
               isSelected={selectedAnswer === choice.id}
               isCorrect={isCorrect}
               showResult={showResult}
-              correctAnswer={question.answer as string}
+              correctAnswer={question.correct_answer}
               disabled={showResult}
               onSelect={onSelectAnswer}
             />

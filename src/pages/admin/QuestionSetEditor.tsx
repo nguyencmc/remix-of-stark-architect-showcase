@@ -41,18 +41,17 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { createAuditLog } from '@/hooks/useAuditLogs';
 
-interface Choice {
-  id: string;
-  text: string;
-}
-
 interface Question {
   id?: string;
-  prompt: string;
-  choices: Choice[];
-  answer: string;
+  question_text: string;
+  question_image?: string | null;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  correct_answer: string;
   explanation: string;
-  difficulty: number;
+  difficulty: string;
   tags: string[];
   question_order: number;
   isNew?: boolean;
@@ -62,7 +61,7 @@ interface Question {
 const QuestionSetEditor = () => {
   const { id } = useParams();
   const isEditMode = Boolean(id);
-  const { isAdmin, hasPermission, loading: roleLoading } = usePermissionsContext();
+  const { hasPermission, loading: roleLoading } = usePermissionsContext();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -84,8 +83,8 @@ const QuestionSetEditor = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [activeQuestionIndex, setActiveQuestionIndex] = useState<number | null>(null);
 
-  const canCreate = hasPermission('questions.create');
-  const canEdit = hasPermission('questions.edit');
+  const canCreate = hasPermission('question_sets.create');
+  const canEdit = hasPermission('question_sets.edit');
   const hasAccess = isEditMode ? canEdit : canCreate;
 
   useEffect(() => {
@@ -156,11 +155,15 @@ const QuestionSetEditor = () => {
     if (!questionsError && questionsData) {
       setQuestions(questionsData.map(q => ({
         id: q.id,
-        prompt: q.prompt,
-        choices: q.choices as unknown as Choice[],
-        answer: q.answer as unknown as string,
+        question_text: q.question_text,
+        question_image: q.question_image,
+        option_a: q.option_a,
+        option_b: q.option_b,
+        option_c: q.option_c || '',
+        option_d: q.option_d || '',
+        correct_answer: q.correct_answer,
         explanation: q.explanation || '',
-        difficulty: q.difficulty || 3,
+        difficulty: q.difficulty || 'medium',
         tags: q.tags || [],
         question_order: q.question_order || 0,
       })));
@@ -182,16 +185,14 @@ const QuestionSetEditor = () => {
 
   const addQuestion = () => {
     const newQuestion: Question = {
-      prompt: '',
-      choices: [
-        { id: 'a', text: '' },
-        { id: 'b', text: '' },
-        { id: 'c', text: '' },
-        { id: 'd', text: '' },
-      ],
-      answer: 'a',
+      question_text: '',
+      option_a: '',
+      option_b: '',
+      option_c: '',
+      option_d: '',
+      correct_answer: 'A',
       explanation: '',
-      difficulty: 3,
+      difficulty: 'medium',
       tags: [],
       question_order: questions.length + 1,
       isNew: true,
@@ -203,15 +204,6 @@ const QuestionSetEditor = () => {
   const updateQuestion = (index: number, updates: Partial<Question>) => {
     const newQuestions = [...questions];
     newQuestions[index] = { ...newQuestions[index], ...updates };
-    setQuestions(newQuestions);
-  };
-
-  const updateChoice = (questionIndex: number, choiceId: string, text: string) => {
-    const newQuestions = [...questions];
-    const question = newQuestions[questionIndex];
-    question.choices = question.choices.map(c => 
-      c.id === choiceId ? { ...c, text } : c
-    );
     setQuestions(newQuestions);
   };
 
@@ -296,9 +288,12 @@ const QuestionSetEditor = () => {
         await supabase
           .from('practice_questions')
           .update({
-            prompt: q.prompt,
-            choices: JSON.parse(JSON.stringify(q.choices)),
-            answer: JSON.parse(JSON.stringify(q.answer)),
+            question_text: q.question_text,
+            option_a: q.option_a,
+            option_b: q.option_b,
+            option_c: q.option_c || null,
+            option_d: q.option_d || null,
+            correct_answer: q.correct_answer,
             explanation: q.explanation || null,
             difficulty: q.difficulty,
             tags: q.tags,
@@ -314,14 +309,17 @@ const QuestionSetEditor = () => {
           .insert(
             newQuestions.map(q => ({
               set_id: setId,
-              type: 'mcq_single',
-              prompt: q.prompt,
-              choices: JSON.parse(JSON.stringify(q.choices)),
-              answer: JSON.parse(JSON.stringify(q.answer)),
+              question_text: q.question_text,
+              option_a: q.option_a,
+              option_b: q.option_b,
+              option_c: q.option_c || null,
+              option_d: q.option_d || null,
+              correct_answer: q.correct_answer,
               explanation: q.explanation || null,
               difficulty: q.difficulty,
               tags: q.tags,
               question_order: q.question_order,
+              creator_id: user?.id,
             }))
           );
 
@@ -541,7 +539,7 @@ const QuestionSetEditor = () => {
                                 Câu {index + 1}
                               </p>
                               <p className="text-xs text-muted-foreground truncate">
-                                {q.prompt || 'Chưa có nội dung'}
+                                {q.question_text || 'Chưa có nội dung'}
                               </p>
                             </div>
                           </div>
@@ -587,40 +585,43 @@ const QuestionSetEditor = () => {
                   </AlertDialog>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Question prompt */}
+                  {/* Question text */}
                   <div className="space-y-2">
                     <Label>Nội dung câu hỏi *</Label>
                     <Textarea
-                      value={activeQuestion.prompt}
-                      onChange={(e) => updateQuestion(activeQuestionIndex!, { prompt: e.target.value })}
+                      value={activeQuestion.question_text}
+                      onChange={(e) => updateQuestion(activeQuestionIndex!, { question_text: e.target.value })}
                       placeholder="Nhập nội dung câu hỏi..."
                       rows={3}
                     />
                   </div>
 
-                  {/* Choices */}
+                  {/* Options */}
                   <div className="space-y-3">
                     <Label>Đáp án</Label>
-                    {activeQuestion.choices.map((choice, idx) => (
-                      <div key={choice.id} className="flex items-center gap-3">
-                        <div 
-                          onClick={() => updateQuestion(activeQuestionIndex!, { answer: choice.id })}
-                          className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer font-medium text-sm transition-colors ${
-                            activeQuestion.answer === choice.id
-                              ? 'bg-primary text-primary-foreground'
-                              : 'bg-muted hover:bg-muted/80'
-                          }`}
-                        >
-                          {choice.id.toUpperCase()}
+                    {(['A', 'B', 'C', 'D'] as const).map((opt) => {
+                      const optionKey = `option_${opt.toLowerCase()}` as keyof Question;
+                      return (
+                        <div key={opt} className="flex items-center gap-3">
+                          <div 
+                            onClick={() => updateQuestion(activeQuestionIndex!, { correct_answer: opt })}
+                            className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer font-medium text-sm transition-colors ${
+                              activeQuestion.correct_answer === opt
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted hover:bg-muted/80'
+                            }`}
+                          >
+                            {opt}
+                          </div>
+                          <Input
+                            value={(activeQuestion[optionKey] as string) || ''}
+                            onChange={(e) => updateQuestion(activeQuestionIndex!, { [optionKey]: e.target.value })}
+                            placeholder={`Đáp án ${opt}...`}
+                            className="flex-1"
+                          />
                         </div>
-                        <Input
-                          value={choice.text}
-                          onChange={(e) => updateChoice(activeQuestionIndex!, choice.id, e.target.value)}
-                          placeholder={`Đáp án ${choice.id.toUpperCase()}...`}
-                          className="flex-1"
-                        />
-                      </div>
-                    ))}
+                      );
+                    })}
                     <p className="text-xs text-muted-foreground">
                       Click vào chữ cái để chọn đáp án đúng
                     </p>
@@ -639,20 +640,18 @@ const QuestionSetEditor = () => {
 
                   {/* Difficulty */}
                   <div className="space-y-2">
-                    <Label>Độ khó (1-5)</Label>
+                    <Label>Độ khó</Label>
                     <Select 
-                      value={String(activeQuestion.difficulty)} 
-                      onValueChange={(v) => updateQuestion(activeQuestionIndex!, { difficulty: parseInt(v) })}
+                      value={activeQuestion.difficulty} 
+                      onValueChange={(v) => updateQuestion(activeQuestionIndex!, { difficulty: v })}
                     >
-                      <SelectTrigger className="w-32">
+                      <SelectTrigger className="w-40">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="1">1 - Rất dễ</SelectItem>
-                        <SelectItem value="2">2 - Dễ</SelectItem>
-                        <SelectItem value="3">3 - Trung bình</SelectItem>
-                        <SelectItem value="4">4 - Khó</SelectItem>
-                        <SelectItem value="5">5 - Rất khó</SelectItem>
+                        <SelectItem value="easy">Dễ</SelectItem>
+                        <SelectItem value="medium">Trung bình</SelectItem>
+                        <SelectItem value="hard">Khó</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
