@@ -46,7 +46,7 @@ export default function ReviewWrongRunner() {
     if (!currentQuestion || !currentAnswer?.selected || currentAnswer.isChecked) return;
 
     setIsChecking(true);
-    const isCorrect = currentAnswer.selected === currentQuestion.answer;
+    const isCorrect = currentAnswer.selected === currentQuestion.correct_answer;
 
     setAnswers((prev) => ({
       ...prev,

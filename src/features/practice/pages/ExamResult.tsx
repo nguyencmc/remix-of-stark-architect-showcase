@@ -63,9 +63,11 @@ export default function ExamResult() {
     );
   }
 
-  const scorePercent = session.total > 0 ? (session.correct / session.total) * 100 : 0;
+  const total = session.total_questions || 0;
+  const correct = session.correct_count || 0;
+  const scorePercent = total > 0 ? (correct / total) * 100 : 0;
   const isPassed = scorePercent >= 50;
-  const wrongCount = session.total - session.correct;
+  const wrongCount = total - correct;
 
   const getScoreColor = () => {
     if (scorePercent >= 80) return 'text-green-500';
@@ -87,8 +89,8 @@ export default function ExamResult() {
     return `${mins} phút ${secs} giây`;
   };
 
-  const timeSpent = session.submitted_at && session.started_at
-    ? Math.floor((new Date(session.submitted_at).getTime() - new Date(session.started_at).getTime()) / 1000)
+  const timeSpent = session.ended_at && session.started_at
+    ? Math.floor((new Date(session.ended_at).getTime() - new Date(session.started_at).getTime()) / 1000)
     : 0;
 
   return (
@@ -129,10 +131,10 @@ export default function ExamResult() {
             {/* Score Display */}
             <div className="text-center">
               <div className={`text-5xl font-bold ${getScoreColor()}`}>
-                {session.score}%
+                {session.score || 0}%
               </div>
               <p className="text-muted-foreground mt-1">
-                {session.correct}/{session.total} câu đúng
+                {correct}/{total} câu đúng
               </p>
             </div>
 
@@ -153,7 +155,7 @@ export default function ExamResult() {
                   <CheckCircle className="h-4 w-4 text-green-500" />
                   <span className="text-sm text-muted-foreground">Câu đúng</span>
                 </div>
-                <p className="text-2xl font-bold text-green-500">{session.correct}</p>
+                <p className="text-2xl font-bold text-green-500">{correct}</p>
               </div>
               <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20">
                 <div className="flex items-center gap-2 mb-1">

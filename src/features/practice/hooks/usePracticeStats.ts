@@ -11,10 +11,10 @@ interface AccuracyStats {
 interface RecentExamSession {
   id: string;
   set_id: string | null;
-  submitted_at: string;
-  score: number;
-  correct: number;
-  total: number;
+  ended_at: string | null;
+  score: number | null;
+  correct_count: number | null;
+  total_questions: number | null;
   duration_sec: number;
   set_title?: string;
 }
@@ -70,10 +70,10 @@ export const usePracticeStats = () => {
       // 2. Fetch recent 5 exam sessions
       const { data: recentSessions, error: sessionsError } = await supabase
         .from('practice_exam_sessions')
-        .select('id, set_id, submitted_at, score, correct, total, duration_sec')
+        .select('id, set_id, ended_at, score, correct_count, total_questions, duration_sec')
         .eq('user_id', user.id)
         .eq('status', 'submitted')
-        .order('submitted_at', { ascending: false })
+        .order('ended_at', { ascending: false })
         .limit(5);
 
       if (sessionsError) throw sessionsError;

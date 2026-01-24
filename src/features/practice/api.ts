@@ -53,17 +53,7 @@ export async function fetchQuestionsBySetId(
 
   // Filter by difficulty
   if (options?.difficulty && options.difficulty !== 'all') {
-    switch (options.difficulty) {
-      case 'easy':
-        query = query.lte('difficulty', 2);
-        break;
-      case 'medium':
-        query = query.eq('difficulty', 3);
-        break;
-      case 'hard':
-        query = query.gte('difficulty', 4);
-        break;
-    }
+    query = query.eq('difficulty', options.difficulty);
   }
 
   // Filter by tags
@@ -94,7 +84,7 @@ export async function createExamSession(
   userId: string,
   setId: string,
   durationSec: number,
-  total: number
+  totalQuestions: number
 ): Promise<ExamSession> {
   const { data, error } = await supabase
     .from('practice_exam_sessions')
@@ -102,7 +92,7 @@ export async function createExamSession(
       user_id: userId,
       set_id: setId,
       duration_sec: durationSec,
-      total: total,
+      total_questions: totalQuestions,
       status: 'in_progress',
     })
     .select()
@@ -115,15 +105,15 @@ export async function createExamSession(
 export async function submitExamSession(
   sessionId: string,
   score: number,
-  correct: number
+  correctCount: number
 ): Promise<ExamSession> {
   const { data, error } = await supabase
     .from('practice_exam_sessions')
     .update({
       status: 'submitted',
-      submitted_at: new Date().toISOString(),
+      ended_at: new Date().toISOString(),
       score,
-      correct,
+      correct_count: correctCount,
     })
     .eq('id', sessionId)
     .select()
@@ -150,15 +140,20 @@ export async function createAttempt(attempt: {
   question_id: string;
   mode: 'practice' | 'exam';
   exam_session_id?: string;
-  selected: string | string[];
+  selected: string;
   is_correct: boolean;
   time_spent_sec: number;
 }): Promise<PracticeAttempt> {
   const { data, error } = await supabase
     .from('practice_attempts')
     .insert({
-      ...attempt,
+      user_id: attempt.user_id,
+      question_id: attempt.question_id,
+      mode: attempt.mode,
+      exam_session_id: attempt.exam_session_id,
       selected: attempt.selected,
+      is_correct: attempt.is_correct,
+      time_spent_sec: attempt.time_spent_sec,
     })
     .select()
     .single();
@@ -173,14 +168,24 @@ export async function createBatchAttempts(
     question_id: string;
     mode: 'practice' | 'exam';
     exam_session_id?: string;
-    selected: string | string[];
+    selected: string;
     is_correct: boolean;
     time_spent_sec: number;
   }>
 ): Promise<PracticeAttempt[]> {
+  const insertData = attempts.map(a => ({
+    user_id: a.user_id,
+    question_id: a.question_id,
+    mode: a.mode,
+    exam_session_id: a.exam_session_id,
+    selected: a.selected,
+    is_correct: a.is_correct,
+    time_spent_sec: a.time_spent_sec,
+  }));
+
   const { data, error } = await supabase
     .from('practice_attempts')
-    .insert(attempts)
+    .insert(insertData)
     .select();
 
   if (error) throw error;

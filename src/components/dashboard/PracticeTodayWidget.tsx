@@ -29,9 +29,9 @@ import {
 
 interface InProgressSession {
   id: string;
-  set_id: string | null;
+  set_id: string;
   started_at: string;
-  total: number;
+  total_questions: number | null;
 }
 
 interface WrongAnswerStats {
@@ -91,7 +91,7 @@ export const PracticeTodayWidget = () => {
       // Fetch in-progress exam session
       const { data: sessions } = await supabase
         .from('practice_exam_sessions')
-        .select('id, set_id, started_at, total')
+        .select('id, set_id, started_at, total_questions')
         .eq('user_id', user?.id)
         .eq('status', 'in_progress')
         .order('started_at', { ascending: false })
@@ -401,7 +401,7 @@ export const PracticeTodayWidget = () => {
               {inProgressSession ? (
                 <>
                   <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">
-                    1 bài chưa hoàn thành ({inProgressSession.total} câu)
+                    1 bài chưa hoàn thành ({inProgressSession.total_questions || 0} câu)
                   </p>
                   <Button size="sm" onClick={handleContinueExam} className="gap-1 sm:gap-2 text-xs sm:text-sm h-8">
                     <Play className="w-3 h-3 sm:w-4 sm:h-4" />

@@ -22,39 +22,45 @@ export interface Choice {
 export interface PracticeQuestion {
   id: string;
   set_id: string;
-  type: 'mcq_single';
-  prompt: string;
-  choices: Choice[];
-  answer: string | string[]; // Single answer or multiple answers
+  question_text: string;
+  question_image?: string | null;
+  option_a: string;
+  option_b: string;
+  option_c?: string | null;
+  option_d?: string | null;
+  option_e?: string | null;
+  option_f?: string | null;
+  correct_answer: string;
   explanation: string | null;
-  difficulty: number;
+  difficulty: string | null;
   tags: string[];
-  question_order: number;
+  question_order: number | null;
   created_at: string;
+  creator_id?: string | null;
 }
 
 export interface ExamSession {
   id: string;
   user_id: string;
-  set_id: string | null;
+  set_id: string;
   status: 'in_progress' | 'submitted';
   duration_sec: number;
   started_at: string;
-  submitted_at: string | null;
-  score: number;
-  total: number;
-  correct: number;
+  ended_at: string | null;
+  score: number | null;
+  total_questions: number | null;
+  correct_count: number | null;
 }
 
 export interface PracticeAttempt {
   id: string;
   user_id: string;
   question_id: string;
-  mode: 'practice' | 'exam';
+  mode: string | null;
   exam_session_id: string | null;
-  selected: string | string[];
+  selected: string;
   is_correct: boolean;
-  time_spent_sec: number;
+  time_spent_sec: number | null;
   created_at: string;
 }
 
