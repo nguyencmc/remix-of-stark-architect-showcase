@@ -1,12 +1,9 @@
 import { Link } from "react-router-dom";
 import { 
-  FileText, 
   Layers, 
   Headphones, 
   GraduationCap, 
   BookOpen, 
-  Users, 
-  Trophy,
   LayoutDashboard,
   User,
   History,
@@ -50,13 +47,10 @@ interface MobileMenuProps {
 }
 
 const studyLinks = [
-  { name: "Luyện thi", href: "/exams", icon: FileText },
   { name: "Flashcards", href: "/flashcards", icon: Layers },
   { name: "Podcasts", href: "/podcasts", icon: Headphones },
   { name: "Khóa học", href: "/courses", icon: GraduationCap },
   { name: "Sách", href: "/books", icon: BookOpen },
-  { name: "Nhóm học", href: "/study-groups", icon: Users },
-  { name: "Xếp hạng", href: "/leaderboard", icon: Trophy },
   { name: "Thành tựu", href: "/achievements", icon: Award },
 ];
 
