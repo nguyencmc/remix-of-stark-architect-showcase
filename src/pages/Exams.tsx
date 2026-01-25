@@ -71,6 +71,8 @@ interface Exam {
   difficulty: string | null;
   duration_minutes: number | null;
   category?: ExamCategory;
+  source: 'exam' | 'question_set'; // Track the source for navigation
+  creator_name?: string | null;
 }
 
 const ITEMS_PER_PAGE = 9;
@@ -114,23 +116,58 @@ const Exams = () => {
   const fetchData = async () => {
     setLoading(true);
     
-    const [categoryResult, examResult] = await Promise.all([
+    const [categoryResult, examResult, questionSetsResult] = await Promise.all([
       supabase.from("exam_categories").select("id, name, slug").order("name"),
-      supabase.from("exams").select("*, exam_categories(id, name, slug)").order("created_at", { ascending: false })
+      supabase.from("exams").select("*, exam_categories(id, name, slug)").order("created_at", { ascending: false }),
+      supabase.from("question_sets").select("*, exam_categories(id, name, slug)").eq("is_published", true).order("created_at", { ascending: false })
     ]);
 
     if (categoryResult.data) {
       setCategories(categoryResult.data);
     }
 
+    const allExams: Exam[] = [];
+
+    // Add official exams
     if (examResult.data) {
-      const formattedExams = examResult.data.map(exam => ({
-        ...exam,
-        category: exam.exam_categories as ExamCategory | undefined
-      }));
-      setExams(formattedExams);
+      examResult.data.forEach(exam => {
+        allExams.push({
+          id: exam.id,
+          title: exam.title,
+          slug: exam.slug,
+          description: exam.description,
+          question_count: exam.question_count,
+          attempt_count: exam.attempt_count,
+          category_id: exam.category_id,
+          difficulty: exam.difficulty,
+          duration_minutes: exam.duration_minutes,
+          category: exam.exam_categories as ExamCategory | undefined,
+          source: 'exam',
+        });
+      });
     }
 
+    // Add published question sets from users
+    if (questionSetsResult.data) {
+      questionSetsResult.data.forEach(qs => {
+        allExams.push({
+          id: qs.id,
+          title: qs.title,
+          slug: qs.id, // Use ID as slug for question sets
+          description: qs.description,
+          question_count: qs.question_count,
+          attempt_count: 0,
+          category_id: qs.category_id,
+          difficulty: qs.level,
+          duration_minutes: null,
+          category: qs.exam_categories as ExamCategory | undefined,
+          source: 'question_set',
+          creator_name: 'Cộng đồng',
+        });
+      });
+    }
+
+    setExams(allExams);
     setLoading(false);
   };
 
@@ -710,9 +747,17 @@ const Exams = () => {
                   >
                     {/* Card Header */}
                     <div className="flex items-start justify-between mb-3">
-                      <Badge className={`${getDifficultyColor(exam.difficulty)} font-medium`}>
-                        {getDifficultyLabel(exam.difficulty)}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge className={`${getDifficultyColor(exam.difficulty)} font-medium`}>
+                          {getDifficultyLabel(exam.difficulty)}
+                        </Badge>
+                        {exam.source === 'question_set' && (
+                          <Badge variant="outline" className="text-xs">
+                            <User className="h-3 w-3 mr-1" />
+                            Cộng đồng
+                          </Badge>
+                        )}
+                      </div>
                       <button className="text-muted-foreground hover:text-primary transition-colors">
                         <Bookmark className="h-5 w-5" />
                       </button>
@@ -729,16 +774,18 @@ const Exams = () => {
                         <FileText className="h-4 w-4" />
                         <span>{exam.question_count || 0} Câu hỏi</span>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        <span>{exam.duration_minutes || 60} Phút</span>
-                      </div>
+                      {exam.duration_minutes && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Clock className="h-4 w-4" />
+                          <span>{exam.duration_minutes} Phút</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Action Button */}
                     <Button 
                       className="w-full gap-2"
-                      onClick={() => navigate(`/exam/${exam.slug}`)}
+                      onClick={() => navigate(exam.source === 'question_set' ? `/practice/setup/${exam.id}` : `/exam/${exam.slug}`)}
                     >
                       Bắt đầu
                       <Play className="h-4 w-4" />
@@ -817,7 +864,7 @@ const Exams = () => {
                     <Button 
                       size="sm"
                       className="shrink-0"
-                      onClick={() => navigate(`/exam/${exam.slug}`)}
+                      onClick={() => navigate(exam.source === 'question_set' ? `/practice/setup/${exam.id}` : `/exam/${exam.slug}`)}
                     >
                       Bắt đầu
                     </Button>
