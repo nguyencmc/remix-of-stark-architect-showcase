@@ -1757,10 +1757,12 @@ export type Database = {
           created_at: string
           creator_id: string | null
           description: string | null
+          duration_minutes: number | null
           id: string
           is_published: boolean | null
           level: string | null
           question_count: number | null
+          slug: string | null
           tags: string[] | null
           title: string
           updated_at: string
@@ -1770,10 +1772,12 @@ export type Database = {
           created_at?: string
           creator_id?: string | null
           description?: string | null
+          duration_minutes?: number | null
           id?: string
           is_published?: boolean | null
           level?: string | null
           question_count?: number | null
+          slug?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string
@@ -1783,10 +1787,12 @@ export type Database = {
           created_at?: string
           creator_id?: string | null
           description?: string | null
+          duration_minutes?: number | null
           id?: string
           is_published?: boolean | null
           level?: string | null
           question_count?: number | null
+          slug?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string

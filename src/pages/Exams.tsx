@@ -153,13 +153,13 @@ const Exams = () => {
         allExams.push({
           id: qs.id,
           title: qs.title,
-          slug: qs.id, // Use ID as slug for question sets
+          slug: qs.slug || qs.id, // Use slug if available, otherwise ID
           description: qs.description,
           question_count: qs.question_count,
           attempt_count: 0,
           category_id: qs.category_id,
           difficulty: qs.level,
-          duration_minutes: null,
+          duration_minutes: qs.duration_minutes,
           category: qs.exam_categories as ExamCategory | undefined,
           source: 'question_set',
           creator_name: 'Cộng đồng',

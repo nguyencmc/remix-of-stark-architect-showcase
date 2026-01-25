@@ -5,23 +5,30 @@ import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Target, Plus, ArrowLeft, Save, X, Globe, Lock } from 'lucide-react';
+import { 
+  Target, 
+  ArrowLeft, 
+  ArrowRight, 
+  Save, 
+  Loader2 
+} from 'lucide-react';
 import { toast } from 'sonner';
+import { StepIndicator } from '@/components/admin/exam/StepIndicator';
+import { PracticeSetInfoStep } from '@/features/practice/components/PracticeSetInfoStep';
 import { CreatePracticeQuestionsStep } from '@/components/admin/practice/CreatePracticeQuestionsStep';
+import { PracticeReviewStep } from '@/features/practice/components/PracticeReviewStep';
 import type { PracticeQuestion } from '@/components/admin/practice/PracticeQuestionEditor';
+
+interface ExamCategory {
+  id: string;
+  name: string;
+}
+
+const STEPS = [
+  { id: 1, title: 'Thông tin', description: 'Nhập thông tin bộ đề' },
+  { id: 2, title: 'Tạo câu hỏi', description: 'Thêm câu hỏi vào bộ đề' },
+  { id: 3, title: 'Xem lại', description: 'Kiểm tra và lưu' },
+];
 
 export default function PracticeEditorPage() {
   const { id } = useParams();
@@ -29,18 +36,20 @@ export default function PracticeEditorPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  const [currentStep, setCurrentStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEditMode);
 
   // Question Set fields
   const [title, setTitle] = useState('');
+  const [slug, setSlug] = useState('');
   const [description, setDescription] = useState('');
   const [level, setLevel] = useState('medium');
+  const [durationMinutes, setDurationMinutes] = useState(60);
   const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState('');
-  const [isPublished, setIsPublished] = useState(false); // Default private
-  const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [isPublished, setIsPublished] = useState(false);
+  const [categoryId, setCategoryId] = useState('');
+  const [categories, setCategories] = useState<ExamCategory[]>([]);
 
   // Questions
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
@@ -78,11 +87,13 @@ export default function PracticeEditorPage() {
     }
 
     setTitle(setData.title);
+    setSlug(setData.slug || '');
     setDescription(setData.description || '');
     setLevel(setData.level || 'medium');
+    setDurationMinutes(setData.duration_minutes || 60);
     setTags(setData.tags || []);
     setIsPublished(setData.is_published ?? false);
-    setCategoryId(setData.category_id || null);
+    setCategoryId(setData.category_id || '');
 
     const { data: questionsData } = await supabase
       .from('practice_questions')
@@ -114,20 +125,49 @@ export default function PracticeEditorPage() {
     setLoading(false);
   };
 
-  const addTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()]);
-      setTagInput('');
+  const generateSlug = (text: string) => {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+  };
+
+  const handleTitleChange = (value: string) => {
+    setTitle(value);
+    if (!isEditMode) {
+      setSlug(generateSlug(value));
     }
   };
 
-  const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter(t => t !== tagToRemove));
+  const handleNext = () => {
+    if (currentStep === 1 && (!title.trim() || !slug.trim())) {
+      toast.error('Vui lòng nhập tiêu đề và đường dẫn trước khi tiếp tục');
+      return;
+    }
+    if (currentStep < 3) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
   };
 
   const handleSave = async () => {
-    if (!title.trim()) {
-      toast.error('Vui lòng nhập tên bộ đề');
+    if (!title.trim() || !slug.trim()) {
+      toast.error('Vui lòng nhập tiêu đề và đường dẫn');
+      setCurrentStep(1);
+      return;
+    }
+
+    if (questions.filter(q => !q.isDeleted).length === 0) {
+      toast.error('Vui lòng thêm ít nhất 1 câu hỏi');
+      setCurrentStep(2);
       return;
     }
 
@@ -141,11 +181,13 @@ export default function PracticeEditorPage() {
           .from('question_sets')
           .update({
             title,
+            slug,
             description: description || null,
             level,
+            duration_minutes: durationMinutes,
             tags,
             is_published: isPublished,
-            category_id: categoryId,
+            category_id: categoryId || null,
             updated_at: new Date().toISOString(),
           })
           .eq('id', id);
@@ -156,11 +198,13 @@ export default function PracticeEditorPage() {
           .from('question_sets')
           .insert({
             title,
+            slug,
             description: description || null,
             level,
+            duration_minutes: durationMinutes,
             tags,
             is_published: isPublished,
-            category_id: categoryId,
+            category_id: categoryId || null,
             question_count: 0,
             creator_id: user?.id,
           })
@@ -239,6 +283,10 @@ export default function PracticeEditorPage() {
     }
   };
 
+  const getCategoryName = () => {
+    return categories.find(c => c.id === categoryId)?.name;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -259,155 +307,123 @@ export default function PracticeEditorPage() {
 
       <main className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Link to="/practice/my-sets">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
-                <Target className="w-7 h-7 sm:w-8 sm:h-8 text-primary" />
-                {isEditMode ? 'Chỉnh sửa bộ đề' : 'Tạo bộ đề mới'}
-              </h1>
-              <p className="text-muted-foreground text-sm mt-1">
-                {isPublished ? (
-                  <span className="flex items-center gap-1 text-green-600">
-                    <Globe className="w-3.5 h-3.5" /> Công khai
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1">
-                    <Lock className="w-3.5 h-3.5" /> Riêng tư
-                  </span>
-                )}
-              </p>
-            </div>
+        <div className="flex items-center gap-4 mb-8">
+          <Link to="/practice/my-sets">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
+              <Target className="w-7 h-7 text-primary" />
+              {isEditMode ? 'Chỉnh sửa bộ đề' : 'Tạo bộ đề mới'}
+            </h1>
+            <p className="text-muted-foreground text-sm mt-1">
+              {title || 'Bộ đề chưa có tên'}
+            </p>
           </div>
-          <Button onClick={handleSave} disabled={saving} className="gap-2">
-            <Save className="w-4 h-4" />
-            {saving ? 'Đang lưu...' : 'Lưu'}
-          </Button>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Left: Question Set Info */}
-          <div className="lg:col-span-1 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Thông tin bộ đề</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Tên bộ đề *</Label>
-                  <Input
-                    id="title"
-                    value={title}
-                    onChange={e => setTitle(e.target.value)}
-                    placeholder="VD: Ôn tập Chương 1..."
-                  />
-                </div>
+        {/* Step Indicator */}
+        <div className="mb-8 max-w-3xl mx-auto">
+          <StepIndicator
+            steps={STEPS}
+            currentStep={currentStep}
+            onStepClick={(step) => {
+              if (step < currentStep || (step === 2 && title && slug) || step === currentStep) {
+                setCurrentStep(step);
+              }
+            }}
+          />
+        </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="description">Mô tả</Label>
-                  <Textarea
-                    id="description"
-                    value={description}
-                    onChange={e => setDescription(e.target.value)}
-                    placeholder="Mô tả ngắn về bộ đề..."
-                    rows={3}
-                  />
-                </div>
+        {/* Step Content */}
+        <div className="mb-8">
+          {currentStep === 1 && (
+            <PracticeSetInfoStep
+              title={title}
+              slug={slug}
+              description={description}
+              categoryId={categoryId}
+              difficulty={level}
+              durationMinutes={durationMinutes}
+              tags={tags}
+              isPublished={isPublished}
+              categories={categories}
+              isEditing={isEditMode}
+              onTitleChange={handleTitleChange}
+              onSlugChange={setSlug}
+              onDescriptionChange={setDescription}
+              onCategoryChange={setCategoryId}
+              onDifficultyChange={setLevel}
+              onDurationChange={setDurationMinutes}
+              onTagsChange={setTags}
+              onPublishedChange={setIsPublished}
+            />
+          )}
 
-                <div className="space-y-2">
-                  <Label>Danh mục</Label>
-                  <Select
-                    value={categoryId || 'none'}
-                    onValueChange={v => setCategoryId(v === 'none' ? null : v)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Chọn danh mục..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">-- Không chọn --</SelectItem>
-                      {categories.map(cat => (
-                        <SelectItem key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Độ khó</Label>
-                  <Select value={level} onValueChange={setLevel}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="easy">Dễ</SelectItem>
-                      <SelectItem value="medium">Trung bình</SelectItem>
-                      <SelectItem value="hard">Khó</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Tags</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={tagInput}
-                      onChange={e => setTagInput(e.target.value)}
-                      placeholder="Thêm tag..."
-                      onKeyDown={e =>
-                        e.key === 'Enter' && (e.preventDefault(), addTag())
-                      }
-                    />
-                    <Button type="button" variant="outline" onClick={addTag}>
-                      <Plus className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  {tags.length > 0 && (
-                    <div className="flex gap-1 flex-wrap mt-2">
-                      {tags.map(tag => (
-                        <Badge key={tag} variant="secondary" className="gap-1">
-                          {tag}
-                          <button onClick={() => removeTag(tag)}>
-                            <X className="w-3 h-3" />
-                          </button>
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t">
-                  <div>
-                    <Label htmlFor="published" className="font-medium">
-                      Công khai (chia sẻ)
-                    </Label>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Bộ đề công khai sẽ hiển thị trong phần Đề thi
-                    </p>
-                  </div>
-                  <Switch
-                    id="published"
-                    checked={isPublished}
-                    onCheckedChange={setIsPublished}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Right: Questions Editor */}
-          <div className="lg:col-span-2">
+          {currentStep === 2 && (
             <CreatePracticeQuestionsStep
               questions={questions}
               onQuestionsChange={setQuestions}
               defaultDifficulty={level}
             />
+          )}
+
+          {currentStep === 3 && (
+            <PracticeReviewStep
+              title={title}
+              description={description}
+              categoryName={getCategoryName()}
+              difficulty={level}
+              durationMinutes={durationMinutes}
+              tags={tags}
+              isPublished={isPublished}
+              questions={questions}
+              onEditInfo={() => setCurrentStep(1)}
+              onEditQuestions={() => setCurrentStep(2)}
+              onUpdateQuestion={(index, field, value) => {
+                setQuestions(prev =>
+                  prev.map((q, i) => (i === index ? { ...q, [field]: value } : q))
+                );
+              }}
+            />
+          )}
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="flex items-center justify-between max-w-3xl mx-auto pt-6 border-t">
+          <Button
+            variant="outline"
+            onClick={handleBack}
+            disabled={currentStep === 1}
+            className="gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Quay lại
+          </Button>
+
+          <div className="flex gap-3">
+            {currentStep < 3 ? (
+              <Button onClick={handleNext} className="gap-2">
+                Tiếp theo
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            ) : (
+              <Button onClick={handleSave} disabled={saving} className="gap-2">
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Đang lưu...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    Lưu bộ đề
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         </div>
       </main>
