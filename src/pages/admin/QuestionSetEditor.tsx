@@ -5,13 +5,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -24,45 +23,12 @@ import {
   Plus,
   ArrowLeft,
   Save,
-  Trash2,
-  GripVertical,
-  X,
-  Sparkles,
-  Upload,
-  Edit
+  X
 } from 'lucide-react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import { createAuditLog } from '@/hooks/useAuditLogs';
-import { AIQuestionGenerator } from '@/components/ai/AIQuestionGenerator';
-import { ImportExportQuestions } from '@/components/admin/ImportExportQuestions';
-
-interface Question {
-  id?: string;
-  question_text: string;
-  question_image?: string | null;
-  option_a: string;
-  option_b: string;
-  option_c: string;
-  option_d: string;
-  correct_answer: string;
-  explanation: string;
-  difficulty: string;
-  tags: string[];
-  question_order: number;
-  isNew?: boolean;
-  isDeleted?: boolean;
-}
+import { CreatePracticeQuestionsStep } from '@/components/admin/practice/CreatePracticeQuestionsStep';
+import type { PracticeQuestion } from '@/components/admin/practice/PracticeQuestionEditor';
 
 const QuestionSetEditor = () => {
   const { id } = useParams();
@@ -74,7 +40,6 @@ const QuestionSetEditor = () => {
   
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEditMode);
-  const [activeTab, setActiveTab] = useState<'manual' | 'ai' | 'import'>('manual');
   
   // Question Set fields
   const [title, setTitle] = useState('');
@@ -89,8 +54,7 @@ const QuestionSetEditor = () => {
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   
   // Questions
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [activeQuestionIndex, setActiveQuestionIndex] = useState<number | null>(null);
+  const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
 
   const canCreate = hasPermission('question_sets.create');
   const canEdit = hasPermission('question_sets.edit');
@@ -177,6 +141,8 @@ const QuestionSetEditor = () => {
         option_b: q.option_b,
         option_c: q.option_c || '',
         option_d: q.option_d || '',
+        option_e: q.option_e || '',
+        option_f: q.option_f || '',
         correct_answer: q.correct_answer,
         explanation: q.explanation || '',
         difficulty: q.difficulty || 'medium',
@@ -197,87 +163,6 @@ const QuestionSetEditor = () => {
 
   const removeTag = (tagToRemove: string) => {
     setTags(tags.filter(t => t !== tagToRemove));
-  };
-
-  const addQuestion = () => {
-    const newQuestion: Question = {
-      question_text: '',
-      option_a: '',
-      option_b: '',
-      option_c: '',
-      option_d: '',
-      correct_answer: 'A',
-      explanation: '',
-      difficulty: 'medium',
-      tags: [],
-      question_order: questions.length + 1,
-      isNew: true,
-    };
-    setQuestions([...questions, newQuestion]);
-    setActiveQuestionIndex(questions.length);
-  };
-
-  const updateQuestion = (index: number, updates: Partial<Question>) => {
-    const newQuestions = [...questions];
-    newQuestions[index] = { ...newQuestions[index], ...updates };
-    setQuestions(newQuestions);
-  };
-
-  const deleteQuestion = (index: number) => {
-    const question = questions[index];
-    if (question.id) {
-      // Mark for deletion
-      const newQuestions = [...questions];
-      newQuestions[index] = { ...question, isDeleted: true };
-      setQuestions(newQuestions);
-    } else {
-      // Remove new question
-      setQuestions(questions.filter((_, i) => i !== index));
-    }
-    setActiveQuestionIndex(null);
-  };
-
-  // Handle AI-generated questions
-  const handleAIQuestionsGenerated = (newQuestions: any[]) => {
-    const mapped = newQuestions.map((q, i) => ({
-      question_text: q.question_text,
-      option_a: q.option_a,
-      option_b: q.option_b,
-      option_c: q.option_c || '',
-      option_d: q.option_d || '',
-      correct_answer: q.correct_answer,
-      explanation: q.explanation || '',
-      difficulty: level, // Use question set level as default
-      tags: [],
-      question_order: questions.length + i + 1,
-      isNew: true,
-    }));
-    setQuestions([...questions, ...mapped]);
-    setActiveTab('manual');
-    toast({
-      title: 'Thành công',
-      description: `Đã thêm ${mapped.length} câu hỏi vào bộ đề!`,
-    });
-  };
-
-  // Handle imported questions
-  const handleImport = (importedQuestions: any[]) => {
-    const mapped = importedQuestions.map((q, i) => ({
-      question_text: q.question_text,
-      option_a: q.option_a,
-      option_b: q.option_b,
-      option_c: q.option_c || '',
-      option_d: q.option_d || '',
-      correct_answer: q.correct_answer,
-      explanation: q.explanation || '',
-      difficulty: q.difficulty || level,
-      tags: q.tags || [],
-      question_order: i + 1,
-      isNew: !q.id,
-      id: q.id,
-    }));
-    setQuestions(mapped);
-    setActiveTab('manual');
   };
 
   const handleSave = async () => {
@@ -354,6 +239,8 @@ const QuestionSetEditor = () => {
             option_b: q.option_b,
             option_c: q.option_c || null,
             option_d: q.option_d || null,
+            option_e: q.option_e || null,
+            option_f: q.option_f || null,
             correct_answer: q.correct_answer,
             explanation: q.explanation || null,
             difficulty: q.difficulty,
@@ -375,6 +262,8 @@ const QuestionSetEditor = () => {
               option_b: q.option_b,
               option_c: q.option_c || null,
               option_d: q.option_d || null,
+              option_e: q.option_e || null,
+              option_f: q.option_f || null,
               correct_answer: q.correct_answer,
               explanation: q.explanation || null,
               difficulty: q.difficulty,
@@ -387,14 +276,19 @@ const QuestionSetEditor = () => {
         if (error) throw error;
       }
 
+      // Update question count
+      await supabase
+        .from('question_sets')
+        .update({ question_count: activeQuestions.length })
+        .eq('id', setId);
+
       // Create audit log
-      const activeQuestionsCount = questions.filter(q => !q.isDeleted).length;
       await createAuditLog(
         isEditMode ? 'update' : 'create',
         'question_set',
         setId,
-        isEditMode ? { title, level, question_count: activeQuestionsCount } : null,
-        { title, level, is_published: isPublished, question_count: activeQuestionsCount }
+        isEditMode ? { title, level, question_count: activeQuestions.length } : null,
+        { title, level, is_published: isPublished, question_count: activeQuestions.length }
       );
 
       toast({
@@ -431,9 +325,6 @@ const QuestionSetEditor = () => {
   if (!hasAccess) {
     return null;
   }
-
-  const activeQuestion = activeQuestionIndex !== null ? questions[activeQuestionIndex] : null;
-  const visibleQuestions = questions.filter(q => !q.isDeleted);
 
   return (
     <div className="min-h-screen bg-background">
@@ -587,278 +478,15 @@ const QuestionSetEditor = () => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Questions List */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Câu hỏi ({visibleQuestions.length})</CardTitle>
-                <Button size="sm" onClick={addQuestion}>
-                  <Plus className="w-4 h-4 mr-1" />
-                  Thêm
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {visibleQuestions.length === 0 ? (
-                  <p className="text-muted-foreground text-sm text-center py-4">
-                    Chưa có câu hỏi nào
-                  </p>
-                ) : (
-                  <div className="space-y-2">
-                    {questions.map((q, index) => {
-                      if (q.isDeleted) return null;
-                      return (
-                        <div
-                          key={index}
-                          onClick={() => setActiveQuestionIndex(index)}
-                          className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                            activeQuestionIndex === index
-                              ? 'border-primary bg-primary/5'
-                              : 'border-border hover:border-primary/50'
-                          }`}
-                        >
-                          <div className="flex items-start gap-2">
-                            <GripVertical className="w-4 h-4 text-muted-foreground mt-0.5" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">
-                                Câu {index + 1}
-                              </p>
-                              <p className="text-xs text-muted-foreground truncate">
-                                {q.question_text || 'Chưa có nội dung'}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </div>
 
-          {/* Right: Question Creation Methods & Editor */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Creation Methods Tabs */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Tạo câu hỏi</CardTitle>
-                  <ImportExportQuestions 
-                    questions={questions.filter(q => !q.isDeleted).map((q, i) => ({
-                      question_text: q.question_text,
-                      option_a: q.option_a,
-                      option_b: q.option_b,
-                      option_c: q.option_c,
-                      option_d: q.option_d,
-                      option_e: '',
-                      option_f: '',
-                      option_g: '',
-                      option_h: '',
-                      correct_answer: q.correct_answer,
-                      explanation: q.explanation,
-                      question_order: i + 1,
-                    }))} 
-                    onImport={handleImport}
-                  />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
-                  <TabsList className="grid grid-cols-3 mb-6">
-                    <TabsTrigger value="manual" className="gap-2">
-                      <Edit className="w-4 h-4" />
-                      Thủ công
-                    </TabsTrigger>
-                    <TabsTrigger value="ai" className="gap-2">
-                      <Sparkles className="w-4 h-4" />
-                      AI tạo đề
-                    </TabsTrigger>
-                    <TabsTrigger value="import" className="gap-2">
-                      <Upload className="w-4 h-4" />
-                      Hướng dẫn
-                    </TabsTrigger>
-                  </TabsList>
-
-                  {/* Manual Tab */}
-                  <TabsContent value="manual" className="mt-0">
-                    {activeQuestion ? (
-                      <div className="space-y-6">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="font-semibold">Câu hỏi {activeQuestionIndex! + 1}</h4>
-                            <p className="text-sm text-muted-foreground">Chỉnh sửa nội dung câu hỏi</p>
-                          </div>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="destructive" size="sm">
-                                <Trash2 className="w-4 h-4 mr-1" />
-                                Xóa
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Xóa câu hỏi?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Hành động này không thể hoàn tác.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Hủy</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => deleteQuestion(activeQuestionIndex!)}>
-                                  Xóa
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-
-                        {/* Question text */}
-                        <div className="space-y-2">
-                          <Label>Nội dung câu hỏi *</Label>
-                          <Textarea
-                            value={activeQuestion.question_text}
-                            onChange={(e) => updateQuestion(activeQuestionIndex!, { question_text: e.target.value })}
-                            placeholder="Nhập nội dung câu hỏi..."
-                            rows={3}
-                          />
-                        </div>
-
-                        {/* Options */}
-                        <div className="space-y-3">
-                          <Label>Đáp án</Label>
-                          {(['A', 'B', 'C', 'D'] as const).map((opt) => {
-                            const optionKey = `option_${opt.toLowerCase()}` as keyof Question;
-                            return (
-                              <div key={opt} className="flex items-center gap-3">
-                                <div 
-                                  onClick={() => updateQuestion(activeQuestionIndex!, { correct_answer: opt })}
-                                  className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer font-medium text-sm transition-colors ${
-                                    activeQuestion.correct_answer === opt
-                                      ? 'bg-primary text-primary-foreground'
-                                      : 'bg-muted hover:bg-muted/80'
-                                  }`}
-                                >
-                                  {opt}
-                                </div>
-                                <Input
-                                  value={(activeQuestion[optionKey] as string) || ''}
-                                  onChange={(e) => updateQuestion(activeQuestionIndex!, { [optionKey]: e.target.value })}
-                                  placeholder={`Đáp án ${opt}...`}
-                                  className="flex-1"
-                                />
-                              </div>
-                            );
-                          })}
-                          <p className="text-xs text-muted-foreground">
-                            Click vào chữ cái để chọn đáp án đúng
-                          </p>
-                        </div>
-
-                        {/* Explanation */}
-                        <div className="space-y-2">
-                          <Label>Giải thích</Label>
-                          <Textarea
-                            value={activeQuestion.explanation}
-                            onChange={(e) => updateQuestion(activeQuestionIndex!, { explanation: e.target.value })}
-                            placeholder="Giải thích đáp án (hiển thị sau khi người dùng trả lời)..."
-                            rows={2}
-                          />
-                        </div>
-
-                        {/* Difficulty */}
-                        <div className="space-y-2">
-                          <Label>Độ khó</Label>
-                          <Select 
-                            value={activeQuestion.difficulty} 
-                            onValueChange={(v) => updateQuestion(activeQuestionIndex!, { difficulty: v })}
-                          >
-                            <SelectTrigger className="w-40">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="easy">Dễ</SelectItem>
-                              <SelectItem value="medium">Trung bình</SelectItem>
-                              <SelectItem value="hard">Khó</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <BookOpen className="w-16 h-16 text-muted-foreground mb-4" />
-                        <p className="text-muted-foreground mb-4">
-                          Chọn một câu hỏi từ danh sách để chỉnh sửa hoặc tạo câu hỏi mới
-                        </p>
-                        <Button onClick={addQuestion}>
-                          <Plus className="w-4 h-4 mr-2" />
-                          Thêm câu hỏi thủ công
-                        </Button>
-                      </div>
-                    )}
-                  </TabsContent>
-
-                  {/* AI Tab */}
-                  <TabsContent value="ai" className="mt-0">
-                    <AIQuestionGenerator onQuestionsGenerated={handleAIQuestionsGenerated} />
-                  </TabsContent>
-
-                  {/* Import Help Tab */}
-                  <TabsContent value="import" className="mt-0">
-                    <div className="space-y-4">
-                      <div className="bg-muted/50 rounded-lg p-4">
-                        <h4 className="font-semibold mb-3">Hướng dẫn import câu hỏi</h4>
-                        <div className="space-y-4 text-sm text-muted-foreground">
-                          <div>
-                            <p className="font-medium text-foreground mb-1">📄 Định dạng TXT:</p>
-                            <pre className="bg-background p-3 rounded text-xs overflow-x-auto">
-{`Question 1: Thủ đô Việt Nam là gì?
-A. Hà Nội
-B. Hồ Chí Minh
-C. Đà Nẵng
-D. Huế
-Correct: A
-Explanation: Hà Nội là thủ đô của Việt Nam
-
-Question 2: 2 + 2 = ?
-*A. 4
-B. 3
-C. 5
-D. 6`}</pre>
-                            <p className="text-xs mt-1">* Dùng dấu * để đánh dấu đáp án đúng</p>
-                          </div>
-
-                          <div>
-                            <p className="font-medium text-foreground mb-1">📊 Định dạng CSV:</p>
-                            <pre className="bg-background p-3 rounded text-xs overflow-x-auto">
-{`Question,Option A,Option B,Option C,Option D,Correct,Explanation
-Thủ đô Việt Nam?,Hà Nội,HCM,Đà Nẵng,Huế,A,Hà Nội là thủ đô`}</pre>
-                          </div>
-
-                          <div>
-                            <p className="font-medium text-foreground mb-1">📋 Định dạng JSON:</p>
-                            <pre className="bg-background p-3 rounded text-xs overflow-x-auto">
-{`[
-  {
-    "question_text": "Thủ đô Việt Nam?",
-    "option_a": "Hà Nội",
-    "option_b": "HCM",
-    "option_c": "Đà Nẵng",
-    "option_d": "Huế",
-    "correct_answer": "A",
-    "explanation": "Hà Nội là thủ đô"
-  }
-]`}</pre>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Sử dụng nút <strong>Import</strong> ở góc trên bên phải để tải file hoặc nhập thủ công.
-                      </p>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
+          {/* Right: Questions Editor */}
+          <div className="lg:col-span-2">
+            <CreatePracticeQuestionsStep
+              questions={questions}
+              onQuestionsChange={setQuestions}
+              defaultDifficulty={level}
+            />
           </div>
         </div>
       </main>
