@@ -89,12 +89,25 @@ const ExamTaking = () => {
     queryKey: ['exam', slug, isPracticeMode],
     queryFn: async () => {
       if (isPracticeMode) {
-        // Fetch from question_sets table
-        const { data, error } = await supabase
+        // Fetch from question_sets table - try slug first, then ID
+        let query = supabase
           .from('question_sets')
           .select('*')
-          .or(`slug.eq.${slug},id.eq.${slug}`)
+          .eq('slug', slug)
           .maybeSingle();
+        
+        let { data, error } = await query;
+        
+        // If not found by slug, try by ID
+        if (!data && !error) {
+          const idQuery = await supabase
+            .from('question_sets')
+            .select('*')
+            .eq('id', slug)
+            .maybeSingle();
+          data = idQuery.data;
+          error = idQuery.error;
+        }
         
         if (error) throw error;
         if (!data) return null;
