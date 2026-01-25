@@ -62,6 +62,8 @@ import ExamSetup from "./features/practice/pages/ExamSetup";
 import ExamRunner from "./features/practice/pages/ExamRunner";
 import ExamResult from "./features/practice/pages/ExamResult";
 import ReviewWrongRunner from "./features/practice/pages/ReviewWrongRunner";
+import MyPracticeSetsPage from "./features/practice/pages/MyPracticeSetsPage";
+import PracticeEditorPage from "./features/practice/pages/PracticeEditorPage";
 
 // Flashcards feature pages
 import DeckListPage from "./features/flashcards/pages/DeckListPage";
@@ -112,6 +114,9 @@ const App = () => (
               
               {/* Practice feature routes */}
               <Route path="/practice" element={<QuestionBankPage />} />
+              <Route path="/practice/my-sets" element={<MyPracticeSetsPage />} />
+              <Route path="/practice/create" element={<PracticeEditorPage />} />
+              <Route path="/practice/edit/:id" element={<PracticeEditorPage />} />
               <Route path="/practice/setup/:setId" element={<PracticeSetup />} />
               <Route path="/practice/run/:setId" element={<PracticeRunner />} />
               <Route path="/practice/exam-setup/:setId" element={<ExamSetup />} />

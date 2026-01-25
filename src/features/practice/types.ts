@@ -4,11 +4,12 @@ export interface QuestionSet {
   id: string;
   title: string;
   description: string | null;
-  course_id: string | null;
+  category_id: string | null;
   tags: string[];
   level: string;
   is_published: boolean;
   question_count: number;
+  creator_id: string | null;
   created_at: string;
   updated_at: string;
 }
