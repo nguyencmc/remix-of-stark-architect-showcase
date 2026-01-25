@@ -114,6 +114,7 @@ const App = () => (
               
               {/* Practice feature routes */}
               <Route path="/practice" element={<QuestionBankPage />} />
+              <Route path="/practice/question-bank" element={<QuestionBankPage />} />
               <Route path="/practice/my-sets" element={<MyPracticeSetsPage />} />
               <Route path="/practice/create" element={<PracticeEditorPage />} />
               <Route path="/practice/edit/:id" element={<PracticeEditorPage />} />
