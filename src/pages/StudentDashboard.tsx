@@ -284,13 +284,13 @@ const StudentDashboard = () => {
 
         {/* Quick Links Grid - Mobile 4 cols */}
         <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-6 sm:mb-8">
-          <Link to="/exams" className="block">
+          <Link to="/practice/question-bank" className="block">
             <Card className="border-border/50 hover:border-primary/50 hover:shadow-md transition-all cursor-pointer group h-full">
               <CardContent className="p-2 sm:p-3 flex flex-col items-center text-center">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-green-500/10 flex items-center justify-center mb-1 sm:mb-2 group-hover:bg-green-500/20 transition-colors">
                   <Target className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
                 </div>
-                <p className="text-[10px] sm:text-xs font-medium text-muted-foreground group-hover:text-primary truncate w-full">{accuracy}%</p>
+                <p className="text-[10px] sm:text-xs font-medium text-muted-foreground group-hover:text-primary truncate w-full">Bộ đề</p>
               </CardContent>
             </Card>
           </Link>
