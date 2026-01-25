@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { createExamSession, submitExamSession, createBatchAttempts } from '../api';
 import type { PracticeQuestion, ExamSession, AnswerState } from '../types';
+import { isMultiSelectQuestion, toggleMultiSelect, checkAnswerCorrect } from '../types';
 
 interface UseExamSessionOptions {
   questions: PracticeQuestion[];
@@ -100,14 +101,30 @@ export function useExamSession({
   }, [user, setId, durationMinutes, questions.length]);
 
   const selectAnswer = useCallback((questionId: string, selected: string) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [questionId]: {
-        ...prev[questionId],
-        selected,
-      },
-    }));
-  }, []);
+    const question = questions.find(q => q.id === questionId);
+    if (!question) return;
+    
+    const isMultiSelect = isMultiSelectQuestion(question.correct_answer);
+    
+    setAnswers((prev) => {
+      const currentSelected = prev[questionId]?.selected;
+      let newSelected: string | null;
+      
+      if (isMultiSelect) {
+        newSelected = toggleMultiSelect(currentSelected, selected) || null;
+      } else {
+        newSelected = selected;
+      }
+      
+      return {
+        ...prev,
+        [questionId]: {
+          ...prev[questionId],
+          selected: newSelected,
+        },
+      };
+    });
+  }, [questions]);
 
   const handleSubmit = useCallback(async () => {
     if (!user || !session || isSubmitting) return;
@@ -120,8 +137,8 @@ export function useExamSession({
       let correct = 0;
       const attemptData = questions.map((q) => {
         const answer = answers[q.id];
-        const isCorrect = answer?.selected === q.correct_answer;
-        if (isCorrect) correct++;
+        const isAnswerCorrect = checkAnswerCorrect(answer?.selected, q.correct_answer);
+        if (isAnswerCorrect) correct++;
 
         return {
           user_id: user.id,
@@ -129,7 +146,7 @@ export function useExamSession({
           mode: 'exam' as const,
           exam_session_id: session.id,
           selected: answer?.selected || '',
-          is_correct: isCorrect,
+          is_correct: isAnswerCorrect,
           time_spent_sec: answer?.timeSpent || 0,
         };
       });

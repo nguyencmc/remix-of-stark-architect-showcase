@@ -81,8 +81,44 @@ export interface ExamSetupConfig {
 // Answer state during practice/exam
 export interface AnswerState {
   questionId: string;
-  selected: string | null;
+  selected: string | null; // Can be comma-separated for multi-select: "A,B"
   isChecked: boolean;
   isCorrect: boolean | null;
   timeSpent: number;
+}
+
+// Helper to check if a question is multi-select
+export function isMultiSelectQuestion(correctAnswer: string): boolean {
+  return correctAnswer.includes(',');
+}
+
+// Helper to compare answers (handles multi-select)
+export function checkAnswerCorrect(selected: string | null, correctAnswer: string): boolean {
+  if (!selected) return false;
+  
+  const selectedSet = new Set(selected.split(',').map(s => s.trim().toUpperCase()));
+  const correctSet = new Set(correctAnswer.split(',').map(s => s.trim().toUpperCase()));
+  
+  if (selectedSet.size !== correctSet.size) return false;
+  for (const item of selectedSet) {
+    if (!correctSet.has(item)) return false;
+  }
+  return true;
+}
+
+// Helper to toggle a choice in multi-select
+export function toggleMultiSelect(current: string | null, choiceId: string): string {
+  if (!current) return choiceId;
+  
+  const selectedArray = current.split(',').map(s => s.trim());
+  const index = selectedArray.indexOf(choiceId);
+  
+  if (index > -1) {
+    selectedArray.splice(index, 1);
+    return selectedArray.join(',') || '';
+  } else {
+    selectedArray.push(choiceId);
+    // Sort alphabetically for consistent comparison
+    return selectedArray.sort().join(',');
+  }
 }
