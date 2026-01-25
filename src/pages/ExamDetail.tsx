@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,35 +7,111 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Clock, FileText, Target, Users, ArrowLeft, Play, BookOpen, BarChart3 } from "lucide-react";
 
+interface ExamData {
+  id: string;
+  title: string;
+  description: string | null;
+  duration_minutes: number | null;
+  difficulty: string | null;
+  question_count: number | null;
+  attempt_count: number | null;
+  pass_rate: number | null;
+  category_name: string | null;
+}
+
 const ExamDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  
+  // Check if this is a practice/community exam
+  const isPracticeMode = searchParams.get('type') === 'practice';
 
   const { data: exam, isLoading: examLoading } = useQuery({
-    queryKey: ["exam-detail", slug],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("exams")
-        .select("*, exam_categories(name, slug)")
-        .eq("slug", slug)
-        .maybeSingle();
+    queryKey: ["exam-detail", slug, isPracticeMode],
+    queryFn: async (): Promise<ExamData | null> => {
+      if (isPracticeMode) {
+        // Fetch from question_sets table - try slug first, then ID
+        let { data, error } = await supabase
+          .from("question_sets")
+          .select("*, exam_categories(name)")
+          .eq("slug", slug)
+          .maybeSingle();
+        
+        // If not found by slug, try by ID
+        if (!data && !error) {
+          const idQuery = await supabase
+            .from("question_sets")
+            .select("*, exam_categories(name)")
+            .eq("id", slug)
+            .maybeSingle();
+          data = idQuery.data;
+          error = idQuery.error;
+        }
 
-      if (error) throw error;
-      return data;
+        if (error) throw error;
+        if (!data) return null;
+        
+        return {
+          id: data.id,
+          title: data.title,
+          description: data.description,
+          duration_minutes: data.duration_minutes || 60,
+          difficulty: data.level,
+          question_count: data.question_count,
+          attempt_count: 0,
+          pass_rate: 0,
+          category_name: (data.exam_categories as { name: string } | null)?.name || null,
+        };
+      } else {
+        // Fetch from exams table (official exams)
+        const { data, error } = await supabase
+          .from("exams")
+          .select("*, exam_categories(name)")
+          .eq("slug", slug)
+          .maybeSingle();
+
+        if (error) throw error;
+        if (!data) return null;
+        
+        return {
+          id: data.id,
+          title: data.title,
+          description: data.description,
+          duration_minutes: data.duration_minutes,
+          difficulty: data.difficulty,
+          question_count: data.question_count,
+          attempt_count: data.attempt_count,
+          pass_rate: data.pass_rate,
+          category_name: (data.exam_categories as { name: string } | null)?.name || null,
+        };
+      }
     },
     enabled: !!slug,
   });
 
   const { data: questionCount } = useQuery({
-    queryKey: ["exam-questions-count", exam?.id],
+    queryKey: ["exam-questions-count", exam?.id, isPracticeMode],
     queryFn: async () => {
-      const { count, error } = await supabase
-        .from("questions")
-        .select("*", { count: "exact", head: true })
-        .eq("exam_id", exam?.id);
+      if (isPracticeMode) {
+        // Count from practice_questions
+        const { count, error } = await supabase
+          .from("practice_questions")
+          .select("*", { count: "exact", head: true })
+          .eq("set_id", exam?.id);
 
-      if (error) throw error;
-      return count || 0;
+        if (error) throw error;
+        return count || 0;
+      } else {
+        // Count from questions table
+        const { count, error } = await supabase
+          .from("questions")
+          .select("*", { count: "exact", head: true })
+          .eq("exam_id", exam?.id);
+
+        if (error) throw error;
+        return count || 0;
+      }
     },
     enabled: !!exam?.id,
   });
@@ -43,10 +119,13 @@ const ExamDetail = () => {
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "easy":
+      case "beginner":
         return "bg-green-500/10 text-green-500 border-green-500/20";
       case "medium":
+      case "intermediate":
         return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
       case "hard":
+      case "advanced":
         return "bg-red-500/10 text-red-500 border-red-500/20";
       default:
         return "bg-muted text-muted-foreground";
@@ -56,13 +135,24 @@ const ExamDetail = () => {
   const getDifficultyLabel = (difficulty: string) => {
     switch (difficulty) {
       case "easy":
+      case "beginner":
         return "Dễ";
       case "medium":
+      case "intermediate":
         return "Trung bình";
       case "hard":
+      case "advanced":
         return "Khó";
       default:
         return difficulty;
+    }
+  };
+
+  const handleStartExam = () => {
+    if (isPracticeMode) {
+      navigate(`/exam/${slug}/take?type=practice`);
+    } else {
+      navigate(`/exam/${slug}/take`);
     }
   };
 
@@ -109,9 +199,14 @@ const ExamDetail = () => {
 
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
             <div className="flex-1">
-              {exam.exam_categories && (
+              {exam.category_name && (
                 <Badge variant="secondary" className="mb-3">
-                  {(exam.exam_categories as { name: string }).name}
+                  {exam.category_name}
+                </Badge>
+              )}
+              {isPracticeMode && (
+                <Badge variant="outline" className="mb-3 ml-2">
+                  Cộng đồng
                 </Badge>
               )}
               <h1 className="text-3xl md:text-4xl font-bold mb-4">{exam.title}</h1>
@@ -126,7 +221,7 @@ const ExamDetail = () => {
               <Button
                 size="lg"
                 className="text-lg px-8"
-                onClick={() => navigate(`/exam/${slug}/take`)}
+                onClick={handleStartExam}
               >
                 <Play className="w-5 h-5 mr-2" />
                 Bắt đầu làm bài
@@ -244,7 +339,7 @@ const ExamDetail = () => {
           <Button
             size="lg"
             className="w-full text-lg"
-            onClick={() => navigate(`/exam/${slug}/take`)}
+            onClick={handleStartExam}
           >
             <Play className="w-5 h-5 mr-2" />
             Bắt đầu làm bài
