@@ -10,6 +10,7 @@ import { QuestionCard } from '../components/QuestionCard';
 import { ProgressBar } from '../components/ProgressBar';
 import { createAttempt } from '../api';
 import type { AnswerState } from '../types';
+import { isMultiSelectQuestion, toggleMultiSelect, checkAnswerCorrect } from '../types';
 
 export default function PracticeRunner() {
   const { setId } = useParams<{ setId: string }>();
@@ -40,23 +41,38 @@ export default function PracticeRunner() {
   const handleSelectAnswer = useCallback((choiceId: string) => {
     if (!currentQuestion || currentAnswer?.isChecked) return;
 
-    setAnswers((prev) => ({
-      ...prev,
-      [currentQuestion.id]: {
-        questionId: currentQuestion.id,
-        selected: choiceId,
-        isChecked: false,
-        isCorrect: null,
-        timeSpent: 0,
-      },
-    }));
+    const isMultiSelect = isMultiSelectQuestion(currentQuestion.correct_answer);
+    
+    setAnswers((prev) => {
+      const currentSelected = prev[currentQuestion.id]?.selected;
+      let newSelected: string;
+      
+      if (isMultiSelect) {
+        // Toggle selection for multi-select questions
+        newSelected = toggleMultiSelect(currentSelected, choiceId);
+      } else {
+        // Single select - replace
+        newSelected = choiceId;
+      }
+      
+      return {
+        ...prev,
+        [currentQuestion.id]: {
+          questionId: currentQuestion.id,
+          selected: newSelected || null,
+          isChecked: false,
+          isCorrect: null,
+          timeSpent: 0,
+        },
+      };
+    });
   }, [currentQuestion, currentAnswer]);
 
   const handleCheck = useCallback(async () => {
     if (!currentQuestion || !currentAnswer?.selected || currentAnswer.isChecked) return;
 
     setIsChecking(true);
-    const isCorrect = currentAnswer.selected === currentQuestion.correct_answer;
+    const isCorrect = checkAnswerCorrect(currentAnswer.selected, currentQuestion.correct_answer);
 
     // Update local state
     setAnswers((prev) => ({

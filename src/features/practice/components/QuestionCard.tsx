@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { createFlashcardFromQuestion } from '@/features/flashcards/api';
 import { toast } from 'sonner';
 import type { PracticeQuestion } from '../types';
+import { isMultiSelectQuestion } from '../types';
 
 interface QuestionCardProps {
   question: PracticeQuestion;
@@ -62,6 +63,10 @@ export function QuestionCard({
 
   const difficultyInfo = getDifficultyBadge(question.difficulty);
   const choices = getChoicesFromQuestion(question);
+  const isMultiSelect = isMultiSelectQuestion(question.correct_answer);
+  
+  // Parse selected answers for multi-select display
+  const selectedAnswers = selectedAnswer?.split(',').map(s => s.trim().toUpperCase()) || [];
 
   const handleCreateFlashcard = async () => {
     if (!user) {
@@ -115,6 +120,15 @@ export function QuestionCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Multi-select indicator */}
+        {isMultiSelect && (
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+            <span className="text-blue-600 dark:text-blue-400 text-sm font-medium">
+              📝 Câu hỏi nhiều đáp án - Chọn tất cả đáp án đúng
+            </span>
+          </div>
+        )}
+
         {/* Question image */}
         {question.question_image && (
           <div className="flex justify-center">
@@ -137,11 +151,12 @@ export function QuestionCard({
               id={choice.id}
               text={choice.text}
               label={CHOICE_LABELS[index]}
-              isSelected={selectedAnswer === choice.id}
+              isSelected={selectedAnswers.includes(choice.id.toUpperCase())}
               isCorrect={isCorrect}
               showResult={showResult}
               correctAnswer={question.correct_answer}
               disabled={showResult}
+              isMultiSelect={isMultiSelect}
               onSelect={onSelectAnswer}
             />
           ))}

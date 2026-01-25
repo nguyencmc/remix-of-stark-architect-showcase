@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Check, X } from 'lucide-react';
+import { Check, X, Square, CheckSquare } from 'lucide-react';
 
 interface ChoiceItemProps {
   id: string;
@@ -10,6 +10,7 @@ interface ChoiceItemProps {
   showResult: boolean;
   correctAnswer?: string;
   disabled?: boolean;
+  isMultiSelect?: boolean;
   onSelect: (id: string) => void;
 }
 
@@ -22,9 +23,12 @@ export function ChoiceItem({
   showResult,
   correctAnswer,
   disabled,
+  isMultiSelect = false,
   onSelect,
 }: ChoiceItemProps) {
-  const isCorrectAnswer = correctAnswer === id;
+  // Check if this specific choice is one of the correct answers
+  const correctAnswers = correctAnswer?.split(',').map(s => s.trim().toUpperCase()) || [];
+  const isCorrectAnswer = correctAnswers.includes(id.toUpperCase());
 
   const getItemStyles = () => {
     if (!showResult) {
@@ -37,7 +41,7 @@ export function ChoiceItem({
       return 'border-green-500 bg-green-500/10 ring-2 ring-green-500/20';
     }
 
-    if (isSelected && !isCorrect) {
+    if (isSelected && !isCorrectAnswer) {
       return 'border-red-500 bg-red-500/10 ring-2 ring-red-500/20';
     }
 
@@ -55,7 +59,7 @@ export function ChoiceItem({
       return 'bg-green-500 text-white';
     }
 
-    if (isSelected && !isCorrect) {
+    if (isSelected && !isCorrectAnswer) {
       return 'bg-red-500 text-white';
     }
 
@@ -74,6 +78,16 @@ export function ChoiceItem({
         getItemStyles()
       )}
     >
+      {/* Multi-select checkbox indicator */}
+      {isMultiSelect && !showResult && (
+        <span className="flex-shrink-0 text-muted-foreground">
+          {isSelected ? (
+            <CheckSquare className="w-5 h-5 text-primary" />
+          ) : (
+            <Square className="w-5 h-5" />
+          )}
+        </span>
+      )}
       <span
         className={cn(
           'flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-sm transition-colors',
@@ -86,7 +100,7 @@ export function ChoiceItem({
       {showResult && isCorrectAnswer && (
         <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
       )}
-      {showResult && isSelected && !isCorrect && (
+      {showResult && isSelected && !isCorrectAnswer && (
         <X className="w-5 h-5 text-red-500 flex-shrink-0" />
       )}
     </button>
