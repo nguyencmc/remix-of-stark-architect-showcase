@@ -15,6 +15,7 @@ import { AchievementsBadgeDisplay } from '@/components/achievements/Achievements
 import { useAchievements } from '@/hooks/useAchievements';
 import { PracticeTodayWidget } from '@/components/dashboard/PracticeTodayWidget';
 import { PracticeStatsWidget } from '@/components/dashboard/PracticeStatsWidget';
+import { MyPracticeSetsWidget } from '@/components/dashboard/MyPracticeSetsWidget';
 import { useDueCards } from '@/features/flashcards/hooks/useDueCards';
 import { 
   BookOpen, 
@@ -333,6 +334,11 @@ const StudentDashboard = () => {
           </Link>
         </div>
 
+
+        {/* My Practice Sets */}
+        <div className="mb-6 sm:mb-8">
+          <MyPracticeSetsWidget />
+        </div>
 
         {/* Practice Widgets Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">

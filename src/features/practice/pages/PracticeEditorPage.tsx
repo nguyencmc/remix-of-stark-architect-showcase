@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { usePermissionsContext } from '@/contexts/PermissionsContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,91 +18,62 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { 
-  BookOpen, 
-  Plus,
-  ArrowLeft,
-  Save,
-  X
-} from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { createAuditLog } from '@/hooks/useAuditLogs';
+import { Target, Plus, ArrowLeft, Save, X, Globe, Lock } from 'lucide-react';
+import { toast } from 'sonner';
 import { CreatePracticeQuestionsStep } from '@/components/admin/practice/CreatePracticeQuestionsStep';
 import type { PracticeQuestion } from '@/components/admin/practice/PracticeQuestionEditor';
 
-const QuestionSetEditor = () => {
+export default function PracticeEditorPage() {
   const { id } = useParams();
   const isEditMode = Boolean(id);
-  const { hasPermission, loading: roleLoading } = usePermissionsContext();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  
+
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEditMode);
-  
+
   // Question Set fields
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [level, setLevel] = useState('medium');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
-  const [isPublished, setIsPublished] = useState(true);
-  
+  const [isPublished, setIsPublished] = useState(false); // Default private
   const [categoryId, setCategoryId] = useState<string | null>(null);
-  
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
-  
+
   // Questions
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
 
-  const canCreate = hasPermission('question_sets.create');
-  const canEdit = hasPermission('question_sets.edit');
-  const hasAccess = isEditMode ? canEdit : canCreate;
-
   useEffect(() => {
-    if (!roleLoading && !hasAccess) {
-      navigate('/');
-      toast({
-        title: "Không có quyền truy cập",
-        description: "Bạn không có quyền thực hiện thao tác này",
-        variant: "destructive",
-      });
+    if (!user) {
+      navigate('/auth');
+      return;
     }
-  }, [hasAccess, roleLoading, navigate, toast]);
-
-  useEffect(() => {
-    if (hasAccess) {
-      fetchCategories();
-      if (isEditMode && id) {
-        fetchData();
-      }
+    fetchCategories();
+    if (isEditMode && id) {
+      fetchData();
     }
-  }, [hasAccess, isEditMode, id]);
+  }, [user, isEditMode, id]);
 
   const fetchCategories = async () => {
     const { data } = await supabase.from('exam_categories').select('id, name').order('name');
     setCategories(data || []);
   };
 
-
   const fetchData = async () => {
     setLoading(true);
-    
-    // Fetch question set
+
     const { data: setData, error: setError } = await supabase
       .from('question_sets')
       .select('*')
       .eq('id', id)
+      .eq('creator_id', user?.id)
       .single();
 
     if (setError || !setData) {
-      toast({
-        title: "Lỗi",
-        description: "Không tìm thấy bộ đề",
-        variant: "destructive",
-      });
-      navigate('/admin/question-sets');
+      toast.error('Không tìm thấy bộ đề hoặc bạn không có quyền chỉnh sửa');
+      navigate('/practice/my-sets');
       return;
     }
 
@@ -110,33 +81,34 @@ const QuestionSetEditor = () => {
     setDescription(setData.description || '');
     setLevel(setData.level || 'medium');
     setTags(setData.tags || []);
-    setIsPublished(setData.is_published ?? true);
+    setIsPublished(setData.is_published ?? false);
     setCategoryId(setData.category_id || null);
 
-    // Fetch questions
-    const { data: questionsData, error: questionsError } = await supabase
+    const { data: questionsData } = await supabase
       .from('practice_questions')
       .select('*')
       .eq('set_id', id)
       .order('question_order', { ascending: true });
 
-    if (!questionsError && questionsData) {
-      setQuestions(questionsData.map(q => ({
-        id: q.id,
-        question_text: q.question_text,
-        question_image: q.question_image,
-        option_a: q.option_a,
-        option_b: q.option_b,
-        option_c: q.option_c || '',
-        option_d: q.option_d || '',
-        option_e: q.option_e || '',
-        option_f: q.option_f || '',
-        correct_answer: q.correct_answer,
-        explanation: q.explanation || '',
-        difficulty: q.difficulty || 'medium',
-        tags: q.tags || [],
-        question_order: q.question_order || 0,
-      })));
+    if (questionsData) {
+      setQuestions(
+        questionsData.map(q => ({
+          id: q.id,
+          question_text: q.question_text,
+          question_image: q.question_image,
+          option_a: q.option_a,
+          option_b: q.option_b,
+          option_c: q.option_c || '',
+          option_d: q.option_d || '',
+          option_e: q.option_e || '',
+          option_f: q.option_f || '',
+          correct_answer: q.correct_answer,
+          explanation: q.explanation || '',
+          difficulty: q.difficulty || 'medium',
+          tags: q.tags || [],
+          question_order: q.question_order || 0,
+        }))
+      );
     }
 
     setLoading(false);
@@ -155,11 +127,7 @@ const QuestionSetEditor = () => {
 
   const handleSave = async () => {
     if (!title.trim()) {
-      toast({
-        title: "Lỗi",
-        description: "Vui lòng nhập tên bộ đề",
-        variant: "destructive",
-      });
+      toast.error('Vui lòng nhập tên bộ đề');
       return;
     }
 
@@ -168,7 +136,6 @@ const QuestionSetEditor = () => {
     try {
       let setId = id;
 
-      // Create or update question set
       if (isEditMode) {
         const { error } = await supabase
           .from('question_sets')
@@ -193,7 +160,6 @@ const QuestionSetEditor = () => {
             level,
             tags,
             is_published: isPublished,
-            
             category_id: categoryId,
             question_count: 0,
             creator_id: user?.id,
@@ -211,12 +177,10 @@ const QuestionSetEditor = () => {
       const newQuestions = activeQuestions.filter(q => q.isNew);
       const existingQuestions = activeQuestions.filter(q => !q.isNew && q.id);
 
-      // Delete marked questions
       for (const q of deletedQuestions) {
         await supabase.from('practice_questions').delete().eq('id', q.id!);
       }
 
-      // Update existing questions
       for (const q of existingQuestions) {
         await supabase
           .from('practice_questions')
@@ -237,66 +201,45 @@ const QuestionSetEditor = () => {
           .eq('id', q.id!);
       }
 
-      // Insert new questions
       if (newQuestions.length > 0) {
-        const { error } = await supabase
-          .from('practice_questions')
-          .insert(
-            newQuestions.map(q => ({
-              set_id: setId,
-              question_text: q.question_text,
-              option_a: q.option_a,
-              option_b: q.option_b,
-              option_c: q.option_c || null,
-              option_d: q.option_d || null,
-              option_e: q.option_e || null,
-              option_f: q.option_f || null,
-              correct_answer: q.correct_answer,
-              explanation: q.explanation || null,
-              difficulty: q.difficulty,
-              tags: q.tags,
-              question_order: q.question_order,
-              creator_id: user?.id,
-            }))
-          );
+        const { error } = await supabase.from('practice_questions').insert(
+          newQuestions.map(q => ({
+            set_id: setId,
+            question_text: q.question_text,
+            option_a: q.option_a,
+            option_b: q.option_b,
+            option_c: q.option_c || null,
+            option_d: q.option_d || null,
+            option_e: q.option_e || null,
+            option_f: q.option_f || null,
+            correct_answer: q.correct_answer,
+            explanation: q.explanation || null,
+            difficulty: q.difficulty,
+            tags: q.tags,
+            question_order: q.question_order,
+            creator_id: user?.id,
+          }))
+        );
 
         if (error) throw error;
       }
 
-      // Update question count
       await supabase
         .from('question_sets')
         .update({ question_count: activeQuestions.length })
         .eq('id', setId);
 
-      // Create audit log
-      await createAuditLog(
-        isEditMode ? 'update' : 'create',
-        'question_set',
-        setId,
-        isEditMode ? { title, level, question_count: activeQuestions.length } : null,
-        { title, level, is_published: isPublished, question_count: activeQuestions.length }
-      );
-
-      toast({
-        title: "Thành công",
-        description: isEditMode ? "Đã cập nhật bộ đề" : "Đã tạo bộ đề mới",
-      });
-
-      navigate('/admin/question-sets');
+      toast.success(isEditMode ? 'Đã cập nhật bộ đề' : 'Đã tạo bộ đề mới');
+      navigate('/practice/my-sets');
     } catch (error) {
       console.error('Save error:', error);
-      toast({
-        title: "Lỗi",
-        description: "Không thể lưu bộ đề",
-        variant: "destructive",
-      });
+      toast.error('Không thể lưu bộ đề');
     } finally {
       setSaving(false);
     }
   };
 
-  if (roleLoading || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -305,37 +248,45 @@ const QuestionSetEditor = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
         </div>
+        <Footer />
       </div>
     );
-  }
-
-  if (!hasAccess) {
-    return null;
   }
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <main className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Link to="/admin/question-sets">
+            <Link to="/practice/my-sets">
               <Button variant="ghost" size="icon">
                 <ArrowLeft className="w-5 h-5" />
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-                <BookOpen className="w-8 h-8 text-primary" />
+              <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
+                <Target className="w-7 h-7 sm:w-8 sm:h-8 text-primary" />
                 {isEditMode ? 'Chỉnh sửa bộ đề' : 'Tạo bộ đề mới'}
               </h1>
+              <p className="text-muted-foreground text-sm mt-1">
+                {isPublished ? (
+                  <span className="flex items-center gap-1 text-green-600">
+                    <Globe className="w-3.5 h-3.5" /> Công khai
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1">
+                    <Lock className="w-3.5 h-3.5" /> Riêng tư
+                  </span>
+                )}
+              </p>
             </div>
           </div>
           <Button onClick={handleSave} disabled={saving} className="gap-2">
             <Save className="w-4 h-4" />
-            {saving ? 'Đang lưu...' : 'Lưu bộ đề'}
+            {saving ? 'Đang lưu...' : 'Lưu'}
           </Button>
         </div>
 
@@ -352,8 +303,8 @@ const QuestionSetEditor = () => {
                   <Input
                     id="title"
                     value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Nhập tên bộ đề..."
+                    onChange={e => setTitle(e.target.value)}
+                    placeholder="VD: Ôn tập Chương 1..."
                   />
                 </div>
 
@@ -362,7 +313,7 @@ const QuestionSetEditor = () => {
                   <Textarea
                     id="description"
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    onChange={e => setDescription(e.target.value)}
                     placeholder="Mô tả ngắn về bộ đề..."
                     rows={3}
                   />
@@ -370,29 +321,26 @@ const QuestionSetEditor = () => {
 
                 <div className="space-y-2">
                   <Label>Danh mục</Label>
-                  <Select 
-                    value={categoryId || 'none'} 
-                    onValueChange={(v) => setCategoryId(v === 'none' ? null : v)}
+                  <Select
+                    value={categoryId || 'none'}
+                    onValueChange={v => setCategoryId(v === 'none' ? null : v)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Chọn danh mục..." />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">-- Không chọn --</SelectItem>
-                      {categories.map((cat) => (
+                      {categories.map(cat => (
                         <SelectItem key={cat.id} value={cat.id}>
                           {cat.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground">
-                    Danh mục giúp phân loại bộ đề (dùng chung với Đề thi)
-                  </p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="level">Độ khó</Label>
+                  <Label>Độ khó</Label>
                   <Select value={level} onValueChange={setLevel}>
                     <SelectTrigger>
                       <SelectValue />
@@ -410,9 +358,11 @@ const QuestionSetEditor = () => {
                   <div className="flex gap-2">
                     <Input
                       value={tagInput}
-                      onChange={(e) => setTagInput(e.target.value)}
+                      onChange={e => setTagInput(e.target.value)}
                       placeholder="Thêm tag..."
-                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                      onKeyDown={e =>
+                        e.key === 'Enter' && (e.preventDefault(), addTag())
+                      }
                     />
                     <Button type="button" variant="outline" onClick={addTag}>
                       <Plus className="w-4 h-4" />
@@ -420,7 +370,7 @@ const QuestionSetEditor = () => {
                   </div>
                   {tags.length > 0 && (
                     <div className="flex gap-1 flex-wrap mt-2">
-                      {tags.map((tag) => (
+                      {tags.map(tag => (
                         <Badge key={tag} variant="secondary" className="gap-1">
                           {tag}
                           <button onClick={() => removeTag(tag)}>
@@ -432,9 +382,15 @@ const QuestionSetEditor = () => {
                   )}
                 </div>
 
-
-                <div className="flex items-center justify-between pt-2">
-                  <Label htmlFor="published">Công khai</Label>
+                <div className="flex items-center justify-between pt-4 border-t">
+                  <div>
+                    <Label htmlFor="published" className="font-medium">
+                      Công khai (chia sẻ)
+                    </Label>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Bộ đề công khai sẽ hiển thị trong phần Đề thi
+                    </p>
+                  </div>
                   <Switch
                     id="published"
                     checked={isPublished}
@@ -455,8 +411,8 @@ const QuestionSetEditor = () => {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
-};
-
-export default QuestionSetEditor;
+}

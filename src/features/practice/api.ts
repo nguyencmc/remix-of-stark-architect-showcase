@@ -217,15 +217,3 @@ export async function fetchQuestionsByIds(ids: string[]): Promise<PracticeQuesti
   return (data || []) as unknown as PracticeQuestion[];
 }
 
-// Question Sets by Course
-export async function fetchQuestionSetsByCourse(courseId: string): Promise<QuestionSet[]> {
-  const { data, error } = await supabase
-    .from('question_sets')
-    .select('*')
-    .eq('course_id', courseId)
-    .eq('is_published', true)
-    .order('created_at', { ascending: false });
-
-  if (error) throw error;
-  return data as QuestionSet[];
-}
