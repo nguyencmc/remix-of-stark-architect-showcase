@@ -1,14 +1,12 @@
 import { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { format, formatDistanceToNow, isToday, isYesterday, startOfDay, subDays } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import {
   Shield,
   User,
   Clock,
-  Filter,
   RefreshCw,
-  ChevronDown,
   ChevronRight,
   FileText,
   UserPlus,
@@ -26,9 +24,10 @@ import {
   CheckCircle2,
   XCircle,
   Download,
-  ArrowUpDown,
   LayoutList,
   LayoutGrid,
+  ArrowLeft,
+  Home,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -579,9 +578,25 @@ const AuditLogs = () => {
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
+      {/* Breadcrumb & Back */}
+      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+        <Link to="/admin" className="flex items-center gap-1 hover:text-foreground transition-colors">
+          <Home className="w-4 h-4" />
+          Dashboard
+        </Link>
+        <ChevronRight className="w-4 h-4" />
+        <span className="text-foreground font-medium">Nhật ký hệ thống</span>
+      </div>
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
+          <Link 
+            to="/admin" 
+            className="w-10 h-10 rounded-lg border bg-background hover:bg-muted flex items-center justify-center transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
             <Activity className="w-6 h-6 text-primary" />
           </div>
