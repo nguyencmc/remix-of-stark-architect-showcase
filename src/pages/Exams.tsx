@@ -785,7 +785,7 @@ const Exams = () => {
                     {/* Action Button */}
                     <Button 
                       className="w-full gap-2"
-                      onClick={() => navigate(exam.source === 'question_set' ? `/practice/setup/${exam.id}` : `/exam/${exam.slug}`)}
+                      onClick={() => navigate(exam.source === 'question_set' ? `/exam/${exam.slug}/take?type=practice` : `/exam/${exam.slug}`)}
                     >
                       Bắt đầu
                       <Play className="h-4 w-4" />

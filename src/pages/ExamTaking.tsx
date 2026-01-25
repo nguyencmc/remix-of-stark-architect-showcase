@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -68,9 +68,13 @@ interface Exam {
 
 const ExamTaking = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  // Check if this is a practice/community exam
+  const isPracticeMode = searchParams.get('type') === 'practice';
   
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
@@ -80,35 +84,85 @@ const ExamTaking = () => {
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [startTime] = useState(Date.now());
 
-  // Fetch exam details
+  // Fetch exam details - supports both official exams and question_sets
   const { data: exam, isLoading: examLoading } = useQuery({
-    queryKey: ['exam', slug],
+    queryKey: ['exam', slug, isPracticeMode],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('exams')
-        .select('*')
-        .eq('slug', slug)
-        .maybeSingle();
-      
-      if (error) throw error;
-      return data as Exam | null;
+      if (isPracticeMode) {
+        // Fetch from question_sets table
+        const { data, error } = await supabase
+          .from('question_sets')
+          .select('*')
+          .or(`slug.eq.${slug},id.eq.${slug}`)
+          .maybeSingle();
+        
+        if (error) throw error;
+        if (!data) return null;
+        
+        return {
+          id: data.id,
+          title: data.title,
+          duration_minutes: data.duration_minutes || 60,
+          question_count: data.question_count || 0,
+          difficulty: data.level,
+        } as Exam;
+      } else {
+        // Fetch from exams table (official exams)
+        const { data, error } = await supabase
+          .from('exams')
+          .select('*')
+          .eq('slug', slug)
+          .maybeSingle();
+        
+        if (error) throw error;
+        return data as Exam | null;
+      }
     },
   });
 
-  // Fetch questions
+  // Fetch questions - supports both sources
   const { data: allQuestions, isLoading: questionsLoading } = useQuery({
-    queryKey: ['questions', exam?.id],
+    queryKey: ['questions', exam?.id, isPracticeMode],
     queryFn: async () => {
       if (!exam?.id) return [];
       
-      const { data, error } = await supabase
-        .from('questions')
-        .select('*')
-        .eq('exam_id', exam.id)
-        .order('question_order', { ascending: true });
-      
-      if (error) throw error;
-      return data as Question[];
+      if (isPracticeMode) {
+        // Fetch from practice_questions table
+        const { data, error } = await supabase
+          .from('practice_questions')
+          .select('*')
+          .eq('set_id', exam.id)
+          .order('question_order', { ascending: true });
+        
+        if (error) throw error;
+        
+        // Map practice_questions to Question format
+        return (data || []).map((q, idx) => ({
+          id: q.id,
+          question_text: q.question_text,
+          option_a: q.option_a,
+          option_b: q.option_b,
+          option_c: q.option_c,
+          option_d: q.option_d,
+          option_e: q.option_e,
+          option_f: q.option_f,
+          option_g: null,
+          option_h: null,
+          correct_answer: q.correct_answer,
+          explanation: q.explanation,
+          question_order: q.question_order ?? idx,
+        })) as Question[];
+      } else {
+        // Fetch from questions table (official exams)
+        const { data, error } = await supabase
+          .from('questions')
+          .select('*')
+          .eq('exam_id', exam.id)
+          .order('question_order', { ascending: true });
+        
+        if (error) throw error;
+        return data as Question[];
+      }
     },
     enabled: !!exam?.id,
   });
@@ -182,20 +236,57 @@ const ExamTaking = () => {
       const correctCount = questions.filter(
         (q) => isAnswerCorrect(q, answers[q.id])
       ).length;
+      const score = Math.round((correctCount / questions.length) * 100);
 
-      supabase.from('exam_attempts').insert({
-        exam_id: exam.id,
-        user_id: user?.id || null,
-        score: Math.round((correctCount / questions.length) * 100),
-        total_questions: questions.length,
-        correct_answers: correctCount,
-        time_spent_seconds: timeSpent,
-        answers: answers,
-      });
+      if (isPracticeMode && user?.id) {
+        // Save to practice tables
+        (async () => {
+          // Create exam session
+          const { data: session } = await supabase
+            .from('practice_exam_sessions')
+            .insert({
+              user_id: user.id,
+              set_id: exam.id,
+              duration_sec: timeSpent,
+              status: 'submitted',
+              ended_at: new Date().toISOString(),
+              score,
+              correct_count: correctCount,
+              total_questions: questions.length,
+            })
+            .select()
+            .single();
+
+          if (session) {
+            // Create attempts for each question
+            const attempts = questions.map((q) => ({
+              user_id: user.id,
+              question_id: q.id,
+              mode: 'exam',
+              exam_session_id: session.id,
+              selected: (answers[q.id] || []).join(','),
+              is_correct: isAnswerCorrect(q, answers[q.id]),
+              time_spent_sec: 0,
+            }));
+            await supabase.from('practice_attempts').insert(attempts);
+          }
+        })();
+      } else {
+        // Save to official exam tables
+        supabase.from('exam_attempts').insert({
+          exam_id: exam.id,
+          user_id: user?.id || null,
+          score,
+          total_questions: questions.length,
+          correct_answers: correctCount,
+          time_spent_seconds: timeSpent,
+          answers: answers,
+        });
+      }
       
       proctoring.endSession();
     }
-  }, [isSubmitted, timeLeft, exam, questions, answers, startTime, user?.id]);
+  }, [isSubmitted, timeLeft, exam, questions, answers, startTime, user?.id, isPracticeMode]);
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -250,19 +341,53 @@ const ExamTaking = () => {
     const correctCount = questions.filter(
       (q) => isAnswerCorrect(q, answers[q.id])
     ).length;
+    const score = Math.round((correctCount / questions.length) * 100);
 
-    await supabase.from('exam_attempts').insert({
-      exam_id: exam.id,
-      user_id: user?.id || null,
-      score: Math.round((correctCount / questions.length) * 100),
-      total_questions: questions.length,
-      correct_answers: correctCount,
-      time_spent_seconds: timeSpent,
-      answers: answers,
-    });
+    if (isPracticeMode && user?.id) {
+      // Save to practice tables
+      const { data: session } = await supabase
+        .from('practice_exam_sessions')
+        .insert({
+          user_id: user.id,
+          set_id: exam.id,
+          duration_sec: timeSpent,
+          status: 'submitted',
+          ended_at: new Date().toISOString(),
+          score,
+          correct_count: correctCount,
+          total_questions: questions.length,
+        })
+        .select()
+        .single();
+
+      if (session) {
+        // Create attempts for each question
+        const attempts = questions.map((q) => ({
+          user_id: user.id,
+          question_id: q.id,
+          mode: 'exam',
+          exam_session_id: session.id,
+          selected: (answers[q.id] || []).join(','),
+          is_correct: isAnswerCorrect(q, answers[q.id]),
+          time_spent_sec: 0,
+        }));
+        await supabase.from('practice_attempts').insert(attempts);
+      }
+    } else {
+      // Save to official exam tables
+      await supabase.from('exam_attempts').insert({
+        exam_id: exam.id,
+        user_id: user?.id || null,
+        score,
+        total_questions: questions.length,
+        correct_answers: correctCount,
+        time_spent_seconds: timeSpent,
+        answers: answers,
+      });
+    }
 
     await proctoring.endSession();
-  }, [questions, exam, answers, startTime, user?.id, proctoring]);
+  }, [questions, exam, answers, startTime, user?.id, proctoring, isPracticeMode]);
 
   const currentQuestion = questions?.[currentQuestionIndex];
   const answeredCount = Object.keys(answers).filter(id => answers[id]?.length > 0).length;
