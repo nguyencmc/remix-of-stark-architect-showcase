@@ -84,7 +84,9 @@ const QuestionSetEditor = () => {
   const [tagInput, setTagInput] = useState('');
   const [isPublished, setIsPublished] = useState(true);
   const [courseId, setCourseId] = useState<string | null>(null);
+  const [categoryId, setCategoryId] = useState<string | null>(null);
   const [courses, setCourses] = useState<{ id: string; title: string }[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   
   // Questions
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -108,11 +110,17 @@ const QuestionSetEditor = () => {
   useEffect(() => {
     if (hasAccess) {
       fetchCourses();
+      fetchCategories();
       if (isEditMode && id) {
         fetchData();
       }
     }
   }, [hasAccess, isEditMode, id]);
+
+  const fetchCategories = async () => {
+    const { data } = await supabase.from('exam_categories').select('id, name').order('name');
+    setCategories(data || []);
+  };
 
   const fetchCourses = async () => {
     const { data, error } = await supabase
@@ -151,6 +159,7 @@ const QuestionSetEditor = () => {
     setTags(setData.tags || []);
     setIsPublished(setData.is_published ?? true);
     setCourseId(setData.course_id || null);
+    setCategoryId(setData.category_id || null);
 
     // Fetch questions
     const { data: questionsData, error: questionsError } = await supabase
@@ -297,6 +306,7 @@ const QuestionSetEditor = () => {
             tags,
             is_published: isPublished,
             course_id: courseId,
+            category_id: categoryId,
             updated_at: new Date().toISOString(),
           })
           .eq('id', id);
@@ -312,6 +322,7 @@ const QuestionSetEditor = () => {
             tags,
             is_published: isPublished,
             course_id: courseId,
+            category_id: categoryId,
             question_count: 0,
             creator_id: user?.id,
           })
@@ -477,6 +488,29 @@ const QuestionSetEditor = () => {
                     placeholder="Mô tả ngắn về bộ đề..."
                     rows={3}
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Danh mục</Label>
+                  <Select 
+                    value={categoryId || 'none'} 
+                    onValueChange={(v) => setCategoryId(v === 'none' ? null : v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Chọn danh mục..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">-- Không chọn --</SelectItem>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Danh mục giúp phân loại bộ đề (dùng chung với Đề thi)
+                  </p>
                 </div>
 
                 <div className="space-y-2">

@@ -1753,6 +1753,7 @@ export type Database = {
       }
       question_sets: {
         Row: {
+          category_id: string | null
           course_id: string | null
           created_at: string
           creator_id: string | null
@@ -1766,6 +1767,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          category_id?: string | null
           course_id?: string | null
           created_at?: string
           creator_id?: string | null
@@ -1779,6 +1781,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          category_id?: string | null
           course_id?: string | null
           created_at?: string
           creator_id?: string | null
@@ -1792,6 +1795,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "question_sets_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "exam_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "question_sets_course_id_fkey"
             columns: ["course_id"]
