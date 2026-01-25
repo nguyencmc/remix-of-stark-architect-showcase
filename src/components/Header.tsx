@@ -20,14 +20,11 @@ import { MobileMenu } from "./MobileMenu";
 import { ThemeToggle } from "./ThemeToggle";
 
 const navLinks = [
-  { name: "Luyện tập", href: "/practice" },
   { name: "Đề thi", href: "/exams" },
   { name: "Flashcards", href: "/flashcards" },
   { name: "Podcasts", href: "/podcasts" },
   { name: "Khóa học", href: "/courses" },
   { name: "Sách", href: "/books" },
-  { name: "Nhóm học tập", href: "/study-groups" },
-  { name: "Bảng xếp hạng", href: "/leaderboard" },
 ];
 
 interface UserProfile {
