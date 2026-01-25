@@ -509,14 +509,37 @@ const AuditLogs = () => {
     return { todayCount, permissionChanges, roleChanges, criticalActions };
   }, [logs]);
 
-  // Export logs
+  // Export logs as TXT
   const handleExport = () => {
-    const data = JSON.stringify(filteredLogs, null, 2);
-    const blob = new Blob([data], { type: 'application/json' });
+    const lines = filteredLogs.map(log => {
+      const actionLabel = ACTION_CONFIG[log.action]?.label || log.action;
+      const entityLabel = ENTITY_LABELS[log.entity_type]?.label || log.entity_type;
+      const user = log.user_name || log.user_email || 'Hệ thống';
+      const time = format(new Date(log.created_at), 'HH:mm:ss dd/MM/yyyy', { locale: vi });
+      
+      let detail = '';
+      if (log.new_value && typeof log.new_value === 'object') {
+        const val = log.new_value as Record<string, unknown>;
+        if (val.permission) detail = ` | Quyền: ${val.permission}`;
+        else if (val.role) detail = ` | Vai trò: ${val.role}`;
+      }
+      if (!detail && log.old_value && typeof log.old_value === 'object') {
+        const val = log.old_value as Record<string, unknown>;
+        if (val.permission) detail = ` | Quyền: ${val.permission}`;
+        else if (val.role) detail = ` | Vai trò: ${val.role}`;
+      }
+      
+      return `[${time}] ${actionLabel} - ${entityLabel} | Người thực hiện: ${user}${detail}`;
+    });
+    
+    const header = `=== NHẬT KÝ HỆ THỐNG ===\nXuất lúc: ${format(new Date(), 'HH:mm:ss dd/MM/yyyy', { locale: vi })}\nTổng số: ${filteredLogs.length} logs\n${'='.repeat(50)}\n\n`;
+    const content = header + lines.join('\n');
+    
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `audit-logs-${format(new Date(), 'yyyy-MM-dd-HHmm')}.json`;
+    a.download = `audit-logs-${format(new Date(), 'yyyy-MM-dd-HHmm')}.txt`;
     a.click();
     URL.revokeObjectURL(url);
     toast({ title: 'Xuất file thành công', description: `${filteredLogs.length} logs đã được xuất` });
