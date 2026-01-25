@@ -1030,6 +1030,54 @@ export type Database = {
         }
         Relationships: []
       }
+      exam_proctoring_logs: {
+        Row: {
+          created_at: string
+          event_type: string
+          exam_attempt_id: string | null
+          exam_id: string | null
+          id: string
+          metadata: Json | null
+          snapshot_url: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          exam_attempt_id?: string | null
+          exam_id?: string | null
+          id?: string
+          metadata?: Json | null
+          snapshot_url?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          exam_attempt_id?: string | null
+          exam_id?: string | null
+          id?: string
+          metadata?: Json | null
+          snapshot_url?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_proctoring_logs_exam_attempt_id_fkey"
+            columns: ["exam_attempt_id"]
+            isOneToOne: false
+            referencedRelation: "exam_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_proctoring_logs_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exams: {
         Row: {
           attempt_count: number | null
