@@ -12,7 +12,8 @@ import {
   LogOut,
   Sparkles,
   Award,
-  X
+  X,
+  FileText
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +48,7 @@ interface MobileMenuProps {
 }
 
 const studyLinks = [
+  { name: "Đề thi", href: "/exams", icon: FileText },
   { name: "Flashcards", href: "/flashcards", icon: Layers },
   { name: "Podcasts", href: "/podcasts", icon: Headphones },
   { name: "Khóa học", href: "/courses", icon: GraduationCap },
