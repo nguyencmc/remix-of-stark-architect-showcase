@@ -187,6 +187,7 @@ export type Database = {
         Row: {
           book_count: number | null
           created_at: string
+          creator_id: string | null
           description: string | null
           display_order: number | null
           icon_url: string | null
@@ -198,6 +199,7 @@ export type Database = {
         Insert: {
           book_count?: number | null
           created_at?: string
+          creator_id?: string | null
           description?: string | null
           display_order?: number | null
           icon_url?: string | null
@@ -209,6 +211,7 @@ export type Database = {
         Update: {
           book_count?: number | null
           created_at?: string
+          creator_id?: string | null
           description?: string | null
           display_order?: number | null
           icon_url?: string | null
@@ -609,6 +612,7 @@ export type Database = {
         Row: {
           course_count: number | null
           created_at: string
+          creator_id: string | null
           description: string | null
           display_order: number | null
           icon_url: string | null
@@ -620,6 +624,7 @@ export type Database = {
         Insert: {
           course_count?: number | null
           created_at?: string
+          creator_id?: string | null
           description?: string | null
           display_order?: number | null
           icon_url?: string | null
@@ -631,6 +636,7 @@ export type Database = {
         Update: {
           course_count?: number | null
           created_at?: string
+          creator_id?: string | null
           description?: string | null
           display_order?: number | null
           icon_url?: string | null
@@ -1202,6 +1208,7 @@ export type Database = {
         Row: {
           attempt_count: number | null
           created_at: string
+          creator_id: string | null
           display_order: number | null
           exam_count: number | null
           icon_url: string | null
@@ -1216,6 +1223,7 @@ export type Database = {
         Insert: {
           attempt_count?: number | null
           created_at?: string
+          creator_id?: string | null
           display_order?: number | null
           exam_count?: number | null
           icon_url?: string | null
@@ -1230,6 +1238,7 @@ export type Database = {
         Update: {
           attempt_count?: number | null
           created_at?: string
+          creator_id?: string | null
           display_order?: number | null
           exam_count?: number | null
           icon_url?: string | null
@@ -1640,6 +1649,7 @@ export type Database = {
       podcast_categories: {
         Row: {
           created_at: string
+          creator_id: string | null
           description: string | null
           display_order: number | null
           icon_url: string | null
@@ -1651,6 +1661,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          creator_id?: string | null
           description?: string | null
           display_order?: number | null
           icon_url?: string | null
@@ -1662,6 +1673,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          creator_id?: string | null
           description?: string | null
           display_order?: number | null
           icon_url?: string | null
