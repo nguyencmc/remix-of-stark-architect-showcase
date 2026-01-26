@@ -69,6 +69,12 @@ import PracticeEditorPage from "./features/practice/pages/PracticeEditorPage";
 import DeckListPage from "./features/flashcards/pages/DeckListPage";
 import DeckDetailPage from "./features/flashcards/pages/DeckDetailPage";
 import StudyDeckPage from "./features/flashcards/pages/StudyDeckPage";
+
+// Classroom feature pages
+import ClassListPage from "./features/classroom/pages/ClassListPage";
+import CreateClassPage from "./features/classroom/pages/CreateClassPage";
+import JoinClassPage from "./features/classroom/pages/JoinClassPage";
+import ClassDetailPage from "./features/classroom/pages/ClassDetailPage";
 import TodayPage from "./features/flashcards/pages/TodayPage";
 
 const queryClient = new QueryClient();
@@ -130,6 +136,12 @@ const App = () => (
               <Route path="/flashcards/decks/:deckId" element={<DeckDetailPage />} />
               <Route path="/flashcards/study/:deckId" element={<StudyDeckPage />} />
               <Route path="/flashcards/today" element={<TodayPage />} />
+              
+              {/* Classroom feature routes */}
+              <Route path="/classes" element={<ClassListPage />} />
+              <Route path="/classes/new" element={<CreateClassPage />} />
+              <Route path="/classes/join" element={<JoinClassPage />} />
+              <Route path="/classes/:classId" element={<ClassDetailPage />} />
               
               {/* Admin & Teacher routes */}
               <Route path="/admin" element={<AdminDashboard />} />
