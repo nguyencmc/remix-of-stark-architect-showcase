@@ -782,10 +782,10 @@ const Exams = () => {
                       )}
                     </div>
 
-                    {/* Action Button */}
+                    {/* Action Button - Always goes to exam detail for "Thi thật" mode */}
                     <Button 
                       className="w-full gap-2"
-                      onClick={() => navigate(exam.source === 'question_set' ? `/exam/${exam.slug}?type=practice` : `/exam/${exam.slug}`)}
+                      onClick={() => navigate(exam.source === 'question_set' ? `/exam/${exam.slug || exam.id}?type=practice` : `/exam/${exam.slug}`)}
                     >
                       Bắt đầu
                       <Play className="h-4 w-4" />
@@ -860,11 +860,11 @@ const Exams = () => {
                       </div>
                     </div>
 
-                    {/* Start Button */}
+                    {/* Start Button - Always goes to exam detail for "Thi thật" mode */}
                     <Button 
                       size="sm"
                       className="shrink-0"
-                      onClick={() => navigate(exam.source === 'question_set' ? `/practice/setup/${exam.id}` : `/exam/${exam.slug}`)}
+                      onClick={() => navigate(exam.source === 'question_set' ? `/exam/${exam.slug || exam.id}?type=practice` : `/exam/${exam.slug}`)}
                     >
                       Bắt đầu
                     </Button>

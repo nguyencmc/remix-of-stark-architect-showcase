@@ -1,5 +1,11 @@
 // Types for Practice Feature
 
+// 3 chế độ làm bài:
+// - 'practice': Luyện tập - xem đáp án ngay sau khi chọn (chỉ dùng cho bộ đề của user)
+// - 'mock': Thi thử - nộp bài mới xem kết quả, không giám sát (chỉ dùng cho bộ đề của user)
+// - 'real': Thi thật - có giám sát webcam, dùng cho exam chính thức và bộ đề public
+export type ExamMode = 'practice' | 'mock' | 'real';
+
 export interface QuestionSet {
   id: string;
   title: string;
