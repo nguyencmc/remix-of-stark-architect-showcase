@@ -70,14 +70,17 @@ interface ExamCategory extends BaseCategory {
   attempt_count: number | null;
   rating: number | null;
   subcategory_count: number | null;
+  creator_id: string | null;
 }
 
 interface PodcastCategory extends BaseCategory {
   podcast_count: number | null;
+  creator_id: string | null;
 }
 
 interface BookCategory extends BaseCategory {
   book_count: number | null;
+  creator_id: string | null;
 }
 
 type CategoryType = 'exam' | 'podcast' | 'book';
