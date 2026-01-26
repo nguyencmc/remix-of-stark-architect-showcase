@@ -1,4 +1,4 @@
-import { Users, Crown, UserMinus, Loader2 } from 'lucide-react';
+import { Users, Crown, UserMinus, Loader2, UserPlus } from 'lucide-react';
 import { useClassMembers, useRemoveMember, useUpdateMemberRole } from '../hooks';
 import { ClassMemberRole } from '../types';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import PendingRequestsSection from './PendingRequestsSection';
+import InviteUserDialog from './InviteUserDialog';
 
 interface MembersTabProps {
   classId: string;
@@ -70,6 +72,24 @@ const MembersTab = ({ classId, isManager }: MembersTabProps) => {
 
   return (
     <div className="space-y-6">
+      {/* Invite button for managers */}
+      {isManager && (
+        <div className="flex justify-end">
+          <InviteUserDialog 
+            classId={classId} 
+            trigger={
+              <Button>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Mời thành viên
+              </Button>
+            }
+          />
+        </div>
+      )}
+
+      {/* Pending Requests - only for managers */}
+      {isManager && <PendingRequestsSection classId={classId} />}
+
       {/* Teachers & Assistants */}
       <div>
         <h3 className="font-semibold mb-3 flex items-center gap-2">
