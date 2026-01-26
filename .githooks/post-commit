@@ -1,0 +1,107 @@
+#!/bin/bash
+
+# =============================================================================
+# Git Post-Commit Hook - Auto Deploy
+# =============================================================================
+# Tự động deploy lên server sau khi commit
+# =============================================================================
+
+# Get the repository root first
+REPO_ROOT=$(git rev-parse --show-toplevel)
+
+# Load environment variables from .env file if exists
+if [ -f "$REPO_ROOT/.env" ]; then
+    export $(grep -v '^#' "$REPO_ROOT/.env" | xargs)
+fi
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Configuration
+AUTO_DEPLOY=${AUTO_DEPLOY:-false}
+DEPLOY_BRANCH=${DEPLOY_BRANCH:-main}
+
+# Supabase Configuration
+VITE_SUPABASE_URL=${VITE_SUPABASE_URL:-}
+VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY:-}
+
+# Deploy Configuration
+DEPLOY_USER=${DEPLOY_USER:-root}
+DEPLOY_HOST=${DEPLOY_HOST:-}
+DEPLOY_PORT=${DEPLOY_PORT:-22}
+DEPLOY_PASS=${DEPLOY_PASS:-}
+DEPLOY_PATH=${DEPLOY_PATH:-/var/www/myexamtest}
+
+# Get current branch
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+COMMIT_MSG=$(git log -1 --pretty=%B)
+COMMIT_HASH=$(git rev-parse --short HEAD)
+
+echo -e "\n${BLUE}========================================${NC}"
+echo -e "${BLUE}  Git Post-Commit Hook${NC}"
+echo -e "${BLUE}========================================${NC}"
+echo -e "Branch: ${GREEN}$CURRENT_BRANCH${NC}"
+echo -e "Commit: ${GREEN}$COMMIT_HASH${NC}"
+echo -e "Message: $COMMIT_MSG"
+
+# Check if auto deploy is enabled
+if [ "$AUTO_DEPLOY" != "true" ]; then
+    echo -e "\n${YELLOW}Auto deploy is disabled.${NC}"
+    echo -e "To enable: ${GREEN}export AUTO_DEPLOY=true${NC}"
+    echo -e "Or add to .env: ${GREEN}AUTO_DEPLOY=true${NC}"
+    exit 0
+fi
+
+# Check if we're on the deploy branch
+if [ "$CURRENT_BRANCH" != "$DEPLOY_BRANCH" ]; then
+    echo -e "\n${YELLOW}Skipping deploy - not on $DEPLOY_BRANCH branch${NC}"
+    echo -e "Current branch: $CURRENT_BRANCH"
+    exit 0
+fi
+
+# Check for [skip deploy] or [no deploy] in commit message
+if echo "$COMMIT_MSG" | grep -qiE '\[(skip deploy|no deploy|skip-deploy|no-deploy)\]'; then
+    echo -e "\n${YELLOW}Skipping deploy - found skip flag in commit message${NC}"
+    exit 0
+fi
+
+# Check for [deploy] flag for manual trigger
+FORCE_DEPLOY=false
+if echo "$COMMIT_MSG" | grep -qiE '\[deploy\]'; then
+    FORCE_DEPLOY=true
+    echo -e "\n${GREEN}Force deploy triggered by commit message${NC}"
+fi
+
+# Run deployment
+echo -e "\n${GREEN}Starting automatic deployment...${NC}"
+
+# Get the directory where the hook is located
+REPO_ROOT=$(git rev-parse --show-toplevel)
+cd "$REPO_ROOT"
+
+# Check if deploy.sh exists
+if [ -f "./deploy.sh" ]; then
+    echo -e "${YELLOW}Running deploy.sh...${NC}"
+    ./deploy.sh production
+    
+    if [ $? -eq 0 ]; then
+        echo -e "\n${GREEN}✓ Deployment completed successfully!${NC}"
+        
+        # Optional: Send notification (uncomment if needed)
+        # curl -X POST -H "Content-Type: application/json" \
+        #     -d "{\"text\":\"🚀 Deployed commit $COMMIT_HASH to production\"}" \
+        #     "$SLACK_WEBHOOK_URL"
+    else
+        echo -e "\n${RED}✗ Deployment failed!${NC}"
+        exit 1
+    fi
+else
+    echo -e "${RED}Error: deploy.sh not found!${NC}"
+    exit 1
+fi
+
+echo -e "\n${BLUE}========================================${NC}"
