@@ -25,8 +25,9 @@ const JoinClassPage = () => {
     e.preventDefault();
     if (!classCode.trim()) return;
     
-    const result = await joinClass.mutateAsync(classCode.trim());
-    navigate(`/classes/${result.id}`);
+    await joinClass.mutateAsync(classCode.trim());
+    // Navigate back to classes list since pending approval is needed
+    navigate('/classes');
   };
 
   return (

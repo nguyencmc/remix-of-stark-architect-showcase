@@ -118,14 +118,14 @@ export const useJoinClass = () => {
         throw new Error('Bạn đã là thành viên của lớp này');
       }
       
-      // Join class
+      // Join class with pending status - requires approval
       const { error: joinError } = await supabase
         .from('class_members')
         .insert({
           class_id: classData.id,
           user_id: user.id,
           role: 'student',
-          status: 'active',
+          status: 'pending',
         });
       
       if (joinError) throw joinError;
@@ -134,7 +134,9 @@ export const useJoinClass = () => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['classes'] });
-      toast({ title: `Tham gia lớp "${data.title}" thành công!` });
+      queryClient.invalidateQueries({ queryKey: ['class-members'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-members'] });
+      toast({ title: `Đã gửi yêu cầu tham gia lớp "${data.title}"`, description: 'Vui lòng chờ giáo viên phê duyệt.' });
     },
     onError: (error) => {
       toast({ title: 'Lỗi', description: error.message, variant: 'destructive' });
