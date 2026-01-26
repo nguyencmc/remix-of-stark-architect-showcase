@@ -97,7 +97,8 @@ else
     if [ -n "$REMOTE_PASS" ]; then
         echo -e "${YELLOW}Using password authentication...${NC}"
         export SSHPASS="$REMOTE_PASS"
-        SSH_CMD="sshpass -e ssh -p $REMOTE_PORT"
+        SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+        SSH_CMD="sshpass -e ssh -p $REMOTE_PORT $SSH_OPTS"
         RSYNC_CMD="sshpass -e rsync"
     else
         echo -e "${YELLOW}Using key-based authentication...${NC}"
@@ -114,7 +115,7 @@ else
          $RSYNC_CMD -avz --delete \
             --exclude '.git' \
             --exclude 'node_modules' \
-            -e "ssh -p $REMOTE_PORT" \
+            -e "ssh -p $REMOTE_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
             ./${BUILD_DIR}/ ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_PATH}/
     else
          $RSYNC_CMD -avz --delete \
