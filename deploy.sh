@@ -45,12 +45,25 @@ if [ ! -f ".env" ]; then
 fi
 
 # Load environment variables from .env
-export $(grep -v '^#' .env | xargs)
+# Safer way to load env vars than xargs
+set -a
+source .env
+set +a
+
+# Start -- Fix for variable naming differences
+# Map VITE_SUPABASE_PUBLISHABLE_KEY to VITE_SUPABASE_ANON_KEY if the latter is missing
+if [ -z "$VITE_SUPABASE_ANON_KEY" ] && [ -n "$VITE_SUPABASE_PUBLISHABLE_KEY" ]; then
+    echo -e "${YELLOW}Using VITE_SUPABASE_PUBLISHABLE_KEY as ANON_KEY${NC}"
+    export VITE_SUPABASE_ANON_KEY="$VITE_SUPABASE_PUBLISHABLE_KEY"
+fi
+# End -- Fix for variable naming differences
 
 # Verify Supabase variables
 if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
     echo -e "${RED}Error: Supabase environment variables not set!${NC}"
-    echo "Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env"
+    echo "DEBUG: URL length: ${#VITE_SUPABASE_URL}"
+    echo "DEBUG: KEY length: ${#VITE_SUPABASE_ANON_KEY}"
+    echo "Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env" 
     exit 1
 fi
 
