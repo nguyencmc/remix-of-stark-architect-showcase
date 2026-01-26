@@ -39,6 +39,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   admin: 'Quản trị',
   teacher: 'Giảng viên',
   users: 'Người dùng',
+  classes: 'Lớp học',
   exams: 'Đề thi',
   courses: 'Khóa học',
   podcasts: 'Podcast',
