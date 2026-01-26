@@ -1,73 +1,187 @@
-# Welcome to your Lovable project
+# 📚 Nền Tảng Học Tập Trực Tuyến
 
-## Project info
+Một nền tảng học tập toàn diện được xây dựng với React, TypeScript và Lovable Cloud, cung cấp đa dạng các tính năng học tập từ khóa học, bài thi, flashcard đến podcast.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 🚀 Công Nghệ Sử Dụng
 
-## How can I edit this code?
+- **Frontend**: React 18, TypeScript, Vite
+- **Styling**: Tailwind CSS, shadcn/ui
+- **Backend**: Lovable Cloud (Supabase)
+- **State Management**: TanStack Query (React Query)
+- **Routing**: React Router DOM v6
+- **Forms**: React Hook Form + Zod validation
 
-There are several ways of editing your application.
+## 📁 Cấu Trúc Thư Mục
 
-**Use Lovable**
+```
+src/
+├── components/          # Components dùng chung
+│   ├── ui/             # shadcn/ui components
+│   ├── admin/          # Components quản trị
+│   ├── ai/             # Components AI (Tutor, Generator)
+│   ├── auth/           # Components xác thực & phân quyền
+│   ├── course/         # Components khóa học
+│   ├── exam/           # Components bài thi
+│   └── podcast/        # Components podcast
+├── contexts/           # React Context providers
+├── features/           # Feature modules
+│   ├── classroom/      # Hệ thống lớp học
+│   ├── flashcards/     # Flashcard với SRS (Spaced Repetition)
+│   └── practice/       # Luyện tập câu hỏi
+├── hooks/              # Custom React hooks
+├── pages/              # Page components
+│   └── admin/          # Trang quản trị
+├── integrations/       # Tích hợp bên ngoài
+│   └── supabase/       # Supabase client & types
+└── lib/                # Utilities
+```
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## ✨ Tính Năng Chính
 
-Changes made via Lovable will be committed automatically to this repo.
+### 📖 Khóa Học (Courses)
+- Xem và học các khóa học với video bài giảng
+- Theo dõi tiến độ học tập
+- Bài kiểm tra cuối khóa
+- Chứng chỉ hoàn thành
+- Hệ thống Q&A và đánh giá
 
-**Use your preferred IDE**
+### 📝 Bài Thi (Exams)
+- Thi thử với thời gian giới hạn
+- Nhiều danh mục và độ khó
+- Xem lại lịch sử thi
+- Giải thích đáp án bằng AI
+- Hỗ trợ giám sát thi (Proctoring)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🃏 Flashcards
+- Tạo bộ thẻ học cá nhân
+- Thuật toán lặp lại ngắt quãng (SM-2)
+- Tự động nhắc ôn tập hàng ngày
+- Tạo flashcard bằng AI
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 🎯 Luyện Tập (Practice)
+- Ngân hàng câu hỏi cá nhân
+- Nhiều chế độ luyện tập
+- Ôn lại câu sai
+- Thống kê chi tiết
 
-Follow these steps:
+### 🎧 Podcast
+- Nghe podcast học tập
+- Đánh dấu thời điểm quan trọng
+- Lặp lại đoạn A-B
+- Transcript đồng bộ
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+### 📚 Sách Điện Tử (Books)
+- Đọc sách trực tuyến
+- Đánh dấu và ghi chú
+- Theo dõi tiến độ đọc
+
+### 🏫 Lớp Học (Classroom)
+- Giáo viên tạo và quản lý lớp học
+- Gán khóa học và bài tập
+- Theo dõi tiến độ học sinh
+- Sổ điểm (Gradebook)
+
+### 👥 Nhóm Học Tập (Study Groups)
+- Tạo nhóm học tập
+- Chat realtime
+- Chia sẻ tài nguyên
+
+### 🏆 Gamification
+- Hệ thống điểm và cấp độ
+- Thành tích (Achievements)
+- Bảng xếp hạng (Leaderboard)
+
+## 🔐 Hệ Thống Phân Quyền (RBAC)
+
+### Vai Trò (Roles)
+| Vai trò | Mô tả |
+|---------|-------|
+| `admin` | Toàn quyền quản trị hệ thống |
+| `teacher` | Quản lý nội dung, lớp học của mình |
+| `moderator` | Duyệt và kiểm duyệt nội dung |
+| `user` | Học viên, sử dụng các tính năng học tập |
+
+### Quyền Hạn Chính
+- **Khóa học**: `courses.create`, `courses.edit`, `courses.delete`, `courses.view`
+- **Bài thi**: `exams.create`, `exams.edit`, `exams.delete`, `exams.view`
+- **Lớp học**: `classes.create`, `classes.manage_members`, `classes.manage_assignments`
+- **Người dùng**: `users.manage`, `users.view`, `users.assign_roles`
+
+## 🗄️ Cơ Sở Dữ Liệu
+
+### Bảng Chính
+- `profiles` - Thông tin người dùng
+- `courses`, `course_sections`, `course_lessons` - Khóa học
+- `exams`, `questions`, `exam_attempts` - Bài thi
+- `flashcard_decks`, `user_flashcards`, `flashcard_reviews` - Flashcards
+- `question_sets`, `practice_questions`, `practice_attempts` - Luyện tập
+- `classes`, `class_members`, `class_assignments` - Lớp học
+- `podcasts`, `podcast_bookmarks` - Podcast
+- `books`, `book_chapters` - Sách
+
+### Bảo Mật (RLS)
+Tất cả các bảng đều được bảo vệ bằng Row Level Security:
+- Người dùng chỉ xem/sửa dữ liệu của mình
+- Admin có quyền truy cập toàn bộ
+- Teacher quản lý nội dung mình tạo ra
+
+## 🤖 Tích Hợp AI
+
+### Edge Functions
+| Function | Mô tả |
+|----------|-------|
+| `ai-tutor` | Gia sư AI hỗ trợ học tập |
+| `explain-answer` | Giải thích đáp án chi tiết |
+| `generate-questions` | Tạo câu hỏi tự động |
+| `generate-flashcards` | Tạo flashcard từ nội dung |
+| `smart-recommendations` | Gợi ý học tập thông minh |
+
+## 🛠️ Cài Đặt & Chạy
+
+### Yêu Cầu
+- Node.js >= 18
+- npm hoặc bun
+
+### Cài Đặt
+```bash
+# Clone repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Di chuyển vào thư mục dự án
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Cài đặt dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Chạy development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Biến Môi Trường
+File `.env` được tự động cấu hình bởi Lovable Cloud:
+```
+VITE_SUPABASE_URL=<auto-configured>
+VITE_SUPABASE_PUBLISHABLE_KEY=<auto-configured>
+VITE_SUPABASE_PROJECT_ID=<auto-configured>
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 📦 Scripts
 
-**Use GitHub Codespaces**
+```bash
+npm run dev      # Chạy development server
+npm run build    # Build production
+npm run preview  # Preview production build
+npm run lint     # Kiểm tra linting
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🔗 Tài Liệu Tham Khảo
 
-## What technologies are used for this project?
+- [React Documentation](https://react.dev)
+- [Tailwind CSS](https://tailwindcss.com)
+- [shadcn/ui](https://ui.shadcn.com)
+- [TanStack Query](https://tanstack.com/query)
+- [Lovable Documentation](https://docs.lovable.dev)
 
-This project is built with:
+## 📄 License
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+© 2024 - All rights reserved.
