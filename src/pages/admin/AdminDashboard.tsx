@@ -20,7 +20,8 @@ import {
   ChevronRight,
   Plus,
   Download,
-  HelpCircle
+  HelpCircle,
+  GraduationCap
 } from 'lucide-react';
 import {
   Table,
@@ -287,6 +288,7 @@ const AdminDashboard = () => {
     { title: 'Phân quyền RBAC', icon: Shield, href: '/admin/permissions', color: 'text-red-500', bg: 'bg-red-500/10' },
     { title: 'Audit Logs', icon: Activity, href: '/admin/audit-logs', color: 'text-amber-500', bg: 'bg-amber-500/10' },
     { title: 'Quản lý danh mục', icon: Layers, href: '/admin/categories', color: 'text-purple-500', bg: 'bg-purple-500/10' },
+    { title: 'Quản lý lớp học', icon: GraduationCap, href: '/classes', color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
     { title: 'Quản lý khóa học', icon: BookOpen, href: '/admin/courses', color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
     { title: 'Quản lý đề thi', icon: FileText, href: '/admin/exams', color: 'text-green-500', bg: 'bg-green-500/10' },
     { title: 'Bộ câu hỏi luyện tập', icon: HelpCircle, href: '/admin/question-sets', color: 'text-teal-500', bg: 'bg-teal-500/10' },
