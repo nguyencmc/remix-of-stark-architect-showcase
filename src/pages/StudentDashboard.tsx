@@ -32,6 +32,7 @@ import {
   Star,
   BarChart3,
   GraduationCap,
+  Users,
 } from 'lucide-react';
 
 interface Stats {
@@ -282,8 +283,8 @@ const StudentDashboard = () => {
           </Link>
         </div>
 
-        {/* Quick Links Grid - Mobile 4 cols */}
-        <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-6 sm:mb-8">
+        {/* Quick Links Grid - Mobile 5 cols */}
+        <div className="grid grid-cols-5 gap-2 sm:gap-3 mb-6 sm:mb-8">
           <Link to="/practice/question-bank" className="block">
             <Card className="border-border/50 hover:border-primary/50 hover:shadow-md transition-all cursor-pointer group h-full">
               <CardContent className="p-2 sm:p-3 flex flex-col items-center text-center">
@@ -307,6 +308,17 @@ const StudentDashboard = () => {
                 {flashcardDueCount > 0 && (
                   <Badge className="absolute -top-1 -right-1 bg-orange-500 text-white text-[8px] px-1 py-0 h-4 min-w-4">!</Badge>
                 )}
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link to="/classes" className="block">
+            <Card className="border-border/50 hover:border-primary/50 hover:shadow-md transition-all cursor-pointer group h-full">
+              <CardContent className="p-2 sm:p-3 flex flex-col items-center text-center">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center mb-1 sm:mb-2 group-hover:bg-indigo-500/20 transition-colors">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-500" />
+                </div>
+                <p className="text-[10px] sm:text-xs font-medium text-muted-foreground group-hover:text-primary truncate w-full">Lớp học</p>
               </CardContent>
             </Card>
           </Link>
