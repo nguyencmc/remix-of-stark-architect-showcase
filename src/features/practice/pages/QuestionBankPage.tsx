@@ -166,7 +166,7 @@ export default function QuestionBankPage() {
 
       <main className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-3">
               <Target className="w-8 h-8 text-primary" />
@@ -180,6 +180,28 @@ export default function QuestionBankPage() {
             <Plus className="w-5 h-5 mr-2" />
             Tạo bộ đề mới
           </Button>
+        </div>
+
+        {/* Mode Description */}
+        <div className="grid sm:grid-cols-2 gap-4 mb-8 p-4 bg-muted/30 rounded-xl border border-border/50">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+              <PlayCircle className="w-5 h-5 text-blue-500" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-sm">Luyện tập</h4>
+              <p className="text-xs text-muted-foreground">Xem đáp án ngay sau mỗi câu. Phù hợp để học và ghi nhớ.</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+              <FileCheck className="w-5 h-5 text-amber-500" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-sm">Thi thử</h4>
+              <p className="text-xs text-muted-foreground">Đánh giá năng lực với timer. Xem kết quả sau khi nộp bài.</p>
+            </div>
+          </div>
         </div>
 
         {/* Filters */}

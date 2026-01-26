@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Clock, FileText, Target, Users, ArrowLeft, Play, BookOpen, BarChart3 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Clock, FileText, Target, Users, ArrowLeft, Play, BookOpen, BarChart3, Shield, Camera, AlertTriangle } from "lucide-react";
 
 interface ExamData {
   id: string;
@@ -309,9 +310,25 @@ const ExamDetail = () => {
                 </div>
               </div>
 
+              {/* Proctoring Notice */}
+              <Alert className="mb-6 border-orange-500/30 bg-orange-500/10">
+                <Shield className="h-4 w-4 text-orange-500" />
+                <AlertDescription className="text-sm">
+                  <strong className="text-orange-600 dark:text-orange-400">Chế độ thi thật</strong> - Bài thi sẽ được giám sát bằng webcam. 
+                  Hãy đảm bảo bạn có camera hoạt động và ở trong môi trường yên tĩnh.
+                </AlertDescription>
+              </Alert>
+
               <div className="bg-muted/50 rounded-lg p-4">
-                <h3 className="font-medium mb-3">Lưu ý khi làm bài:</h3>
+                <h3 className="font-medium mb-3 flex items-center gap-2">
+                  <Camera className="h-4 w-4 text-primary" />
+                  Lưu ý khi làm bài:
+                </h3>
                 <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">•</span>
+                    <span>Camera sẽ được bật trong suốt thời gian làm bài</span>
+                  </li>
                   <li className="flex items-start gap-2">
                     <span className="text-primary mt-0.5">•</span>
                     <span>Thời gian sẽ được tính ngay khi bạn bắt đầu làm bài</span>
@@ -325,8 +342,8 @@ const ExamDetail = () => {
                     <span>Bài thi sẽ tự động nộp khi hết thời gian</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-primary mt-0.5">•</span>
-                    <span>Xem lại đáp án và giải thích sau khi nộp bài</span>
+                    <span className="text-orange-500 mt-0.5">•</span>
+                    <span className="text-orange-600 dark:text-orange-400">Không chuyển tab hoặc rời khỏi trang khi đang làm bài</span>
                   </li>
                 </ul>
               </div>

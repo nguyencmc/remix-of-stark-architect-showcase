@@ -94,7 +94,7 @@ export default function ExamSetup() {
             <CardHeader>
               <div className="flex items-center gap-2 text-muted-foreground mb-2">
                 <FileCheck className="h-5 w-5" />
-                <span>Thiết lập thi thử</span>
+                <span>Chế độ Thi thử</span>
               </div>
               <CardTitle className="text-2xl">{questionSet.title}</CardTitle>
               {questionSet.description && (
@@ -106,6 +106,10 @@ export default function ExamSetup() {
                   {questionSet.question_count} câu hỏi
                 </Badge>
               </div>
+              <p className="text-sm text-muted-foreground mt-3 p-3 bg-muted/50 rounded-lg">
+                📝 Chế độ thi thử giúp bạn <strong>đánh giá năng lực</strong> thực tế. Bạn sẽ chỉ xem được kết quả 
+                sau khi nộp bài. Không có giám sát webcam.
+              </p>
             </CardHeader>
 
             <CardContent className="space-y-6">
