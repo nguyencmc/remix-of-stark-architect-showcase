@@ -41,14 +41,18 @@ jobs:
           echo "Creating .env file for deployment script..."
           echo "VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}" > .env
           
-          # Try to get ANON_KEY, if empty try PUBLISHABLE_KEY
+          # Create both ANON_KEY and PUBLISHABLE_KEY for compatibility
+          # The code uses PUBLISHABLE_KEY, deploy.sh maps to ANON_KEY
           if [ -n "${{ secrets.VITE_SUPABASE_ANON_KEY }}" ]; then
-            echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}" >> .env
+            KEY="${{ secrets.VITE_SUPABASE_ANON_KEY }}"
           elif [ -n "${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}" ]; then
-            echo "VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}" >> .env
+            KEY="${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}"
           else
-            echo "VITE_SUPABASE_ANON_KEY=" >> .env
+            KEY=""
           fi
+          
+          echo "VITE_SUPABASE_ANON_KEY=$KEY" >> .env
+          echo "VITE_SUPABASE_PUBLISHABLE_KEY=$KEY" >> .env
           
           ./deploy.sh production
         env:
