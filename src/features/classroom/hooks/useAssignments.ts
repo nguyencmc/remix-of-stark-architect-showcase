@@ -3,6 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { ClassAssignment, CreateAssignmentInput, AssignmentSubmission, AssignmentType } from '../types';
 import { useToast } from '@/hooks/use-toast';
+import type { Database } from '@/integrations/supabase/types';
+
+type ClassAssignmentInsert = Database['public']['Tables']['class_assignments']['Insert'];
 
 export const useClassAssignments = (classId: string | undefined) => {
   const { user } = useAuth();
@@ -51,20 +54,20 @@ export const useCreateAssignment = () => {
     mutationFn: async (input: CreateAssignmentInput) => {
       if (!user) throw new Error('Not authenticated');
       
-      const insertData = {
+      const insertData: ClassAssignmentInsert = {
         class_id: input.class_id,
         title: input.title,
         description: input.description || null,
         type: input.type,
         ref_id: input.ref_id,
         due_at: input.due_at || null,
-        settings: input.settings || {},
+        settings: (input.settings || {}) as Database['public']['Tables']['class_assignments']['Insert']['settings'],
         created_by: user.id,
       };
       
       const { data, error } = await supabase
         .from('class_assignments')
-        .insert(insertData as any)
+        .insert(insertData)
         .select()
         .single();
       

@@ -4,7 +4,7 @@ import { Menu, LogOut, User, History, Settings, Trophy, LayoutDashboard, Shield,
 import logo from "@/assets/logo.png";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useUserRole } from "@/hooks/useUserRole";
+import { usePermissionsContext } from "@/contexts/PermissionsContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -38,7 +38,7 @@ interface UserProfile {
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
-  const { isAdmin, isTeacher } = useUserRole();
+  const { isAdmin, isTeacher } = usePermissionsContext();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
