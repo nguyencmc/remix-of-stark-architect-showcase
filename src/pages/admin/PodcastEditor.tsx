@@ -26,6 +26,8 @@ import {
   Loader2,
   X,
   Music,
+  Sparkles,
+  RefreshCw,
 } from 'lucide-react';
 import {
   Select,
@@ -64,6 +66,7 @@ const PodcastEditor = () => {
   const [uploadingAudio, setUploadingAudio] = useState(false);
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [generatingTranscript, setGeneratingTranscript] = useState(false);
   
   // Podcast fields
   const [title, setTitle] = useState('');
@@ -232,6 +235,71 @@ const PodcastEditor = () => {
       if (audioInputRef.current) {
         audioInputRef.current.value = '';
       }
+    }
+  };
+
+  // Generate transcript using AI
+  const handleGenerateTranscript = async () => {
+    if (!audioUrl) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng upload file audio trước khi tạo transcript",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setGeneratingTranscript(true);
+
+    try {
+      const totalDurationSeconds = durationMinutes * 60 + durationSeconds;
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/transcribe-audio`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ 
+            audioUrl,
+            duration: totalDurationSeconds
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error('Đã vượt quá giới hạn request. Vui lòng thử lại sau.');
+        }
+        if (response.status === 402) {
+          throw new Error('Cần nạp thêm credits để sử dụng tính năng này.');
+        }
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Không thể tạo transcript');
+      }
+
+      const data = await response.json();
+      
+      if (data.transcript) {
+        setTranscript(data.transcript);
+        toast({
+          title: "Thành công",
+          description: `Đã tạo transcript với ${data.lineCount || 0} dòng timestamps`,
+        });
+      } else {
+        throw new Error('Không nhận được transcript từ AI');
+      }
+    } catch (error: any) {
+      console.error('Transcript generation error:', error);
+      toast({
+        title: "Lỗi tạo transcript",
+        description: error.message || "Không thể tạo transcript tự động",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingTranscript(false);
     }
   };
 
@@ -718,6 +786,41 @@ const PodcastEditor = () => {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* AI Transcript Generation */}
+              <div className="flex flex-wrap items-center gap-3 p-3 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20">
+                <div className="flex-1">
+                  <p className="text-sm font-medium">🎤 Tạo Transcript AI</p>
+                  <p className="text-xs text-muted-foreground">
+                    AI sẽ phân tích audio và tạo transcript với timestamps tự động (kiểu karaoke)
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="default"
+                  size="sm"
+                  onClick={handleGenerateTranscript}
+                  disabled={generatingTranscript || !audioUrl}
+                  className="gap-2"
+                >
+                  {generatingTranscript ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Đang tạo...
+                    </>
+                  ) : transcript ? (
+                    <>
+                      <RefreshCw className="w-4 h-4" />
+                      Tạo lại
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      Tạo Transcript
+                    </>
+                  )}
+                </Button>
+              </div>
+
               {/* Quick timestamp buttons */}
               <div className="flex flex-wrap gap-2 pb-2">
                 <Badge variant="outline" className="text-xs">
