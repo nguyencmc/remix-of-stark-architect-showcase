@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { fetchDeckWithCounts, createDeck, updateDeck, deleteDeck } from '../api';
+import { FlashcardDeck } from '../types';
 import { toast } from 'sonner';
 
 export function useDecks() {
@@ -26,7 +27,7 @@ export function useDecks() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ deckId, updates }: { deckId: string; updates: any }) =>
+    mutationFn: ({ deckId, updates }: { deckId: string; updates: Partial<FlashcardDeck> }) =>
       updateDeck(deckId, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['flashcard-decks'] });

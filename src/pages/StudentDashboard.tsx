@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUserRole } from '@/hooks/useUserRole';
+import { usePermissionsContext } from '@/contexts/PermissionsContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -53,7 +53,7 @@ interface WeeklyProgress {
 
 const StudentDashboard = () => {
   const { user } = useAuth();
-  const { isAdmin, isTeacher } = useUserRole();
+  const { isAdmin, isTeacher } = usePermissionsContext();
   const { checkAndAwardAchievements, getUserProgress } = useAchievements();
   
   const [stats, setStats] = useState<Stats>({
