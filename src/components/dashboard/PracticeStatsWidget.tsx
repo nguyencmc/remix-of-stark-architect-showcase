@@ -89,7 +89,7 @@ export const PracticeStatsWidget = () => {
             </CardTitle>
             <CardDescription className="text-xs sm:text-sm">Tiến độ 7 ngày gần nhất</CardDescription>
           </div>
-          <Button variant="ghost" size="sm" onClick={refetch} className="h-8 w-8 p-0 flex-shrink-0">
+          <Button variant="ghost" size="sm" onClick={() => refetch()} className="h-8 w-8 p-0 flex-shrink-0">
             <RefreshCw className="w-3 h-3 sm:w-4 sm:h-4" />
           </Button>
         </div>

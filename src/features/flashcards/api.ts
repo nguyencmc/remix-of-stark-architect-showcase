@@ -1,5 +1,50 @@
 import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
 import { FlashcardDeck, UserFlashcard, FlashcardReview } from './types';
+
+// Type aliases from Database
+type DbFlashcardDeck = Database['public']['Tables']['flashcard_decks']['Row'];
+type DbUserFlashcard = Database['public']['Tables']['user_flashcards']['Row'];
+type DbFlashcardReview = Database['public']['Tables']['flashcard_reviews']['Row'];
+
+// Transform functions to ensure type safety
+function toFlashcardDeck(row: DbFlashcardDeck): FlashcardDeck {
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    title: row.title,
+    description: row.description,
+    tags: row.tags || [],
+    created_at: row.created_at,
+  };
+}
+
+function toUserFlashcard(row: DbUserFlashcard): UserFlashcard {
+  return {
+    id: row.id,
+    deck_id: row.deck_id,
+    front: row.front,
+    back: row.back,
+    hint: row.hint,
+    source_type: row.source_type as UserFlashcard['source_type'],
+    source_id: row.source_id,
+    created_at: row.created_at,
+  };
+}
+
+function toFlashcardReview(row: DbFlashcardReview): FlashcardReview {
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    flashcard_id: row.flashcard_id,
+    due_at: row.due_at,
+    interval_days: row.interval_days,
+    ease: row.ease,
+    repetitions: row.repetitions,
+    last_grade: row.last_grade,
+    reviewed_at: row.reviewed_at,
+  };
+}
 
 // ========== DECKS ==========
 
@@ -11,7 +56,7 @@ export async function fetchDecks(userId: string): Promise<FlashcardDeck[]> {
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return (data || []) as unknown as FlashcardDeck[];
+  return (data || []).map(toFlashcardDeck);
 }
 
 export async function fetchDeckWithCounts(userId: string): Promise<FlashcardDeck[]> {
@@ -53,7 +98,7 @@ export async function createDeck(userId: string, title: string, description?: st
     .single();
 
   if (error) throw error;
-  return data as unknown as FlashcardDeck;
+  return toFlashcardDeck(data);
 }
 
 export async function updateDeck(deckId: string, updates: Partial<FlashcardDeck>): Promise<void> {
@@ -84,7 +129,7 @@ export async function fetchCards(deckId: string): Promise<UserFlashcard[]> {
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return (data || []) as unknown as UserFlashcard[];
+  return (data || []).map(toUserFlashcard);
 }
 
 export async function fetchCardWithReview(cardId: string, userId: string): Promise<UserFlashcard | null> {
@@ -105,8 +150,8 @@ export async function fetchCardWithReview(cardId: string, userId: string): Promi
     .single();
 
   return {
-    ...(card as unknown as UserFlashcard),
-    review: review as unknown as FlashcardReview | undefined,
+    ...toUserFlashcard(card),
+    review: review ? toFlashcardReview(review) : undefined,
   };
 }
 
@@ -132,7 +177,7 @@ export async function createCard(
     .single();
 
   if (error) throw error;
-  return data as unknown as UserFlashcard;
+  return toUserFlashcard(data);
 }
 
 export async function updateCard(cardId: string, updates: Partial<UserFlashcard>): Promise<void> {
@@ -296,7 +341,7 @@ export async function getOrCreateMistakesDeck(userId: string): Promise<Flashcard
     .single();
 
   if (existing) {
-    return existing as unknown as FlashcardDeck;
+    return toFlashcardDeck(existing);
   }
 
   // Create if not exists
