@@ -1,5 +1,80 @@
 import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
 import type { QuestionSet, PracticeQuestion, ExamSession, PracticeAttempt } from './types';
+
+// Database row types
+type DbQuestionSet = Database['public']['Tables']['question_sets']['Row'];
+type DbPracticeQuestion = Database['public']['Tables']['practice_questions']['Row'];
+type DbExamSession = Database['public']['Tables']['practice_exam_sessions']['Row'];
+type DbPracticeAttempt = Database['public']['Tables']['practice_attempts']['Row'];
+
+// Transform functions
+function toQuestionSet(row: DbQuestionSet): QuestionSet {
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    category_id: row.category_id,
+    tags: row.tags || [],
+    level: row.level || 'beginner',
+    is_published: row.is_published ?? false,
+    question_count: row.question_count || 0,
+    creator_id: row.creator_id,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+}
+
+function toPracticeQuestion(row: DbPracticeQuestion): PracticeQuestion {
+  return {
+    id: row.id,
+    set_id: row.set_id,
+    question_text: row.question_text,
+    question_image: row.question_image,
+    option_a: row.option_a,
+    option_b: row.option_b,
+    option_c: row.option_c,
+    option_d: row.option_d,
+    option_e: row.option_e,
+    option_f: row.option_f,
+    correct_answer: row.correct_answer,
+    explanation: row.explanation,
+    difficulty: row.difficulty,
+    tags: row.tags || [],
+    question_order: row.question_order,
+    created_at: row.created_at,
+    creator_id: row.creator_id,
+  };
+}
+
+function toExamSession(row: DbExamSession): ExamSession {
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    set_id: row.set_id,
+    status: row.status as ExamSession['status'],
+    duration_sec: row.duration_sec,
+    started_at: row.started_at,
+    ended_at: row.ended_at,
+    score: row.score,
+    total_questions: row.total_questions,
+    correct_count: row.correct_count,
+  };
+}
+
+function toPracticeAttempt(row: DbPracticeAttempt): PracticeAttempt {
+  return {
+    id: row.id,
+    user_id: row.user_id,
+    question_id: row.question_id,
+    mode: row.mode,
+    exam_session_id: row.exam_session_id,
+    selected: row.selected,
+    is_correct: row.is_correct,
+    time_spent_sec: row.time_spent_sec,
+    created_at: row.created_at,
+  };
+}
 
 // Question Sets
 export async function fetchQuestionSets(filters?: {
@@ -22,7 +97,7 @@ export async function fetchQuestionSets(filters?: {
 
   const { data, error } = await query;
   if (error) throw error;
-  return data as QuestionSet[];
+  return (data || []).map(toQuestionSet);
 }
 
 export async function fetchQuestionSetById(id: string): Promise<QuestionSet | null> {
@@ -33,7 +108,7 @@ export async function fetchQuestionSetById(id: string): Promise<QuestionSet | nu
     .single();
 
   if (error) throw error;
-  return data as QuestionSet;
+  return data ? toQuestionSet(data) : null;
 }
 
 // Questions
@@ -64,7 +139,7 @@ export async function fetchQuestionsBySetId(
   const { data, error } = await query;
   if (error) throw error;
 
-  let questions = (data || []) as unknown as PracticeQuestion[];
+  let questions = (data || []).map(toPracticeQuestion);
 
   // Shuffle if requested
   if (options?.shuffle) {
@@ -99,7 +174,7 @@ export async function createExamSession(
     .single();
 
   if (error) throw error;
-  return data as ExamSession;
+  return toExamSession(data);
 }
 
 export async function submitExamSession(
@@ -120,7 +195,7 @@ export async function submitExamSession(
     .single();
 
   if (error) throw error;
-  return data as ExamSession;
+  return toExamSession(data);
 }
 
 export async function fetchExamSessionById(id: string): Promise<ExamSession | null> {
@@ -131,7 +206,7 @@ export async function fetchExamSessionById(id: string): Promise<ExamSession | nu
     .single();
 
   if (error) throw error;
-  return data as ExamSession;
+  return data ? toExamSession(data) : null;
 }
 
 // Attempts
@@ -159,7 +234,7 @@ export async function createAttempt(attempt: {
     .single();
 
   if (error) throw error;
-  return data as PracticeAttempt;
+  return toPracticeAttempt(data);
 }
 
 export async function createBatchAttempts(
@@ -189,7 +264,7 @@ export async function createBatchAttempts(
     .select();
 
   if (error) throw error;
-  return data as PracticeAttempt[];
+  return (data || []).map(toPracticeAttempt);
 }
 
 export async function fetchWrongAttempts(userId: string, limit = 50): Promise<PracticeAttempt[]> {
@@ -202,7 +277,7 @@ export async function fetchWrongAttempts(userId: string, limit = 50): Promise<Pr
     .limit(limit);
 
   if (error) throw error;
-  return data as PracticeAttempt[];
+  return (data || []).map(toPracticeAttempt);
 }
 
 export async function fetchQuestionsByIds(ids: string[]): Promise<PracticeQuestion[]> {
@@ -214,6 +289,6 @@ export async function fetchQuestionsByIds(ids: string[]): Promise<PracticeQuesti
     .in('id', ids);
 
   if (error) throw error;
-  return (data || []) as unknown as PracticeQuestion[];
+  return (data || []).map(toPracticeQuestion);
 }
 
