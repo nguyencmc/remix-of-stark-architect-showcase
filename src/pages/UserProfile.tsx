@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -164,8 +162,7 @@ const UserProfile = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-8">
+<main className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto space-y-6">
             <Skeleton className="h-48 w-full rounded-2xl" />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -175,32 +172,27 @@ const UserProfile = () => {
             </div>
           </div>
         </main>
-        <Footer />
-      </div>
+</div>
     );
   }
 
   if (!profile) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-16 text-center">
+<main className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold text-foreground mb-4">Không tìm thấy người dùng</h1>
           <p className="text-muted-foreground mb-6">Người dùng này không tồn tại hoặc chưa thiết lập trang cá nhân.</p>
           <Button asChild>
             <Link to="/">Về trang chủ</Link>
           </Button>
         </main>
-        <Footer />
-      </div>
+</div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container mx-auto px-4 py-8">
+<main className="container mx-auto px-4 py-8">
         <div className="max-w-5xl mx-auto space-y-8">
           {/* Profile Header */}
           <Card className="overflow-hidden">
@@ -414,9 +406,7 @@ const UserProfile = () => {
           </Tabs>
         </div>
       </main>
-
-      <Footer />
-    </div>
+</div>
   );
 };
 

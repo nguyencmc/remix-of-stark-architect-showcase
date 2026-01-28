@@ -3,6 +3,9 @@ const path = require('path');
 
 // Files to fix
 const files = [
+  'src/pages/Leaderboard.tsx',
+  'src/pages/Settings.tsx',
+  'src/pages/StudentDashboard.tsx',
   'src/pages/ExamCategoryDetail.tsx',
   'src/pages/Flashcards.tsx',
   'src/pages/InstructorProfile.tsx',
@@ -50,53 +53,11 @@ const files = [
   'src/features/practice/pages/ExamResult.tsx',
 ];
 
-function fixFile(filePath) {
-  const fullPath = path.join(process.cwd(), filePath);
-  if (!fs.existsSync(fullPath)) {
-    console.log('Not found:', filePath);
-    return;
-  }
-
-  let content = fs.readFileSync(fullPath, 'utf8');
-  let modified = false;
-
-  // Remove Header import
-  if (content.includes("import { Header } from '@/components/Header'") || 
-      content.includes('import { Header } from "@/components/Header"')) {
-    content = content.replace(/import \{ Header \} from ['"]@\/components\/Header['"];\n?/g, '');
-    modified = true;
-  }
-  
-  // Remove Footer import  
-  if (content.includes("import { Footer } from '@/components/Footer'") ||
-      content.includes('import { Footer } from "@/components/Footer"')) {
-    content = content.replace(/import \{ Footer \} from ['"]@\/components\/Footer['"];\n?/g, '');
-    modified = true;
-  }
-
-  // Remove FloatingActions import
-  if (content.includes("import { FloatingActions } from '@/components/FloatingActions'") ||
-      content.includes('import { FloatingActions } from "@/components/FloatingActions"')) {
-    content = content.replace(/import \{ FloatingActions \} from ['"]@\/components\/FloatingActions['"];\n?/g, '');
-    modified = true;
-  }
-
-  // Remove <Header /> usage
-  content = content.replace(/\s*<Header \/>\s*\n?/g, '\n');
-
-  // Remove <Footer /> usage
-  content = content.replace(/\s*<Footer \/>\s*\n?/g, '\n');
-
-  // Remove <FloatingActions /> usage
-  content = content.replace(/\s*<FloatingActions \/>\s*\n?/g, '\n');
-
-  if (modified || content !== fs.readFileSync(fullPath, 'utf8')) {
-    fs.writeFileSync(fullPath, content);
-    console.log('Fixed:', filePath);
+files.forEach(file => {
+  const filePath = path.join(process.cwd(), file);
+  if (fs.existsSync(filePath)) {
+    console.log(`Found: ${file}`);
   } else {
-    console.log('No changes needed:', filePath);
+    console.log(`Missing: ${file}`);
   }
-}
-
-files.forEach(fixFile);
-console.log('Done!');
+});

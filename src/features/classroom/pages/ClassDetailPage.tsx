@@ -2,7 +2,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Settings, Copy, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useClass, useMyClassRole } from '../hooks';
-import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -40,8 +39,7 @@ const ClassDetailPage = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <div className="flex justify-center py-20">
+<div className="flex justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       </div>
@@ -51,8 +49,7 @@ const ClassDetailPage = () => {
   if (!classData) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-8 text-center">
+<div className="container mx-auto px-4 py-8 text-center">
           <h1 className="text-2xl font-bold mb-4">Không tìm thấy lớp học</h1>
           <Button onClick={() => navigate('/classes')}>Quay lại danh sách</Button>
         </div>
@@ -62,8 +59,7 @@ const ClassDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      <main className="container mx-auto px-4 py-8">
+<main className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div>

@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { 
   Target, 
@@ -290,22 +288,18 @@ export default function PracticeEditorPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
+<div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
         </div>
-        <Footer />
-      </div>
+</div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="container mx-auto px-4 py-8">
+<main className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Link to="/practice/my-sets">
@@ -427,8 +421,6 @@ export default function PracticeEditorPage() {
           </div>
         </div>
       </main>
-
-      <Footer />
-    </div>
+</div>
   );
 }

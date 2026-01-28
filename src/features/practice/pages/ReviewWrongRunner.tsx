@@ -4,8 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, ArrowRight, Check, RotateCcw, AlertCircle } from 'lucide-react';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useReviewWrong } from '../hooks/useReviewWrong';
 import { QuestionCard } from '../components/QuestionCard';
@@ -103,8 +101,7 @@ export default function ReviewWrongRunner() {
   if (!authLoading && !user) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-8 text-center">
+<main className="container mx-auto px-4 py-8 text-center">
           <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
           <p className="text-lg mb-4">Bạn cần đăng nhập để xem lại câu sai</p>
           <Button onClick={() => navigate('/auth?redirect=/practice/review')}>
@@ -118,8 +115,7 @@ export default function ReviewWrongRunner() {
   if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-8 max-w-3xl">
+<main className="container mx-auto px-4 py-8 max-w-3xl">
           <Skeleton className="h-8 w-full mb-4" />
           <Skeleton className="h-96 w-full" />
         </main>
@@ -130,8 +126,7 @@ export default function ReviewWrongRunner() {
   if (error) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-8 text-center">
+<main className="container mx-auto px-4 py-8 text-center">
           <p className="text-destructive">Có lỗi xảy ra khi tải dữ liệu</p>
           <Button variant="link" onClick={() => navigate('/practice')}>
             Quay lại
@@ -145,8 +140,7 @@ export default function ReviewWrongRunner() {
   if (!questions || questions.length === 0) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-8 max-w-2xl">
+<main className="container mx-auto px-4 py-8 max-w-2xl">
           <Button
             variant="ghost"
             className="mb-6"
@@ -171,16 +165,13 @@ export default function ReviewWrongRunner() {
             </CardContent>
           </Card>
         </main>
-        <Footer />
-      </div>
+</div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="container mx-auto px-4 py-6 max-w-3xl">
+<main className="container mx-auto px-4 py-6 max-w-3xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <Button variant="ghost" onClick={() => navigate('/practice')}>

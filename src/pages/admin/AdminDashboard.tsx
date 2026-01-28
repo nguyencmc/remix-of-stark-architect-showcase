@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -259,8 +258,7 @@ const AdminDashboard = () => {
   if (roleLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
+<div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
@@ -305,9 +303,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container mx-auto px-4 py-4 md:py-8 pb-24 md:pb-8">
+<main className="container mx-auto px-4 py-4 md:py-8 pb-24 md:pb-8">
         {/* Mobile Header */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">

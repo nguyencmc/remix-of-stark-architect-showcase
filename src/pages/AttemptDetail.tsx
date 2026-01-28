@@ -1,8 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -141,8 +139,7 @@ const AttemptDetail = () => {
   if (!attemptLoading && !attempt) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-20 text-center">
+<div className="container mx-auto px-4 py-20 text-center">
           <div className="max-w-md mx-auto">
             <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-6">
               <FileText className="w-10 h-10 text-muted-foreground" />
@@ -159,16 +156,13 @@ const AttemptDetail = () => {
             </Link>
           </div>
         </div>
-        <Footer />
-      </div>
+</div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-
-      {/* Header Section */}
+{/* Header Section */}
       <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 py-8">
         <div className="container mx-auto px-4">
           <Button
@@ -382,9 +376,7 @@ const AttemptDetail = () => {
           )}
         </div>
       </section>
-
-      <Footer />
-    </div>
+</div>
   );
 };
 

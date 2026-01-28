@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDecks } from '../hooks/useDecks';
 import { useDueCards } from '../hooks/useDueCards';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -48,8 +46,7 @@ export default function DeckListPage() {
   if (!user) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-20 text-center">
+<div className="container mx-auto px-4 py-20 text-center">
           <div className="max-w-md mx-auto">
             <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-6">
               <LogIn className="w-10 h-10 text-muted-foreground" />
@@ -66,16 +63,13 @@ export default function DeckListPage() {
             </Link>
           </div>
         </div>
-        <Footer />
-      </div>
+</div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-
-      {/* Header */}
+{/* Header */}
       <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 py-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -216,8 +210,6 @@ export default function DeckListPage() {
           )}
         </div>
       </section>
-
-      <Footer />
-    </div>
+</div>
   );
 }

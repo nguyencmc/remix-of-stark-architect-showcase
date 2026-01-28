@@ -5,9 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { FloatingActions } from "@/components/FloatingActions";
 import { 
   ArrowLeft, 
   BookOpen, 
@@ -120,8 +117,7 @@ const BookDetail = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <main className="pt-24 pb-16">
+<main className="pt-24 pb-16">
           <div className="container mx-auto px-4">
             <div className="animate-pulse">
               <div className="h-8 bg-muted rounded w-32 mb-8"></div>
@@ -136,16 +132,14 @@ const BookDetail = () => {
             </div>
           </div>
         </main>
-        <Footer />
-      </div>
+</div>
     );
   }
 
   if (!book) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <main className="pt-24 pb-16">
+<main className="pt-24 pb-16">
           <div className="container mx-auto px-4 text-center py-16">
             <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-foreground mb-2">Book not found</h1>
@@ -156,16 +150,13 @@ const BookDetail = () => {
             </Button>
           </div>
         </main>
-        <Footer />
-      </div>
+</div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="pt-24 pb-16">
+<main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
           {/* Back Button */}
           <Button
@@ -381,10 +372,7 @@ const BookDetail = () => {
           </div>
         </div>
       </main>
-
-      <Footer />
-      <FloatingActions />
-    </div>
+</div>
   );
 };
 

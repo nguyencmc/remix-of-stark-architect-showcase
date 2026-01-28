@@ -3,7 +3,6 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { 
   FileText, 
@@ -306,8 +305,7 @@ const ExamEditor = () => {
   if (roleLoading || loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
+<div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
@@ -322,9 +320,7 @@ const ExamEditor = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container mx-auto px-4 py-8">
+<main className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Link to="/admin/exams">

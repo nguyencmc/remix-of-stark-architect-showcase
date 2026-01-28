@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -190,14 +188,12 @@ const Flashcards = () => {
   if (setsLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-8">
+<main className="flex-1 container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
         </main>
-        <Footer />
-      </div>
+</div>
     );
   }
 
@@ -205,8 +201,7 @@ const Flashcards = () => {
   if (!selectedSet) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-8">
+<main className="flex-1 container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-foreground mb-2">Flashcards</h1>
@@ -264,8 +259,7 @@ const Flashcards = () => {
             )}
           </div>
         </main>
-        <Footer />
-      </div>
+</div>
     );
   }
 
@@ -274,8 +268,7 @@ const Flashcards = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      <main className="flex-1 container mx-auto px-4 py-8">
+<main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="mb-6">
@@ -451,8 +444,7 @@ const Flashcards = () => {
           )}
         </div>
       </main>
-      <Footer />
-    </div>
+</div>
   );
 };
 

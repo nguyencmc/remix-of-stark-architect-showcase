@@ -13,8 +13,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ArrowLeft, FileCheck, BookOpen, Clock, AlertTriangle } from 'lucide-react';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuestionSet } from '../hooks/useQuestionSets';
 
@@ -43,8 +41,7 @@ export default function ExamSetup() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-8">
+<main className="container mx-auto px-4 py-8">
           <Skeleton className="h-8 w-48 mb-4" />
           <Skeleton className="h-64 w-full max-w-xl" />
         </main>
@@ -55,8 +52,7 @@ export default function ExamSetup() {
   if (error || !questionSet) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-8 text-center">
+<main className="container mx-auto px-4 py-8 text-center">
           <p className="text-destructive">Không tìm thấy bộ đề</p>
           <Button variant="link" onClick={() => navigate('/practice')}>
             Quay lại
@@ -76,9 +72,7 @@ export default function ExamSetup() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="container mx-auto px-4 py-8">
+<main className="container mx-auto px-4 py-8">
         {/* Back button */}
         <Button
           variant="ghost"
@@ -203,8 +197,6 @@ export default function ExamSetup() {
           </Card>
         </div>
       </main>
-
-      <Footer />
-    </div>
+</div>
   );
 }

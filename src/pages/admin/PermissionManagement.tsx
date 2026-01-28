@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Header } from '@/components/Header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -238,8 +237,7 @@ const PermissionManagement = () => {
   if (roleLoading || loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <div className="flex items-center justify-center min-h-[60vh]">
+<div className="flex items-center justify-center min-h-[60vh]">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       </div>
@@ -250,8 +248,7 @@ const PermissionManagement = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      <main className="container mx-auto px-4 py-6 sm:py-8">
+<main className="container mx-auto px-4 py-6 sm:py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">

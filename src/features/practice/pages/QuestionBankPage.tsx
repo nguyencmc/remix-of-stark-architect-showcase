@@ -2,8 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -162,9 +160,7 @@ export default function QuestionBankPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="container mx-auto px-4 py-8">
+<main className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
@@ -441,10 +437,7 @@ export default function QuestionBankPage() {
           </div>
         )}
       </main>
-
-      <Footer />
-
-      {/* Delete Confirmation Dialog */}
+{/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

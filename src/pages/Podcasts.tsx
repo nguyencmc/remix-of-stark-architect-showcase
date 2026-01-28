@@ -1,8 +1,5 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { FloatingActions } from "@/components/FloatingActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -133,10 +130,8 @@ const Podcasts = () => {
   const otherPodcasts = filteredPodcasts.filter(p => p.id !== featuredPodcast?.id);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="container mx-auto px-4 py-8">
+    <>
+      <div className="container mx-auto px-4 py-8">
         {/* Filter by Category */}
         <div className="mb-6">
           <h2 className="text-sm font-semibold text-muted-foreground mb-3">Filter by Category</h2>
@@ -291,10 +286,7 @@ const Podcasts = () => {
             </div>
           )}
         </div>
-      </main>
-
-      <FloatingActions />
-      <Footer />
+      </div>
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
@@ -312,7 +304,7 @@ const Podcasts = () => {
           background: rgba(255, 255, 255, 0.3);
         }
       `}</style>
-    </div>
+    </>
   );
 };
 

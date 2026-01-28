@@ -1,8 +1,5 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { FloatingActions } from "@/components/FloatingActions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -252,8 +249,7 @@ const CourseDetail = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
+<div className="container mx-auto px-4 py-8">
           <div className="animate-pulse space-y-4">
             <div className="h-8 bg-muted rounded w-3/4"></div>
             <div className="h-4 bg-muted rounded w-1/2"></div>
@@ -267,8 +263,7 @@ const CourseDetail = () => {
   if (!course) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-16 text-center">
+<div className="container mx-auto px-4 py-16 text-center">
           <AlertCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-2">Không tìm thấy khóa học</h1>
           <p className="text-muted-foreground mb-4">Khóa học này không tồn tại hoặc đã bị xóa</p>
@@ -276,16 +271,13 @@ const CourseDetail = () => {
             <Link to="/courses">Quay lại danh sách khóa học</Link>
           </Button>
         </div>
-        <Footer />
-      </div>
+</div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-
-      {/* Hero Section - Dark Background */}
+{/* Hero Section - Dark Background */}
       <section className="bg-slate-900 text-white">
         <div className="container mx-auto px-4 py-8">
           <div className="grid lg:grid-cols-3 gap-8">
@@ -727,10 +719,7 @@ const CourseDetail = () => {
         thumbnailUrl={course.image_url}
         courseTitle={course.title}
       />
-
-      <FloatingActions />
-      <Footer />
-    </div>
+</div>
   );
 };
 

@@ -4,7 +4,6 @@ import { Plus, Users, BookOpen, LogIn, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
 import { useClasses } from '../hooks';
-import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,8 +23,7 @@ const ClassListPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      <main className="container mx-auto px-4 py-8">
+<main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold">Lớp học của tôi</h1>

@@ -3,8 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStudyGroupDetail } from '@/hooks/useStudyGroups';
 import { useStudyGroups } from '@/hooks/useStudyGroups';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -108,38 +106,32 @@ const StudyGroupDetail = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <Header />
-        <main className="flex-grow container mx-auto px-4 py-8">
+<main className="flex-grow container mx-auto px-4 py-8">
           <div className="animate-pulse space-y-4">
             <div className="h-8 bg-muted rounded w-1/3"></div>
             <div className="h-4 bg-muted rounded w-1/2"></div>
           </div>
         </main>
-        <Footer />
-      </div>
+</div>
     );
   }
 
   if (!group) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <Header />
-        <main className="flex-grow container mx-auto px-4 py-8 text-center">
+<main className="flex-grow container mx-auto px-4 py-8 text-center">
           <h1 className="text-2xl font-bold text-foreground">Không tìm thấy nhóm</h1>
           <Button className="mt-4" onClick={() => navigate('/study-groups')}>
             Quay lại
           </Button>
         </main>
-        <Footer />
-      </div>
+</div>
     );
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      
-      <main className="flex-grow container mx-auto px-4 py-8">
+<main className="flex-grow container mx-auto px-4 py-8">
         <Button 
           variant="ghost" 
           className="mb-4 gap-2"
@@ -418,9 +410,7 @@ const StudyGroupDetail = () => {
           </div>
         </div>
       </main>
-
-      <Footer />
-    </div>
+</div>
   );
 };
 

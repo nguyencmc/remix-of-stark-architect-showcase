@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -102,8 +100,7 @@ const InstructorProfile = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-8">
+<main className="flex-1 container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
             <Skeleton className="h-64 w-full rounded-xl mb-8" />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -113,16 +110,14 @@ const InstructorProfile = () => {
             </div>
           </div>
         </main>
-        <Footer />
-      </div>
+</div>
     );
   }
 
   if (!instructor) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-8">
+<main className="flex-1 container mx-auto px-4 py-8">
           <div className="max-w-2xl mx-auto text-center py-20">
             <GraduationCap className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
             <h1 className="text-2xl font-bold mb-2">Không tìm thấy giảng viên</h1>
@@ -137,8 +132,7 @@ const InstructorProfile = () => {
             </Button>
           </div>
         </main>
-        <Footer />
-      </div>
+</div>
     );
   }
 
@@ -151,9 +145,7 @@ const InstructorProfile = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      
-      <main className="flex-1">
+<main className="flex-1">
         {/* Instructor Hero Section */}
         <div className="bg-gradient-to-br from-primary/10 via-background to-primary/5 border-b">
           <div className="container mx-auto px-4 py-12">
@@ -361,9 +353,7 @@ const InstructorProfile = () => {
           </div>
         </div>
       </main>
-      
-      <Footer />
-    </div>
+</div>
   );
 };
 

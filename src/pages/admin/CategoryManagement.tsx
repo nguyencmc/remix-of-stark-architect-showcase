@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -356,8 +355,7 @@ const CategoryManagement = () => {
   if (roleLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
+<div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
@@ -374,9 +372,7 @@ const CategoryManagement = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container mx-auto px-4 py-8">
+<main className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">

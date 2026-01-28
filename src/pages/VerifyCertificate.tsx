@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Award, CheckCircle, XCircle, Loader2, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
@@ -84,9 +82,7 @@ const VerifyCertificate = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container mx-auto px-4 py-12">
+<main className="container mx-auto px-4 py-12">
         <Link to="/" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-8">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Quay lại trang chủ
@@ -193,9 +189,7 @@ const VerifyCertificate = () => {
           </div>
         )}
       </main>
-
-      <Footer />
-    </div>
+</div>
   );
 };
 

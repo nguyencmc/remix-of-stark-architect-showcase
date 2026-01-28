@@ -1,8 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { FloatingActions } from "@/components/FloatingActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -458,11 +455,6 @@ const Exams = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Desktop Header */}
-      <div className="hidden lg:block">
-        <Header />
-      </div>
-
       {/* Mobile Header */}
       <header className="lg:hidden sticky top-0 z-50 bg-background border-b border-border">
         <div className="flex items-center justify-between px-4 h-14">
@@ -942,12 +934,6 @@ const Exams = () => {
           </Link>
         </div>
       </nav>
-
-      {/* Desktop Footer & Floating Actions */}
-      <div className="hidden lg:block">
-        <FloatingActions />
-        <Footer />
-      </div>
     </div>
   );
 };

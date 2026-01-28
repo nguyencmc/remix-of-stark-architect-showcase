@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Loader2, KeyRound } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useJoinClass } from '../hooks';
-import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -32,8 +31,7 @@ const JoinClassPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      <main className="container mx-auto px-4 py-8 max-w-md">
+<main className="container mx-auto px-4 py-8 max-w-md">
         <Button 
           variant="ghost" 
           className="mb-6"

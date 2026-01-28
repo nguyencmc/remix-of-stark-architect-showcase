@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useStudyGroups } from '@/hooks/useStudyGroups';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -78,9 +76,7 @@ const StudyGroups = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      
-      <main className="flex-grow container mx-auto px-4 py-8">
+<main className="flex-grow container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Nhóm Học Tập</h1>
@@ -300,9 +296,7 @@ const StudyGroups = () => {
           </TabsContent>
         </Tabs>
       </main>
-
-      <Footer />
-    </div>
+</div>
   );
 };
 

@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -70,9 +68,7 @@ const Leaderboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
+    <>
       {/* Hero Section */}
       <section className="relative py-16 overflow-hidden bg-gradient-to-br from-primary/10 via-background to-accent/10">
         <div className="container mx-auto px-4 text-center">
@@ -249,9 +245,7 @@ const Leaderboard = () => {
           </Card>
         </div>
       </main>
-
-      <Footer />
-    </div>
+    </>
   );
 };
 

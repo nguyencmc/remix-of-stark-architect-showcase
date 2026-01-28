@@ -1,7 +1,4 @@
 import { useState, useEffect } from "react";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { FloatingActions } from "@/components/FloatingActions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -117,8 +114,7 @@ const Courses = () => {
   const getRandomOriginalPrice = (price: number) => Math.floor(price * (1.5 + Math.random()));
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <>
 
       {/* Hero Banner */}
       <section className="relative bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 py-12 md:py-20 overflow-hidden">
@@ -547,10 +543,7 @@ const Courses = () => {
           </div>
         </div>
       </section>
-
-      <FloatingActions />
-      <Footer />
-    </div>
+    </>
   );
 };
 

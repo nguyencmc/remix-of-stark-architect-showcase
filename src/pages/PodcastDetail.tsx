@@ -2,8 +2,6 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
@@ -320,22 +318,19 @@ const PodcastDetail = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-8">
+<main className="flex-1 container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
         </main>
-        <Footer />
-      </div>
+</div>
     );
   }
 
   if (!podcast) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
-        <Header />
-        <main className="flex-1 container mx-auto px-4 py-8">
+<main className="flex-1 container mx-auto px-4 py-8">
           <div className="text-center py-16">
             <Headphones className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
             <h2 className="text-2xl font-bold mb-2">Không tìm thấy podcast</h2>
@@ -344,16 +339,13 @@ const PodcastDetail = () => {
             </Link>
           </div>
         </main>
-        <Footer />
-      </div>
+</div>
     );
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      
-      <main className="flex-1">
+<main className="flex-1">
         {/* Hero Section with Gradient */}
         <div className="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 text-white">
           <div className="container mx-auto px-4 py-8">
@@ -723,9 +715,7 @@ const PodcastDetail = () => {
           </div>
         </div>
       </main>
-
-      <Footer />
-    </div>
+</div>
   );
 };
 

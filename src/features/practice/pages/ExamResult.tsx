@@ -15,8 +15,6 @@ import {
   CheckCircle,
   ArrowLeft,
 } from 'lucide-react';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { fetchExamSessionById, fetchQuestionSetById } from '../api';
 
 export default function ExamResult() {
@@ -40,8 +38,7 @@ export default function ExamResult() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-8 max-w-2xl">
+<main className="container mx-auto px-4 py-8 max-w-2xl">
           <Skeleton className="h-64 w-full" />
         </main>
       </div>
@@ -51,8 +48,7 @@ export default function ExamResult() {
   if (!session) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-8 text-center">
+<main className="container mx-auto px-4 py-8 text-center">
           <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
           <p className="text-lg mb-4">Không tìm thấy kết quả thi</p>
           <Button onClick={() => navigate('/practice')}>
@@ -95,9 +91,7 @@ export default function ExamResult() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
+<main className="container mx-auto px-4 py-8 max-w-2xl">
         <Button
           variant="ghost"
           className="mb-6"
@@ -208,8 +202,6 @@ export default function ExamResult() {
           </div>
         )}
       </main>
-
-      <Footer />
-    </div>
+</div>
   );
 }

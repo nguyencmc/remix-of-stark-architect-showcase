@@ -3,7 +3,6 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, ArrowRight, Check, RotateCcw } from 'lucide-react';
-import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePracticeQuestions } from '../hooks/usePracticeQuestions';
 import { QuestionCard } from '../components/QuestionCard';
@@ -133,8 +132,7 @@ export default function PracticeRunner() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-8 max-w-3xl">
+<main className="container mx-auto px-4 py-8 max-w-3xl">
           <Skeleton className="h-8 w-full mb-4" />
           <Skeleton className="h-96 w-full" />
         </main>
@@ -145,8 +143,7 @@ export default function PracticeRunner() {
   if (error || !questions || questions.length === 0) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-8 text-center">
+<main className="container mx-auto px-4 py-8 text-center">
           <p className="text-destructive mb-4">
             {questions?.length === 0
               ? 'Không có câu hỏi phù hợp với tiêu chí đã chọn'
@@ -162,9 +159,7 @@ export default function PracticeRunner() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="container mx-auto px-4 py-6 max-w-3xl">
+<main className="container mx-auto px-4 py-6 max-w-3xl">
         {/* Progress */}
         <ProgressBar
           current={currentIndex + 1}

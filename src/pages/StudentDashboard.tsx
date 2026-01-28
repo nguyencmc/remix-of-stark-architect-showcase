@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -182,55 +180,45 @@ const StudentDashboard = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container mx-auto px-4 py-16 text-center">
-          <BookOpen className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-          <h1 className="text-2xl font-bold mb-2">Đăng nhập để xem Dashboard</h1>
-          <p className="text-muted-foreground mb-6">
-            Theo dõi tiến độ học tập và thống kê cá nhân của bạn
-          </p>
-          <Link to="/auth">
-            <Button size="lg">Đăng nhập ngay</Button>
-          </Link>
-        </main>
-        <Footer />
-      </div>
+      <main className="container mx-auto px-4 py-16 text-center">
+        <BookOpen className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+        <h1 className="text-2xl font-bold mb-2">Đăng nhập để xem Dashboard</h1>
+        <p className="text-muted-foreground mb-6">
+          Theo dõi tiến độ học tập và thống kê cá nhân của bạn
+        </p>
+        <Link to="/auth">
+          <Button size="lg">Đăng nhập ngay</Button>
+        </Link>
+      </main>
     );
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
+    <>
       <main className="container mx-auto px-4 py-6 sm:py-8 overflow-x-hidden">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
           <div className="min-w-0">
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-2 sm:gap-3">
-              <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 text-primary flex-shrink-0" />
-              <span className="truncate">Dashboard</span>
-            </h1>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1">Theo dõi tiến độ học tập của bạn</p>
-          </div>
-          <div className="flex gap-2 flex-shrink-0">
-            {(isAdmin || isTeacher) && (
-              <Link to={isAdmin ? "/admin" : "/teacher"}>
-                <Button variant="outline" size="sm" className="text-xs sm:text-sm">
+            <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 text-primary flex-shrink-0" />
+            <span className="truncate">Dashboard</span>
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">Theo dõi tiến độ học tập của bạn</p>
+        </div>
+        <div className="flex gap-2 flex-shrink-0">
+          {(isAdmin || isTeacher) && (
+            <Link to={isAdmin ? "/admin" : "/teacher"}>
+              <Button variant="outline" size="sm" className="text-xs sm:text-sm">
                   {isAdmin ? 'Admin' : 'Teacher'}
                 </Button>
               </Link>
@@ -510,8 +498,7 @@ const StudentDashboard = () => {
       </main>
       
       <AITutorButton />
-      <Footer />
-    </div>
+    </>
   );
 };
 

@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -125,20 +123,17 @@ const ExamCategoryDetail = () => {
   if (categoryLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <div className="flex items-center justify-center py-20">
+<div className="flex items-center justify-center py-20">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
-        <Footer />
-      </div>
+</div>
     );
   }
 
   if (!category) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-20 text-center">
+<div className="container mx-auto px-4 py-20 text-center">
           <h1 className="text-2xl font-bold text-foreground mb-4">Không tìm thấy danh mục</h1>
           <Link to="/exams">
             <Button>
@@ -147,16 +142,13 @@ const ExamCategoryDetail = () => {
             </Button>
           </Link>
         </div>
-        <Footer />
-      </div>
+</div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
-      {/* Breadcrumb & Header */}
+{/* Breadcrumb & Header */}
       <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 py-12">
         <div className="container mx-auto px-4">
           {/* Breadcrumb */}
@@ -345,9 +337,7 @@ const ExamCategoryDetail = () => {
           )}
         </div>
       </section>
-
-      <Footer />
-    </div>
+</div>
   );
 };
 

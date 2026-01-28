@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useDeckDetail } from '../hooks/useDeckDetail';
-import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -86,8 +84,7 @@ export default function DeckDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
+<div className="container mx-auto px-4 py-8">
           <Skeleton className="h-8 w-48 mb-4" />
           <Skeleton className="h-4 w-72 mb-8" />
           <div className="space-y-4">
@@ -96,31 +93,26 @@ export default function DeckDetailPage() {
             ))}
           </div>
         </div>
-        <Footer />
-      </div>
+</div>
     );
   }
 
   if (!deck) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-20 text-center">
+<div className="container mx-auto px-4 py-20 text-center">
           <h1 className="text-2xl font-bold mb-4">Không tìm thấy bộ thẻ</h1>
           <Link to="/flashcards">
             <Button>Quay lại</Button>
           </Link>
         </div>
-        <Footer />
-      </div>
+</div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-
-      {/* Header */}
+{/* Header */}
       <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 py-8">
         <div className="container mx-auto px-4">
           <Link
@@ -301,8 +293,6 @@ export default function DeckDetailPage() {
           )}
         </div>
       </section>
-
-      <Footer />
-    </div>
+</div>
   );
 }
