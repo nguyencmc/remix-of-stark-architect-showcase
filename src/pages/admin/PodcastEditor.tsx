@@ -78,7 +78,7 @@ const PodcastEditor = () => {
   const [audioUrl, setAudioUrl] = useState('');
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [transcript, setTranscript] = useState('');
-  const [hostName, setHostName] = useState('The Best Study');
+  const [hostName, setHostName] = useState('AI-Exam.cloud');
   const [episodeNumber, setEpisodeNumber] = useState(1);
 
   const canCreate = hasPermission('podcasts.create');
@@ -130,7 +130,7 @@ const PodcastEditor = () => {
     setAudioUrl(podcast.audio_url || '');
     setThumbnailUrl(podcast.thumbnail_url || '');
     setTranscript(podcast.transcript || '');
-    setHostName(podcast.host_name || 'The Best Study');
+    setHostName(podcast.host_name || 'AI-Exam.cloud');
     setEpisodeNumber(podcast.episode_number || 1);
     
     const totalSeconds = podcast.duration_seconds || 0;

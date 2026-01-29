@@ -39,7 +39,7 @@ export const HeroSection = () => {
             <div className="relative z-10 animate-float">
               <img
                 src={heroLaptop}
-                alt="The Best Study Platform"
+                alt="AI-Exam.cloud Platform"
                 className="w-full max-w-2xl mx-auto drop-shadow-2xl"
                 width={1024}
                 height={768}

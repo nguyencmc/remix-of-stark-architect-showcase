@@ -7,14 +7,14 @@ const testimonials = [
     name: "Hải Đinh",
     role: "Học viên",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    content: "Mình rất thích học tiếng Anh trên The Best Study. Các bài học như flashcard, game từ vựng, bài thi thử… rất hữu ích và dễ tiếp cận. Nhờ website mà việc học trở nên thú vị và hiệu quả hơn!",
+    content: "Mình rất thích học trên AI-Exam.cloud. Các bài học như flashcard, bài thi thử… rất hữu ích và dễ tiếp cận. Nhờ website mà việc học trở nên thú vị và hiệu quả hơn!",
     rating: 5,
   },
   {
     name: "Trần Thị Bảo Châu",
     role: "Học viên",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
-    content: "The Best Study quả thực là một website tuyệt vời! Tôi đã học được rất nhiều điều bổ ích và thú vị tại đây. Chúc The Best Study ngày càng phát triển!",
+    content: "AI-Exam.cloud quả thực là một website tuyệt vời! Tôi đã học được rất nhiều điều bổ ích và thú vị tại đây. Chúc AI-Exam.cloud ngày càng phát triển!",
     rating: 5,
   },
   {
@@ -38,7 +38,7 @@ export const TestimonialsSection = () => {
             Cảm nhận của học viên
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            The Best Study luôn lắng nghe và không ngừng cải thiện để mang đến cho bạn trải nghiệm học ngôn ngữ tốt nhất.
+            AI-Exam.cloud luôn lắng nghe và không ngừng cải thiện để mang đến cho bạn trải nghiệm học tập tốt nhất.
           </p>
         </div>
 

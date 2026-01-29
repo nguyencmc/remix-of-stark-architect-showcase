@@ -81,7 +81,7 @@ const Leaderboard = () => {
             Bảng Xếp Hạng
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Top 100 người dùng xuất sắc nhất trên nền tảng The Best Study
+            Top 100 người dùng xuất sắc nhất trên nền tảng AI-Exam.cloud
           </p>
         </div>
       </section>

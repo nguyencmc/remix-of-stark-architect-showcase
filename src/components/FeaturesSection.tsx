@@ -98,7 +98,7 @@ export const FeaturesSection = () => {
             Tính năng nổi bật
           </h2>
           <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto">
-            The Best Study mang đến những tính năng tuyệt vời giúp bạn đẩy nhanh hành trình học ngôn ngữ. Đây là những tính năng nổi bật mà bạn chắc chắn sẽ yêu thích!
+            AI-Exam.cloud mang đến những tính năng tuyệt vời giúp bạn đẩy nhanh hành trình học tập. Đây là những tính năng nổi bật mà bạn chắc chắn sẽ yêu thích!
           </p>
         </div>
 
