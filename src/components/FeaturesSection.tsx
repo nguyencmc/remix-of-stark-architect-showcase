@@ -1,146 +1,131 @@
 import { 
-  BookOpen, 
-  Gamepad2, 
-  PenTool, 
-  Puzzle, 
+  Brain, 
   Target, 
-  Zap,
-  Grid3X3,
-  MessageSquare,
-  Brain,
-  Trophy,
-  Layers,
-  Lightbulb
+  BarChart3, 
+  Layers, 
+  Headphones, 
+  Users,
+  ArrowRight 
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const features = [
   {
-    icon: BookOpen,
-    title: "Thẻ ghi nhớ",
-    description: "Ghi nhớ từ vựng hiệu quả với hệ thống thẻ ghi nhớ thông minh, hỗ trợ học sâu và ôn tập theo phương pháp lặp lại ngắt quãng.",
-    color: "bg-blue-100 text-blue-600",
-  },
-  {
-    icon: Puzzle,
-    title: "Ghép thẻ",
-    description: "Cải thiện khả năng ghi nhớ từ vựng thông qua trò chơi ghép thẻ – luyện phản xạ nhanh và ghi nhớ sâu sắc hơn.",
-    color: "bg-purple-100 text-purple-600",
-  },
-  {
-    icon: PenTool,
-    title: "Đoán chữ",
-    description: "Bạn có đoán được từ bí mật không? Hãy luyện từ vựng và khả năng suy luận với trò chơi đoán chữ.",
-    color: "bg-green-100 text-green-600",
-  },
-  {
-    icon: Grid3X3,
-    title: "Câu đố ô chữ",
-    description: "Luyện từ vựng hiệu quả với trò chơi ô chữ – rèn phản xạ từ vựng và kỹ năng đoán từ qua từng gợi ý.",
-    color: "bg-orange-100 text-orange-600",
+    icon: Brain,
+    title: "AI Tutor thông minh",
+    description: "Trợ lý AI cá nhân hóa giúp giải thích chi tiết từng câu hỏi và gợi ý phương pháp học tập hiệu quả.",
+    color: "from-blue-500 to-indigo-600",
+    bgColor: "bg-blue-50 dark:bg-blue-950/30",
+    iconColor: "text-blue-600 dark:text-blue-400",
   },
   {
     icon: Target,
-    title: "Tiêu diệt quái vật",
-    description: "Điều khiển nhân vật, vượt qua thử thách và tiêu diệt quái vật để giành lại vốn từ của mình!",
-    color: "bg-red-100 text-red-600",
-  },
-  {
-    icon: Zap,
-    title: "Con rắn chăm chỉ",
-    description: "Luyện phản xạ và từ vựng cùng lúc! Điều khiển con rắn thông minh, tìm đúng từ để ghi điểm.",
-    color: "bg-yellow-100 text-yellow-600",
-  },
-  {
-    icon: Brain,
-    title: "Trắc nghiệm",
-    description: "Thử thách trí tuệ với trắc nghiệm từ vựng! Bạn có thể trả lời đúng tất cả các câu hỏi không?",
-    color: "bg-indigo-100 text-indigo-600",
-  },
-  {
-    icon: MessageSquare,
-    title: "Điền vào ô trống",
-    description: "Điền vào ô trống và tìm ra từ vựng chính xác! Luyện tập từng thuật ngữ qua định nghĩa.",
-    color: "bg-pink-100 text-pink-600",
+    title: "Đề thi thực tế",
+    description: "Hàng ngàn đề thi được cập nhật thường xuyên từ các kỳ thi thực tế, đa dạng chuyên ngành.",
+    color: "from-emerald-500 to-teal-600",
+    bgColor: "bg-emerald-50 dark:bg-emerald-950/30",
+    iconColor: "text-emerald-600 dark:text-emerald-400",
   },
   {
     icon: Layers,
-    title: "Ghép nối và điền từ",
-    description: "Nối từ đúng với định nghĩa để nâng cao vốn từ vựng của bạn một cách nhanh chóng.",
-    color: "bg-teal-100 text-teal-600",
+    title: "Flashcard SRS",
+    description: "Hệ thống lặp lại ngắt quãng thông minh giúp ghi nhớ kiến thức lâu dài và hiệu quả.",
+    color: "from-violet-500 to-purple-600",
+    bgColor: "bg-violet-50 dark:bg-violet-950/30",
+    iconColor: "text-violet-600 dark:text-violet-400",
   },
   {
-    icon: Gamepad2,
-    title: "Bảng học từ vựng",
-    description: "Sử dụng bảng học từ vựng để lật và che các ô từ. Đoán nghĩa và kiểm tra khả năng ghi nhớ!",
-    color: "bg-cyan-100 text-cyan-600",
+    icon: BarChart3,
+    title: "Phân tích chi tiết",
+    description: "Theo dõi tiến độ học tập với biểu đồ trực quan, xác định điểm yếu cần cải thiện.",
+    color: "from-orange-500 to-amber-600",
+    bgColor: "bg-orange-50 dark:bg-orange-950/30",
+    iconColor: "text-orange-600 dark:text-orange-400",
   },
   {
-    icon: Trophy,
-    title: "Thử tài đoán chữ",
-    description: "Thách thức khả năng ghép chữ! Kéo thả các phần của từ vào đúng vị trí.",
-    color: "bg-amber-100 text-amber-600",
+    icon: Headphones,
+    title: "Podcast học tập",
+    description: "Học mọi lúc mọi nơi với podcast chất lượng cao, transcript đồng bộ theo thời gian thực.",
+    color: "from-pink-500 to-rose-600",
+    bgColor: "bg-pink-50 dark:bg-pink-950/30",
+    iconColor: "text-pink-600 dark:text-pink-400",
   },
   {
-    icon: Lightbulb,
-    title: "Ghép từ bí ẩn",
-    description: "Trở thành nhà giải đố tài ba! Tìm và ghép các cặp từ bí ẩn để hoàn thành từ vựng.",
-    color: "bg-lime-100 text-lime-600",
+    icon: Users,
+    title: "Lớp học trực tuyến",
+    description: "Tạo và quản lý lớp học, giao bài tập và theo dõi tiến độ học viên dễ dàng.",
+    color: "from-cyan-500 to-sky-600",
+    bgColor: "bg-cyan-50 dark:bg-cyan-950/30",
+    iconColor: "text-cyan-600 dark:text-cyan-400",
   },
 ];
 
 export const FeaturesSection = () => {
   return (
-    <section className="relative bg-primary py-20 lg:py-28">
-      <div className="container mx-auto px-4 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary-foreground mb-4">
-            Tính năng nổi bật
+    <section className="py-24 lg:py-32 bg-secondary/30 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute inset-0 bg-hero-pattern opacity-30" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
+      
+      <div className="container mx-auto px-4 lg:px-8 relative z-10">
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto mb-16 lg:mb-20">
+          <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 px-4 py-2 rounded-full mb-6">
+            <Brain className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold text-primary">Tính năng nổi bật</span>
+          </div>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-6">
+            Mọi thứ bạn cần để
+            <span className="text-gradient"> đạt điểm cao</span>
           </h2>
-          <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto">
-            AI-Exam.cloud mang đến những tính năng tuyệt vời giúp bạn đẩy nhanh hành trình học tập. Đây là những tính năng nổi bật mà bạn chắc chắn sẽ yêu thích!
+          <p className="text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto">
+            AI-Exam.cloud cung cấp đầy đủ công cụ học tập thông minh giúp bạn chuẩn bị tốt nhất cho mọi kỳ thi.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {/* Features Grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {features.map((feature, index) => (
-            <Card
+            <div
               key={feature.title}
-              className="group bg-card border-0 shadow-card card-hover cursor-pointer overflow-hidden"
+              className="group relative bg-card rounded-2xl p-6 lg:p-8 border border-border/50 hover:border-primary/30 hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <CardHeader className="pb-2">
-                <div className={`w-14 h-14 rounded-xl ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                  <feature.icon className="h-7 w-7" />
-                </div>
-                <CardTitle className="text-lg font-bold text-card-foreground group-hover:text-primary transition-colors">
-                  {feature.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {feature.description}
-                </p>
-              </CardContent>
-            </Card>
+              {/* Gradient Hover Effect */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-5 rounded-2xl transition-opacity duration-500`} />
+              
+              {/* Icon */}
+              <div className={`w-14 h-14 ${feature.bgColor} rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
+                <feature.icon className={`h-7 w-7 ${feature.iconColor}`} />
+              </div>
+              
+              {/* Content */}
+              <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
+                {feature.title}
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                {feature.description}
+              </p>
+              
+              {/* Arrow */}
+              <div className="mt-6 flex items-center text-primary opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-0 group-hover:translate-x-2">
+                <span className="text-sm font-semibold mr-2">Tìm hiểu thêm</span>
+                <ArrowRight className="h-4 w-4" />
+              </div>
+            </div>
           ))}
         </div>
-      </div>
 
-      {/* Wave Bottom */}
-      <div className="absolute bottom-0 left-0 right-0 rotate-180">
-        <svg
-          viewBox="0 0 1440 120"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-auto"
-          preserveAspectRatio="none"
-        >
-          <path
-            d="M0 40C360 100 720 120 1080 80C1260 60 1380 30 1440 0V120H0V40Z"
-            fill="hsl(var(--background))"
-          />
-        </svg>
+        {/* Bottom CTA */}
+        <div className="text-center mt-16">
+          <Link to="/auth">
+            <Button size="lg" className="h-14 px-8 text-base font-semibold shadow-button gap-2 group">
+              Khám phá tất cả tính năng
+              <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </Link>
+        </div>
       </div>
     </section>
   );
