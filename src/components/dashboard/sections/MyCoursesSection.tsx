@@ -14,7 +14,9 @@ import {
   CheckCircle2, 
   Heart,
   GraduationCap,
-  Plus
+  Plus,
+  Award,
+  ExternalLink
 } from 'lucide-react';
 
 interface EnrolledCourse {
@@ -44,12 +46,28 @@ interface WishlistCourse {
   };
 }
 
+interface Certificate {
+  id: string;
+  certificate_number: string;
+  completion_date: string;
+  final_score: number | null;
+  issued_at: string;
+  course_id: string;
+  course: {
+    id: string;
+    title: string;
+    image_url: string | null;
+    creator_name: string | null;
+  };
+}
+
 export function MyCoursesSection() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('enrolled');
   const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([]);
   const [completedCourses, setCompletedCourses] = useState<EnrolledCourse[]>([]);
   const [wishlistCourses, setWishlistCourses] = useState<WishlistCourse[]>([]);
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -95,6 +113,25 @@ export function MyCoursesSection() {
       setWishlistCourses(wishlist as unknown as WishlistCourse[]);
     }
 
+    // Fetch certificates
+    const { data: certs } = await supabase
+      .from('course_certificates')
+      .select(`
+        id,
+        certificate_number,
+        completion_date,
+        final_score,
+        issued_at,
+        course_id,
+        course:courses(id, title, image_url, creator_name)
+      `)
+      .eq('user_id', user?.id)
+      .order('issued_at', { ascending: false });
+
+    if (certs) {
+      setCertificates(certs as unknown as Certificate[]);
+    }
+
     setLoading(false);
   };
 
@@ -137,7 +174,7 @@ export function MyCoursesSection() {
             Yêu thích ({wishlistCourses.length})
           </TabsTrigger>
           <TabsTrigger value="certificates" className="text-xs sm:text-sm">
-            Chứng chỉ
+            Chứng chỉ ({certificates.length})
           </TabsTrigger>
         </TabsList>
 
@@ -194,11 +231,19 @@ export function MyCoursesSection() {
         </TabsContent>
 
         <TabsContent value="certificates" className="mt-4">
-          <EmptyState 
-            icon={GraduationCap}
-            title="Chưa có chứng chỉ"
-            description="Hoàn thành khóa học để nhận chứng chỉ"
-          />
+          {certificates.length === 0 ? (
+            <EmptyState 
+              icon={GraduationCap}
+              title="Chưa có chứng chỉ"
+              description="Hoàn thành khóa học để nhận chứng chỉ"
+            />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {certificates.map((cert) => (
+                <CertificateCard key={cert.id} certificate={cert} />
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
@@ -227,7 +272,7 @@ function CourseCard({ course, type }: CourseCardProps) {
             </div>
           )}
           {type === 'completed' && (
-            <Badge className="absolute top-2 right-2 bg-green-500">
+            <Badge className="absolute top-2 right-2 bg-emerald-500 text-white">
               <CheckCircle2 className="w-3 h-3 mr-1" />
               Hoàn thành
             </Badge>
@@ -300,6 +345,65 @@ function WishlistCard({ item }: WishlistCardProps) {
               {item.course.price === 0 ? 'Miễn phí' : `${item.course.price.toLocaleString()}đ`}
             </p>
           )}
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
+interface CertificateCardProps {
+  certificate: Certificate;
+}
+
+function CertificateCard({ certificate }: CertificateCardProps) {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  return (
+    <Link to={`/verify-certificate/${certificate.certificate_number}`}>
+      <Card className="border-border/50 hover:border-primary/50 hover:shadow-md transition-all cursor-pointer overflow-hidden group">
+        <div className="aspect-video relative bg-gradient-to-br from-primary/10 via-primary/5 to-transparent">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <Award className="w-16 h-16 mx-auto text-primary mb-2" />
+              <p className="text-xs font-mono text-muted-foreground">
+                #{certificate.certificate_number.slice(0, 8)}...
+              </p>
+            </div>
+          </div>
+          <Badge className="absolute top-2 right-2 bg-primary">
+            <CheckCircle2 className="w-3 h-3 mr-1" />
+            Đã cấp
+          </Badge>
+        </div>
+        <CardContent className="p-4">
+          <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors mb-2">
+            {certificate.course?.title || 'Khóa học'}
+          </h3>
+          <p className="text-xs text-muted-foreground mb-2">
+            {certificate.course?.creator_name || 'AI-Exam.cloud'}
+          </p>
+          
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">
+              Ngày cấp: {formatDate(certificate.issued_at)}
+            </span>
+            {certificate.final_score !== null && (
+              <Badge variant="secondary" className="text-xs">
+                {certificate.final_score}%
+              </Badge>
+            )}
+          </div>
+          
+          <Button variant="ghost" size="sm" className="w-full mt-3 gap-2 text-xs">
+            <ExternalLink className="w-3 h-3" />
+            Xem chứng chỉ
+          </Button>
         </CardContent>
       </Card>
     </Link>
