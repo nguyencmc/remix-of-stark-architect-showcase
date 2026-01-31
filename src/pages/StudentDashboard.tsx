@@ -5,6 +5,7 @@ import { usePermissionsContext } from '@/contexts/PermissionsContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { BookOpen, BarChart3 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 import { AITutorButton } from '@/components/ai/AITutorButton';
 import { useAchievements } from '@/hooks/useAchievements';
@@ -211,8 +212,11 @@ const StudentDashboard = () => {
   return (
     <>
       <main className="container mx-auto px-4 py-6 overflow-x-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between gap-4 mb-6">
+      {/* Header - Hide on mobile when not on overview */}
+        <div className={cn(
+          "flex items-center justify-between gap-4 mb-6",
+          activeSection !== 'overview' && "hidden lg:flex"
+        )}>
           <div className="min-w-0">
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground flex items-center gap-3">
               <BarChart3 className="w-7 h-7 text-primary flex-shrink-0" />
