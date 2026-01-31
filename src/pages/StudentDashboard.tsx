@@ -15,6 +15,7 @@ import { MobileBottomNav } from '@/components/dashboard/MobileBottomNav';
 import { DashboardSuggestions } from '@/components/dashboard/DashboardSuggestions';
 import { OverviewSection } from '@/components/dashboard/sections/OverviewSection';
 import { MyCoursesSection } from '@/components/dashboard/sections/MyCoursesSection';
+import { MyClassesSection } from '@/components/dashboard/sections/MyClassesSection';
 import { FlashcardsSection } from '@/components/dashboard/sections/FlashcardsSection';
 import { HistorySection } from '@/components/dashboard/sections/HistorySection';
 import { AchievementsSection } from '@/components/dashboard/sections/AchievementsSection';
@@ -196,6 +197,8 @@ const StudentDashboard = () => {
         );
       case 'my-courses':
         return <MyCoursesSection />;
+      case 'my-classes':
+        return <MyClassesSection />;
       case 'flashcards':
         return <FlashcardsSection />;
       case 'history':
