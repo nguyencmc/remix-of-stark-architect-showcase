@@ -10,6 +10,7 @@ import { AITutorButton } from '@/components/ai/AITutorButton';
 import { useAchievements } from '@/hooks/useAchievements';
 
 import { DashboardSidebar, DashboardSection } from '@/components/dashboard/DashboardSidebar';
+import { MobileBottomNav } from '@/components/dashboard/MobileBottomNav';
 import { DashboardSuggestions } from '@/components/dashboard/DashboardSuggestions';
 import { OverviewSection } from '@/components/dashboard/sections/OverviewSection';
 import { MyCoursesSection } from '@/components/dashboard/sections/MyCoursesSection';
@@ -243,29 +244,7 @@ const StudentDashboard = () => {
           </div>
 
           {/* Middle Column - Main Content (6/12 = 50%) */}
-          <div className="lg:col-span-6">
-            {/* Mobile Navigation */}
-            <div className="lg:hidden mb-6 overflow-x-auto">
-              <div className="flex gap-2 pb-2">
-                {(['overview', 'my-courses', 'flashcards', 'history', 'achievements', 'settings'] as DashboardSection[]).map((section) => (
-                  <Button
-                    key={section}
-                    variant={activeSection === section ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setActiveSection(section)}
-                    className="whitespace-nowrap"
-                  >
-                    {section === 'overview' && 'Tổng quan'}
-                    {section === 'my-courses' && 'Khóa học'}
-                    {section === 'flashcards' && 'Flashcards'}
-                    {section === 'history' && 'Lịch sử'}
-                    {section === 'achievements' && 'Thành tích'}
-                    {section === 'settings' && 'Cài đặt'}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
+          <div className="lg:col-span-6 pb-24 lg:pb-0">
             {/* Section Content */}
             {renderSectionContent()}
           </div>
@@ -285,6 +264,10 @@ const StudentDashboard = () => {
         </div>
       </main>
       
+      <MobileBottomNav 
+        activeSection={activeSection} 
+        onSectionChange={setActiveSection} 
+      />
       <AITutorButton />
     </>
   );
