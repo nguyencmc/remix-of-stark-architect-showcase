@@ -4,7 +4,8 @@ import {
   Layers, 
   Clock, 
   Trophy, 
-  Settings 
+  Settings,
+  Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DashboardSection } from './DashboardSidebar';
@@ -18,8 +19,8 @@ interface NavItem {
 const navItems: NavItem[] = [
   { id: 'overview', label: 'Tổng quan', icon: BarChart3 },
   { id: 'my-courses', label: 'Khóa học', icon: GraduationCap },
+  { id: 'my-classes', label: 'Lớp học', icon: Users },
   { id: 'flashcards', label: 'Flashcards', icon: Layers },
-  { id: 'history', label: 'Lịch sử', icon: Clock },
   { id: 'achievements', label: 'Thành tích', icon: Trophy },
   { id: 'settings', label: 'Cài đặt', icon: Settings },
 ];

@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils';
 export type DashboardSection = 
   | 'overview' 
   | 'my-courses' 
+  | 'my-classes'
   | 'flashcards' 
   | 'history' 
   | 'achievements' 
@@ -30,6 +31,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { id: 'overview', label: 'Tổng quan', icon: BarChart3, color: 'text-primary' },
   { id: 'my-courses', label: 'Khóa học', icon: GraduationCap, color: 'text-blue-500' },
+  { id: 'my-classes', label: 'Lớp học', icon: Users, color: 'text-indigo-500' },
   { id: 'flashcards', label: 'Flashcards', icon: Layers, color: 'text-cyan-500' },
   { id: 'history', label: 'Lịch sử', icon: Clock, color: 'text-purple-500' },
   { id: 'achievements', label: 'Thành tích', icon: Trophy, color: 'text-yellow-500' },
@@ -40,7 +42,6 @@ const quickLinks = [
   { label: 'Đề thi', href: '/exams', icon: Target, color: 'text-green-500' },
   { label: 'Podcast', href: '/podcasts', icon: Headphones, color: 'text-pink-500' },
   { label: 'Sách', href: '/books', icon: BookOpen, color: 'text-orange-500' },
-  { label: 'Lớp học', href: '/classes', icon: Users, color: 'text-indigo-500' },
 ];
 
 interface DashboardSidebarProps {
