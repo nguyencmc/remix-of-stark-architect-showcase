@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, BookOpen, Star, Eye, User } from "lucide-react";
+import PageHeader from "@/components/PageHeader";
 
 interface BookCategory {
   id: string;
@@ -95,6 +96,17 @@ const Books = () => {
 
   return (
     <>
+      {/* Page Header */}
+      <div className="container mx-auto px-4 pt-6">
+        <PageHeader
+          breadcrumbs={[
+            { label: "Trang chủ", href: "/" },
+            { label: "Sách" },
+          ]}
+          showBack={true}
+          backHref="/"
+        />
+      </div>
       {/* Hero Section */}
       <section className="relative overflow-hidden py-12 bg-gradient-to-br from-primary/5 via-background to-secondary/5">
         <div className="container mx-auto px-4 text-center">
