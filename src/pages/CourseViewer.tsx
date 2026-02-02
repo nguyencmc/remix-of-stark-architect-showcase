@@ -13,19 +13,15 @@ import { CourseTestTaking } from '@/components/course/CourseTestTaking';
 import { LessonNotes } from '@/components/course/LessonNotes';
 import { CourseCertificate } from '@/components/course/CourseCertificate';
 import { CourseQA } from '@/components/course/CourseQA';
+import { VideoPlayer } from '@/components/course/VideoPlayer';
 import { 
   Play, 
-  Pause, 
   CheckCircle, 
   Circle, 
   Clock, 
   ArrowLeft,
   ChevronRight,
   ChevronLeft,
-  Volume2,
-  VolumeX,
-  Maximize,
-  Settings,
   FileText,
   MessageSquare,
   BookOpen,
@@ -418,84 +414,14 @@ const CourseViewer = () => {
         </header>
 
         {/* Video Player */}
-        <div className="relative bg-black aspect-video">
-          {currentLesson?.video_url ? (
-            <>
-              <video
-                ref={videoRef}
-                src={currentLesson.video_url}
-                className="w-full h-full"
-                onTimeUpdate={handleVideoTimeUpdate}
-                onLoadedMetadata={handleVideoLoadedMetadata}
-                onEnded={() => setIsPlaying(false)}
-              />
-              
-              {/* Video Controls */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                {/* Progress bar */}
-                <input
-                  type="range"
-                  min={0}
-                  max={videoDuration || 100}
-                  value={videoProgress}
-                  onChange={handleSeek}
-                  className="w-full h-1 mb-3 cursor-pointer"
-                />
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={togglePlay}
-                      className="text-white hover:bg-white/20"
-                    >
-                      {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-                    </Button>
-                    
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={toggleMute}
-                      className="text-white hover:bg-white/20"
-                    >
-                      {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
-                    </Button>
-                    
-                    <span className="text-white text-sm">
-                      {formatTime(videoProgress)} / {formatTime(videoDuration)}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-white hover:bg-white/20"
-                    >
-                      <Settings className="h-5 w-5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={toggleFullscreen}
-                      className="text-white hover:bg-white/20"
-                    >
-                      <Maximize className="h-5 w-5" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-white">
-              <div className="text-center">
-                <Play className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                <p>Chưa có video cho bài học này</p>
-              </div>
-            </div>
-          )}
-        </div>
+        <VideoPlayer
+          src={currentLesson?.video_url || null}
+          onTimeUpdate={(time, dur) => {
+            setVideoProgress(time);
+            setVideoDuration(dur);
+          }}
+          onEnded={() => setIsPlaying(false)}
+        />
 
         {/* Lesson Navigation */}
         <div className="bg-card border-b px-4 py-3 flex items-center justify-between">
