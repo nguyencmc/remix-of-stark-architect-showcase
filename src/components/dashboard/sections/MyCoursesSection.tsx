@@ -22,15 +22,20 @@ import {
 interface EnrolledCourse {
   id: string;
   course_id: string;
-  progress: number;
+  progress_percentage: number;
   enrolled_at: string;
+  completed_at: string | null;
+  last_activity?: string;
+  completed_lessons?: number;
   course: {
     id: string;
     title: string;
+    slug: string | null;
     image_url: string | null;
     creator_name: string | null;
     lesson_count: number | null;
     duration_hours: number | null;
+    level: string | null;
   };
 }
 
@@ -79,22 +84,66 @@ export function MyCoursesSection() {
   const fetchData = async () => {
     setLoading(true);
     
-    // Fetch enrolled courses
+    // Fetch enrolled courses with progress percentage
     const { data: enrolled } = await supabase
       .from('user_course_enrollments')
       .select(`
         id,
         course_id,
-        progress,
+        progress_percentage,
         enrolled_at,
-        course:courses(id, title, image_url, creator_name, lesson_count, duration_hours)
+        completed_at,
+        course:courses(id, title, slug, image_url, creator_name, lesson_count, duration_hours, level)
       `)
       .eq('user_id', user?.id)
       .order('enrolled_at', { ascending: false });
 
     if (enrolled) {
-      const inProgress = enrolled.filter((e: any) => e.progress < 100);
-      const completed = enrolled.filter((e: any) => e.progress >= 100);
+      // Also fetch lesson progress for each course
+      const courseIds = enrolled.map(e => e.course_id).filter(Boolean);
+      
+      const { data: lessonProgress } = await supabase
+        .from('user_course_progress')
+        .select('course_id, is_completed, last_watched_at')
+        .eq('user_id', user?.id)
+        .in('course_id', courseIds);
+
+      // Calculate completed lessons and last activity for each course
+      const progressMap = new Map<string, { completed: number; lastActivity: string | null }>();
+      
+      if (lessonProgress) {
+        lessonProgress.forEach(lp => {
+          const courseId = lp.course_id;
+          if (!progressMap.has(courseId)) {
+            progressMap.set(courseId, { completed: 0, lastActivity: null });
+          }
+          const current = progressMap.get(courseId)!;
+          if (lp.is_completed) {
+            current.completed++;
+          }
+          if (lp.last_watched_at && (!current.lastActivity || lp.last_watched_at > current.lastActivity)) {
+            current.lastActivity = lp.last_watched_at;
+          }
+        });
+      }
+
+      const enrichedEnrolled = enrolled.map((e: any) => {
+        const progressInfo = progressMap.get(e.course_id);
+        return {
+          ...e,
+          completed_lessons: progressInfo?.completed || 0,
+          last_activity: progressInfo?.lastActivity || e.enrolled_at,
+        };
+      });
+
+      // Filter courses: in progress (< 100%) and completed (100% or completed_at is not null)
+      const inProgress = enrichedEnrolled.filter((e: any) => 
+        e.progress_percentage < 100 && !e.completed_at
+      );
+      const completed = enrichedEnrolled.filter((e: any) => 
+        e.progress_percentage >= 100 || e.completed_at
+      );
+      
       setEnrolledCourses(inProgress as unknown as EnrolledCourse[]);
       setCompletedCourses(completed as unknown as EnrolledCourse[]);
     }
@@ -256,6 +305,25 @@ interface CourseCardProps {
 }
 
 function CourseCard({ course, type }: CourseCardProps) {
+  const progress = course.progress_percentage || 0;
+  const completedLessons = course.completed_lessons || 0;
+  const totalLessons = course.course.lesson_count || 0;
+  
+  // Format last activity date
+  const formatLastActivity = (dateString?: string) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Hôm nay';
+    if (diffDays === 1) return 'Hôm qua';
+    if (diffDays < 7) return `${diffDays} ngày trước`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} tuần trước`;
+    return date.toLocaleDateString('vi-VN');
+  };
+
   return (
     <Link to={`/course/${course.course_id}/learn`}>
       <Card className="border-border/50 hover:border-primary/50 hover:shadow-md transition-all cursor-pointer overflow-hidden group">
@@ -277,6 +345,16 @@ function CourseCard({ course, type }: CourseCardProps) {
               Hoàn thành
             </Badge>
           )}
+          {type === 'enrolled' && progress > 0 && (
+            <Badge className="absolute top-2 right-2 bg-blue-500 text-white">
+              Đang học
+            </Badge>
+          )}
+          {course.course.level && (
+            <Badge variant="secondary" className="absolute top-2 left-2 text-xs">
+              {course.course.level}
+            </Badge>
+          )}
         </div>
         <CardContent className="p-4">
           <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors mb-2">
@@ -287,19 +365,27 @@ function CourseCard({ course, type }: CourseCardProps) {
           </p>
           
           {type === 'enrolled' && (
-            <div>
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-muted-foreground">Tiến độ</span>
-                <span className="font-medium">{Math.round(course.progress)}%</span>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">
+                  {completedLessons}/{totalLessons} bài học
+                </span>
+                <span className="font-medium text-primary">{Math.round(progress)}%</span>
               </div>
-              <Progress value={course.progress} className="h-1.5" />
+              <Progress value={progress} className="h-2" />
+              {course.last_activity && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  Học gần nhất: {formatLastActivity(course.last_activity)}
+                </p>
+              )}
             </div>
           )}
 
           <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <BookOpen className="w-3 h-3" />
-              {course.course.lesson_count || 0} bài
+              {totalLessons} bài
             </span>
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
