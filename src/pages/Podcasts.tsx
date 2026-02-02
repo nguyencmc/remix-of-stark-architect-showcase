@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import PageHeader from "@/components/PageHeader";
 
 interface PodcastCategory {
   id: string;
@@ -132,6 +133,16 @@ const Podcasts = () => {
   return (
     <>
       <div className="container mx-auto px-4 py-8">
+        {/* Page Header */}
+        <PageHeader
+          breadcrumbs={[
+            { label: "Trang chủ", href: "/" },
+            { label: "Podcast" },
+          ]}
+          showBack={true}
+          backHref="/"
+          className="mb-6"
+        />
         {/* Filter by Category */}
         <div className="mb-6">
           <h2 className="text-sm font-semibold text-muted-foreground mb-3">Filter by Category</h2>

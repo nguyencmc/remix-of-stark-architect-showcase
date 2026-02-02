@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/select";
 import { useWishlist } from "@/hooks/useWishlist";
 import { WishlistButton } from "@/components/course/WishlistButton";
+import PageHeader from "@/components/PageHeader";
 
 interface Course {
   id: string;
@@ -115,6 +116,17 @@ const Courses = () => {
 
   return (
     <>
+      {/* Page Header with Back Button and Breadcrumb */}
+      <div className="container mx-auto px-4 pt-6">
+        <PageHeader
+          breadcrumbs={[
+            { label: "Trang chủ", href: "/" },
+            { label: "Khóa học" },
+          ]}
+          showBack={true}
+          backHref="/"
+        />
+      </div>
 
       {/* Hero Banner */}
       <section className="relative bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 py-12 md:py-20 overflow-hidden">

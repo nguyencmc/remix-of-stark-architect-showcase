@@ -33,7 +33,8 @@ import {
   Palette,
   Music,
   Globe,
-  Scale
+  Scale,
+  ArrowLeft
 } from "lucide-react";
 import {
   Select,
@@ -50,6 +51,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import PageHeader from "@/components/PageHeader";
 
 interface ExamCategory {
   id: string;
@@ -458,12 +460,10 @@ const Exams = () => {
       {/* Mobile Header */}
       <header className="lg:hidden sticky top-0 z-50 bg-background border-b border-border">
         <div className="flex items-center justify-between px-4 h-14">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center">
-              <GraduationCap className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <h1 className="font-bold text-lg text-foreground">Thư viện đề thi</h1>
-          </div>
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="font-bold text-lg text-foreground">Thư viện đề thi</h1>
           <div className="flex items-center gap-2">
             <Button 
               variant="ghost" 
@@ -543,15 +543,16 @@ const Exams = () => {
 
       {/* Desktop Layout */}
       <main className="hidden lg:block container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm mb-6">
-          <Link to="/" className="text-primary hover:underline flex items-center gap-1">
-            <Home className="h-4 w-4" />
-            Trang chủ
-          </Link>
-          <span className="text-muted-foreground">/</span>
-          <span className="text-muted-foreground">Thư viện đề thi</span>
-        </nav>
+        {/* Breadcrumb with Back Button */}
+        <PageHeader
+          breadcrumbs={[
+            { label: "Trang chủ", href: "/" },
+            { label: "Thư viện đề thi" },
+          ]}
+          showBack={true}
+          backHref="/"
+          className="mb-6"
+        />
 
         {/* Search Bar */}
         <div className="mb-8">

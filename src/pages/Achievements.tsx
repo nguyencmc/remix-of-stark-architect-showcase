@@ -3,12 +3,23 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Trophy } from 'lucide-react';
+import PageHeader from '@/components/PageHeader';
 
 const Achievements = () => {
   const { user } = useAuth();
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Page Header with Back Button and Breadcrumb */}
+      <PageHeader
+        breadcrumbs={[
+          { label: "Trang chủ", href: "/" },
+          { label: "Thành tựu" },
+        ]}
+        showBack={true}
+        backHref="/"
+        className="mb-6"
+      />
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">

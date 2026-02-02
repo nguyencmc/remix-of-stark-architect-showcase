@@ -21,6 +21,7 @@ import {
   Upload,
   Trash2
 } from "lucide-react";
+import PageHeader from "@/components/PageHeader";
 
 interface Profile {
   id: string;
@@ -253,11 +254,19 @@ const Settings = () => {
   return (
     <main className="container mx-auto px-4 py-8">
       <div className="max-w-2xl mx-auto space-y-6">
-        {/* Page Header */}
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Thiết lập tài khoản</h1>
-            <p className="text-muted-foreground mt-1">Quản lý thông tin cá nhân của bạn</p>
-          </div>
+        {/* Page Header with Back Button and Breadcrumb */}
+        <PageHeader
+          breadcrumbs={[
+            { label: "Trang chủ", href: "/" },
+            { label: "Thiết lập tài khoản" },
+          ]}
+          showBack={true}
+          backHref="/"
+        />
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Thiết lập tài khoản</h1>
+          <p className="text-muted-foreground mt-1">Quản lý thông tin cá nhân của bạn</p>
+        </div>
 
           {/* Profile Card */}
           <Card>
