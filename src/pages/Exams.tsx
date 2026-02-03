@@ -6,7 +6,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 import { 
   Search, 
   FileText,
@@ -15,6 +19,7 @@ import {
   ChevronRight,
   RotateCcw,
   Bookmark,
+  BookmarkCheck,
   Play,
   BarChart3,
   Home,
@@ -34,7 +39,25 @@ import {
   Music,
   Globe,
   Scale,
-  ArrowLeft
+  ArrowLeft,
+  Sparkles,
+  TrendingUp,
+  Users,
+  Target,
+  Trophy,
+  Flame,
+  Star,
+  Filter,
+  Grid3X3,
+  List,
+  ArrowRight,
+  Zap,
+  Timer,
+  CheckCircle2,
+  X,
+  Eye,
+  Heart,
+  Medal
 } from "lucide-react";
 import {
   Select,
@@ -59,6 +82,13 @@ interface ExamCategory {
   slug: string;
 }
 
+interface CreatorProfile {
+  user_id: string;
+  full_name: string | null;
+  username: string | null;
+  avatar_url: string | null;
+}
+
 interface Exam {
   id: string;
   title: string;
@@ -72,26 +102,41 @@ interface Exam {
   category?: ExamCategory;
   source: 'exam' | 'question_set'; // Track the source for navigation
   creator_name?: string | null;
+  creator_avatar?: string | null;
+  creator_id?: string | null;
 }
 
-const ITEMS_PER_PAGE = 9;
+const ITEMS_PER_PAGE = 12;
 
 // Category icon and color mapping
 const getCategoryStyle = (categoryName: string, index: number) => {
   const styles = [
-    { icon: Sigma, bgColor: "bg-blue-100 dark:bg-blue-900/30", iconColor: "text-blue-600 dark:text-blue-400" },
-    { icon: Code, bgColor: "bg-teal-100 dark:bg-teal-900/30", iconColor: "text-teal-600 dark:text-teal-400" },
-    { icon: Languages, bgColor: "bg-orange-100 dark:bg-orange-900/30", iconColor: "text-orange-600 dark:text-orange-400" },
-    { icon: Stethoscope, bgColor: "bg-rose-100 dark:bg-rose-900/30", iconColor: "text-rose-600 dark:text-rose-400" },
-    { icon: Atom, bgColor: "bg-purple-100 dark:bg-purple-900/30", iconColor: "text-purple-600 dark:text-purple-400" },
-    { icon: Calculator, bgColor: "bg-indigo-100 dark:bg-indigo-900/30", iconColor: "text-indigo-600 dark:text-indigo-400" },
-    { icon: Globe, bgColor: "bg-green-100 dark:bg-green-900/30", iconColor: "text-green-600 dark:text-green-400" },
-    { icon: Scale, bgColor: "bg-amber-100 dark:bg-amber-900/30", iconColor: "text-amber-600 dark:text-amber-400" },
-    { icon: Palette, bgColor: "bg-pink-100 dark:bg-pink-900/30", iconColor: "text-pink-600 dark:text-pink-400" },
-    { icon: Music, bgColor: "bg-cyan-100 dark:bg-cyan-900/30", iconColor: "text-cyan-600 dark:text-cyan-400" },
+    { icon: Sigma, bgColor: "bg-blue-500/10", iconColor: "text-blue-500", borderColor: "border-blue-500/20", gradient: "from-blue-500/20 to-blue-500/5" },
+    { icon: Code, bgColor: "bg-teal-500/10", iconColor: "text-teal-500", borderColor: "border-teal-500/20", gradient: "from-teal-500/20 to-teal-500/5" },
+    { icon: Languages, bgColor: "bg-orange-500/10", iconColor: "text-orange-500", borderColor: "border-orange-500/20", gradient: "from-orange-500/20 to-orange-500/5" },
+    { icon: Stethoscope, bgColor: "bg-rose-500/10", iconColor: "text-rose-500", borderColor: "border-rose-500/20", gradient: "from-rose-500/20 to-rose-500/5" },
+    { icon: Atom, bgColor: "bg-purple-500/10", iconColor: "text-purple-500", borderColor: "border-purple-500/20", gradient: "from-purple-500/20 to-purple-500/5" },
+    { icon: Calculator, bgColor: "bg-indigo-500/10", iconColor: "text-indigo-500", borderColor: "border-indigo-500/20", gradient: "from-indigo-500/20 to-indigo-500/5" },
+    { icon: Globe, bgColor: "bg-green-500/10", iconColor: "text-green-500", borderColor: "border-green-500/20", gradient: "from-green-500/20 to-green-500/5" },
+    { icon: Scale, bgColor: "bg-amber-500/10", iconColor: "text-amber-500", borderColor: "border-amber-500/20", gradient: "from-amber-500/20 to-amber-500/5" },
+    { icon: Palette, bgColor: "bg-pink-500/10", iconColor: "text-pink-500", borderColor: "border-pink-500/20", gradient: "from-pink-500/20 to-pink-500/5" },
+    { icon: Music, bgColor: "bg-cyan-500/10", iconColor: "text-cyan-500", borderColor: "border-cyan-500/20", gradient: "from-cyan-500/20 to-cyan-500/5" },
   ];
   return styles[index % styles.length];
 };
+
+// Stats summary component
+const StatCard = ({ icon: Icon, value, label, color }: { icon: any; value: string | number; label: string; color: string }) => (
+  <div className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/50 hover:shadow-md transition-all">
+    <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", color)}>
+      <Icon className="w-5 h-5" />
+    </div>
+    <div>
+      <p className="text-xl font-bold">{value}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
+    </div>
+  </div>
+);
 
 const Exams = () => {
   const navigate = useNavigate();
@@ -107,6 +152,8 @@ const Exams = () => {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [savedExams, setSavedExams] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchData();
@@ -127,9 +174,42 @@ const Exams = () => {
 
     const allExams: Exam[] = [];
 
-    // Add official exams
+    // Collect all creator IDs from both exams and question_sets
+    const allCreatorIds: string[] = [];
+    
     if (examResult.data) {
       examResult.data.forEach(exam => {
+        if (exam.creator_id) allCreatorIds.push(exam.creator_id);
+      });
+    }
+    
+    if (questionSetsResult.data) {
+      questionSetsResult.data.forEach(qs => {
+        if (qs.creator_id) allCreatorIds.push(qs.creator_id);
+      });
+    }
+
+    // Fetch all creator profiles at once
+    let creatorProfiles: Record<string, CreatorProfile> = {};
+    const uniqueCreatorIds = [...new Set(allCreatorIds)];
+    
+    if (uniqueCreatorIds.length > 0) {
+      const { data: profilesData } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, username, avatar_url")
+        .in("user_id", uniqueCreatorIds);
+      
+      if (profilesData) {
+        profilesData.forEach(profile => {
+          creatorProfiles[profile.user_id] = profile;
+        });
+      }
+    }
+
+    // Add official exams with creator info from database
+    if (examResult.data) {
+      examResult.data.forEach(exam => {
+        const creator = exam.creator_id ? creatorProfiles[exam.creator_id] : null;
         allExams.push({
           id: exam.id,
           title: exam.title,
@@ -142,6 +222,9 @@ const Exams = () => {
           duration_minutes: exam.duration_minutes,
           category: exam.exam_categories as ExamCategory | undefined,
           source: 'exam',
+          creator_id: exam.creator_id,
+          creator_name: creator?.full_name || creator?.username || 'Hệ thống',
+          creator_avatar: creator?.avatar_url || null,
         });
       });
     }
@@ -149,10 +232,11 @@ const Exams = () => {
     // Add published question sets from users
     if (questionSetsResult.data) {
       questionSetsResult.data.forEach(qs => {
+        const creator = qs.creator_id ? creatorProfiles[qs.creator_id] : null;
         allExams.push({
           id: qs.id,
           title: qs.title,
-          slug: qs.slug || qs.id, // Use slug if available, otherwise ID
+          slug: qs.slug || qs.id,
           description: qs.description,
           question_count: qs.question_count,
           attempt_count: 0,
@@ -161,7 +245,9 @@ const Exams = () => {
           duration_minutes: qs.duration_minutes,
           category: qs.exam_categories as ExamCategory | undefined,
           source: 'question_set',
-          creator_name: 'Cộng đồng',
+          creator_id: qs.creator_id,
+          creator_name: creator?.full_name || creator?.username || 'Người dùng ẩn danh',
+          creator_avatar: creator?.avatar_url || null,
         });
       });
     }
@@ -291,6 +377,28 @@ const Exams = () => {
     const idx = categories.findIndex(c => c.id === exam.category_id);
     return idx >= 0 ? idx : 0;
   };
+
+  const toggleSaveExam = (examId: string) => {
+    setSavedExams(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(examId)) {
+        newSet.delete(examId);
+      } else {
+        newSet.add(examId);
+      }
+      return newSet;
+    });
+  };
+
+  // Get featured/popular exams
+  const featuredExams = useMemo(() => {
+    return [...exams]
+      .sort((a, b) => (b.attempt_count || 0) - (a.attempt_count || 0))
+      .slice(0, 4);
+  }, [exams]);
+
+  // Check if any filter is active
+  const hasActiveFilters = searchQuery || selectedCategories.length > 0 || selectedDifficulty || selectedDuration.length > 0 || activeCategoryId;
 
   const renderPagination = () => {
     if (totalPages <= 1) return null;
@@ -456,9 +564,10 @@ const Exams = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <TooltipProvider>
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
       {/* Mobile Header */}
-      <header className="lg:hidden sticky top-0 z-50 bg-background border-b border-border">
+      <header className="lg:hidden sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="flex items-center justify-between px-4 h-14">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
@@ -474,9 +583,12 @@ const Exams = () => {
             </Button>
             <Sheet open={mobileFilterOpen} onOpenChange={setMobileFilterOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button variant="outline" size="sm" className="gap-2 relative">
                   <SlidersHorizontal className="h-4 w-4" />
                   Lọc
+                  {hasActiveFilters && (
+                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full" />
+                  )}
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-80">
@@ -542,35 +654,84 @@ const Exams = () => {
       </header>
 
       {/* Desktop Layout */}
-      <main className="hidden lg:block container mx-auto px-4 py-8">
-        {/* Breadcrumb with Back Button */}
-        <PageHeader
-          breadcrumbs={[
-            { label: "Trang chủ", href: "/" },
-            { label: "Thư viện đề thi" },
-          ]}
-          showBack={true}
-          backHref="/"
-          className="mb-6"
-        />
-
-        {/* Search Bar */}
-        <div className="mb-8">
-          <div className="relative max-w-2xl">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              placeholder="Tìm kiếm đề thi theo tên, mã hoặc từ khóa..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="pl-12 h-12 text-base rounded-xl border-2 border-border focus:border-primary bg-card"
-            />
+      <main className="hidden lg:block">
+        {/* Hero Section */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-purple-500/5 border-b">
+          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
+          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+          
+          <div className="container mx-auto px-4 py-12 relative">
+            <div className="max-w-3xl">
+              <div className="flex items-center gap-2 text-primary mb-4">
+                <Sparkles className="w-5 h-5" />
+                <span className="text-sm font-medium">Khám phá & Luyện tập</span>
+              </div>
+              <h1 className="text-4xl font-bold text-foreground mb-4">
+                Thư viện đề thi
+              </h1>
+              <p className="text-lg text-muted-foreground mb-8 max-w-2xl">
+                Hàng nghìn đề thi chất lượng được biên soạn bởi đội ngũ chuyên gia và cộng đồng. 
+                Luyện tập ngay để nâng cao kiến thức và kỹ năng của bạn!
+              </p>
+              
+              {/* Search Bar */}
+              <div className="relative max-w-2xl">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  placeholder="Tìm kiếm đề thi theo tên, mã hoặc từ khóa..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="pl-12 pr-4 h-14 text-base rounded-2xl border-2 border-border focus:border-primary bg-card/80 backdrop-blur-sm shadow-lg"
+                />
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-2 top-1/2 -translate-y-1/2"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+            
+            {/* Stats Cards */}
+            <div className="grid grid-cols-4 gap-4 mt-8 max-w-3xl">
+              <StatCard 
+                icon={FileText} 
+                value={exams.length} 
+                label="Đề thi" 
+                color="bg-primary/10 text-primary" 
+              />
+              <StatCard 
+                icon={Users} 
+                value={categories.length} 
+                label="Danh mục" 
+                color="bg-purple-500/10 text-purple-500" 
+              />
+              <StatCard 
+                icon={TrendingUp} 
+                value={exams.reduce((sum, e) => sum + (e.attempt_count || 0), 0).toLocaleString()} 
+                label="Lượt thi" 
+                color="bg-green-500/10 text-green-500" 
+              />
+              <StatCard 
+                icon={Flame} 
+                value={exams.filter(e => e.source === 'question_set').length} 
+                label="Từ cộng đồng" 
+                color="bg-orange-500/10 text-orange-500" 
+              />
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Filters */}
           <aside className="w-full lg:w-72 shrink-0">
             <div className="bg-card rounded-xl border border-border p-6 sticky top-24">
@@ -684,113 +845,410 @@ const Exams = () => {
 
           {/* Main Content */}
           <div className="flex-1 min-w-0">
-            {/* Header */}
+            {/* Header with View Toggle */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <h2 className="text-xl font-bold text-foreground">
-                Đề thi hiện có ({filteredExams.length})
-              </h2>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Sắp xếp:</span>
+              <div>
+                <h2 className="text-xl font-bold text-foreground">
+                  {hasActiveFilters ? 'Kết quả tìm kiếm' : 'Tất cả đề thi'}
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {filteredExams.length} đề thi được tìm thấy
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                {/* View Mode Toggle */}
+                <div className="flex items-center border rounded-lg p-1 bg-muted/50">
+                  <Button
+                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="h-8 px-3"
+                    onClick={() => setViewMode('grid')}
+                  >
+                    <Grid3X3 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === 'list' ? 'default' : 'ghost'}
+                    size="sm"
+                    className="h-8 px-3"
+                    onClick={() => setViewMode('list')}
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                </div>
+                
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-40 bg-card">
+                  <SelectTrigger className="w-44 bg-card">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="recent">Mới nhất</SelectItem>
-                    <SelectItem value="popular">Phổ biến nhất</SelectItem>
-                    <SelectItem value="name">Tên (A-Z)</SelectItem>
-                    <SelectItem value="questions">Số câu hỏi</SelectItem>
+                    <SelectItem value="recent">
+                      <span className="flex items-center gap-2">
+                        <Sparkles className="h-4 w-4" />
+                        Mới nhất
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="popular">
+                      <span className="flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4" />
+                        Phổ biến nhất
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="name">
+                      <span className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Tên (A-Z)
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="questions">
+                      <span className="flex items-center gap-2">
+                        <Target className="h-4 w-4" />
+                        Số câu hỏi
+                      </span>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            {/* Exams Grid */}
+            {/* Active Filters Pills */}
+            {hasActiveFilters && (
+              <div className="flex flex-wrap items-center gap-2 mb-6">
+                <span className="text-sm text-muted-foreground">Bộ lọc:</span>
+                {searchQuery && (
+                  <Badge variant="secondary" className="gap-1 pr-1">
+                    Từ khóa: "{searchQuery}"
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-4 w-4 ml-1 hover:bg-transparent"
+                      onClick={() => setSearchQuery("")}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </Badge>
+                )}
+                {activeCategoryId && (
+                  <Badge variant="secondary" className="gap-1 pr-1">
+                    {categories.find(c => c.id === activeCategoryId)?.name}
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-4 w-4 ml-1 hover:bg-transparent"
+                      onClick={() => setActiveCategoryId(null)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </Badge>
+                )}
+                {selectedDifficulty && (
+                  <Badge variant="secondary" className="gap-1 pr-1">
+                    {selectedDifficulty === 'beginner' ? 'Cơ bản' : selectedDifficulty === 'intermediate' ? 'Trung bình' : 'Nâng cao'}
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-4 w-4 ml-1 hover:bg-transparent"
+                      onClick={() => setSelectedDifficulty("")}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </Badge>
+                )}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-primary h-7"
+                  onClick={handleReset}
+                >
+                  Xóa tất cả
+                </Button>
+              </div>
+            )}
+
+            {/* Exams Grid/List */}
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div className={cn(
+                "gap-5",
+                viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3" : "space-y-4"
+              )}>
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-card rounded-xl border border-border p-5 animate-pulse">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="h-6 bg-muted rounded-full w-24"></div>
-                      <div className="h-6 w-6 bg-muted rounded"></div>
-                    </div>
-                    <div className="h-6 bg-muted rounded w-3/4 mb-4"></div>
-                    <div className="space-y-2 mb-6">
-                      <div className="h-4 bg-muted rounded w-1/2"></div>
-                      <div className="h-4 bg-muted rounded w-1/3"></div>
-                    </div>
-                    <div className="h-11 bg-muted rounded-lg"></div>
-                  </div>
+                  <Card key={i} className="animate-pulse">
+                    <CardContent className="p-5">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="h-6 bg-muted rounded-full w-24"></div>
+                        <div className="h-6 w-6 bg-muted rounded"></div>
+                      </div>
+                      <div className="h-6 bg-muted rounded w-3/4 mb-4"></div>
+                      <div className="space-y-2 mb-6">
+                        <div className="h-4 bg-muted rounded w-1/2"></div>
+                        <div className="h-4 bg-muted rounded w-1/3"></div>
+                      </div>
+                      <div className="h-11 bg-muted rounded-lg"></div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             ) : paginatedExams.length === 0 ? (
-              <div className="text-center py-16 bg-card rounded-xl border border-border">
-                <FileText className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground text-lg mb-2">Không tìm thấy đề thi nào</p>
-                <p className="text-sm text-muted-foreground">
-                  Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
-                </p>
+              <Card className="text-center py-16">
+                <CardContent>
+                  <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-6">
+                    <FileText className="w-10 h-10 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">Không tìm thấy đề thi</h3>
+                  <p className="text-muted-foreground mb-6">
+                    Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm
+                  </p>
+                  <Button onClick={handleReset} variant="outline">
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Xóa bộ lọc
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : viewMode === 'grid' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                {paginatedExams.map((exam) => {
+                  const categoryIndex = getExamCategoryIndex(exam);
+                  const style = getCategoryStyle(exam.category?.name || "", categoryIndex);
+                  const IconComponent = style.icon;
+                  const isSaved = savedExams.has(exam.id);
+                  
+                  return (
+                    <Card
+                      key={exam.id}
+                      className={cn(
+                        "group relative overflow-hidden border-border/50 hover:border-primary/50 hover:shadow-xl transition-all duration-300",
+                        "hover:-translate-y-1"
+                      )}
+                    >
+                      {/* Header with gradient background */}
+                      <div className={cn(
+                        "relative px-5 py-4 bg-gradient-to-r",
+                        style.gradient.replace('from-', 'from-').replace('/20', '/80').replace('/5', '/60'),
+                        "from-primary/80 to-primary/60"
+                      )}>
+                        <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-indigo-600 opacity-90" />
+                        <div className="relative">
+                          <h3 className="font-bold text-white text-lg line-clamp-2 mb-3">
+                            {exam.title}
+                          </h3>
+                          <div className="flex items-center gap-4 text-white/90 text-sm">
+                            <span className="flex items-center gap-1.5 bg-white/20 px-2.5 py-1 rounded-full">
+                              <Clock className="h-3.5 w-3.5" />
+                              {exam.duration_minutes || 60} Phút
+                            </span>
+                            <span className="flex items-center gap-1.5 bg-white/20 px-2.5 py-1 rounded-full">
+                              <FileText className="h-3.5 w-3.5" />
+                              {exam.question_count || 0}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <CardContent className="p-5 relative">
+                        {/* Title & Description */}
+                        <h4 className="font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                          {exam.title}
+                        </h4>
+                        
+                        {exam.description && (
+                          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                            {exam.description}
+                          </p>
+                        )}
+
+                        {/* Attempt count */}
+                        <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
+                          <Users className="h-4 w-4" />
+                          <span>{(exam.attempt_count || 0).toLocaleString()} lượt thi</span>
+                        </div>
+
+                        {/* Creator section */}
+                        <div className="flex items-center gap-3 mb-4 pb-4 border-b border-border/50">
+                          <Avatar className="h-10 w-10">
+                            <AvatarImage src={exam.creator_avatar || undefined} alt={exam.creator_name || ''} />
+                            <AvatarFallback className={cn(
+                              "text-sm font-medium",
+                              exam.source === 'question_set' ? "bg-orange-500/10 text-orange-600" : "bg-primary/10 text-primary"
+                            )}>
+                              {exam.creator_name?.charAt(0)?.toUpperCase() || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Người tạo</p>
+                            <p className="font-medium text-sm text-foreground">
+                              {exam.creator_name || 'Ẩn danh'}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Action icons */}
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-1">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button 
+                                  className={cn(
+                                    "p-2 rounded-full transition-colors",
+                                    isSaved ? "text-red-500 bg-red-500/10" : "text-muted-foreground hover:text-red-500 hover:bg-red-500/10"
+                                  )}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleSaveExam(exam.id);
+                                  }}
+                                >
+                                  <Heart className={cn("h-5 w-5", isSaved && "fill-current")} />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>{isSaved ? 'Bỏ yêu thích' : 'Yêu thích'}</TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button className="p-2 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
+                                  <Eye className="h-5 w-5" />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>Xem trước</TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button className="p-2 rounded-full text-muted-foreground hover:text-yellow-500 hover:bg-yellow-500/10 transition-colors">
+                                  <Trophy className="h-5 w-5" />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>Bảng xếp hạng</TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button className="p-2 rounded-full text-muted-foreground hover:text-blue-500 hover:bg-blue-500/10 transition-colors">
+                                  <Medal className="h-5 w-5" />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>Thành tích</TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button className="p-2 rounded-full text-muted-foreground hover:text-green-500 hover:bg-green-500/10 transition-colors">
+                                  <Timer className="h-5 w-5" />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>Lịch sử làm bài</TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </div>
+
+                        {/* Action Button */}
+                        <Button 
+                          className="w-full gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-lg shadow-violet-500/25"
+                          onClick={() => navigate(exam.source === 'question_set' ? `/exam/${exam.slug || exam.id}?type=practice` : `/exam/${exam.slug}`)}
+                        >
+                          <Play className="h-4 w-4" />
+                          Bắt đầu làm bài
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                {paginatedExams.map((exam) => (
-                  <div
-                    key={exam.id}
-                    className="bg-card rounded-xl border border-border p-5 hover:shadow-lg hover:border-primary/30 transition-all duration-200 group"
-                  >
-                    {/* Card Header */}
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <Badge className={`${getDifficultyColor(exam.difficulty)} font-medium`}>
-                          {getDifficultyLabel(exam.difficulty)}
-                        </Badge>
-                        {exam.source === 'question_set' && (
-                          <Badge variant="outline" className="text-xs">
-                            <User className="h-3 w-3 mr-1" />
-                            Cộng đồng
-                          </Badge>
-                        )}
-                      </div>
-                      <button className="text-muted-foreground hover:text-primary transition-colors">
-                        <Bookmark className="h-5 w-5" />
-                      </button>
-                    </div>
-
-                    {/* Title */}
-                    <h3 className="font-semibold text-foreground mb-4 line-clamp-2 min-h-[3rem] group-hover:text-primary transition-colors">
-                      {exam.title}
-                    </h3>
-
-                    {/* Stats */}
-                    <div className="space-y-2 mb-5">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <FileText className="h-4 w-4" />
-                        <span>{exam.question_count || 0} Câu hỏi</span>
-                      </div>
-                      {exam.duration_minutes && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Clock className="h-4 w-4" />
-                          <span>{exam.duration_minutes} Phút</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Action Button - Always goes to exam detail for "Thi thật" mode */}
-                    <Button 
-                      className="w-full gap-2"
-                      onClick={() => navigate(exam.source === 'question_set' ? `/exam/${exam.slug || exam.id}?type=practice` : `/exam/${exam.slug}`)}
+              /* List View */
+              <div className="space-y-3">
+                {paginatedExams.map((exam) => {
+                  const categoryIndex = getExamCategoryIndex(exam);
+                  const style = getCategoryStyle(exam.category?.name || "", categoryIndex);
+                  const IconComponent = style.icon;
+                  const isSaved = savedExams.has(exam.id);
+                  
+                  return (
+                    <Card
+                      key={exam.id}
+                      className="group hover:border-primary/50 hover:shadow-md transition-all duration-200 overflow-hidden"
                     >
-                      Bắt đầu
-                      <Play className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+                      <div className="flex">
+                        {/* Left gradient bar */}
+                        <div className="w-2 bg-gradient-to-b from-violet-600 to-indigo-600 shrink-0" />
+                        
+                        <CardContent className="p-4 flex-1">
+                          <div className="flex items-center gap-4">
+                            {/* Icon */}
+                            <div className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br from-violet-500/20 to-indigo-500/20">
+                              <IconComponent className="h-7 w-7 text-violet-600" />
+                            </div>
+
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                                  {exam.title}
+                                </h3>
+                                {exam.source === 'question_set' && (
+                                  <Badge variant="outline" className="text-xs shrink-0 border-orange-500/30 text-orange-600">
+                                    Cộng đồng
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                                <span className="flex items-center gap-1.5">
+                                  <Avatar className="h-4 w-4">
+                                    <AvatarImage src={exam.creator_avatar || undefined} />
+                                    <AvatarFallback className="text-[8px]">
+                                      {exam.creator_name?.charAt(0)?.toUpperCase() || 'U'}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  {exam.creator_name || 'Ẩn danh'}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <FileText className="h-3.5 w-3.5" />
+                                  {exam.question_count || 0} câu
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Clock className="h-3.5 w-3.5" />
+                                  {exam.duration_minutes || 60} phút
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Users className="h-3.5 w-3.5" />
+                                  {(exam.attempt_count || 0).toLocaleString()} lượt
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex items-center gap-2 shrink-0">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    className={cn(isSaved ? "text-red-500" : "text-muted-foreground hover:text-red-500")}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleSaveExam(exam.id);
+                                    }}
+                                  >
+                                    <Heart className={cn("h-5 w-5", isSaved && "fill-current")} />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>{isSaved ? 'Bỏ yêu thích' : 'Yêu thích'}</TooltipContent>
+                              </Tooltip>
+                              <Button 
+                                className="gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white"
+                                onClick={() => navigate(exam.source === 'question_set' ? `/exam/${exam.slug || exam.id}?type=practice` : `/exam/${exam.slug}`)}
+                              >
+                                <Play className="h-4 w-4" />
+                                Bắt đầu
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </div>
+                    </Card>
+                  );
+                })}
               </div>
             )}
 
             {/* Pagination */}
             {renderPagination()}
           </div>
+        </div>
         </div>
       </main>
 
@@ -828,38 +1286,60 @@ const Exams = () => {
               return (
                 <div
                   key={exam.id}
-                  className="bg-card rounded-xl border border-border p-4 hover:shadow-md transition-all"
+                  className="bg-card rounded-xl border border-border overflow-hidden hover:shadow-md transition-all"
                 >
-                  <div className="flex items-center gap-4">
-                    {/* Category Icon */}
-                    <div className={`w-12 h-12 ${style.bgColor} rounded-xl flex items-center justify-center shrink-0`}>
-                      <IconComponent className={`h-6 w-6 ${style.iconColor}`} />
+                  {/* Header with gradient */}
+                  <div className="relative px-4 py-3 bg-gradient-to-r from-violet-600 to-indigo-600">
+                    <h3 className="font-bold text-white text-base line-clamp-1 mb-2">
+                      {exam.title}
+                    </h3>
+                    <div className="flex items-center gap-3 text-white/90 text-xs">
+                      <span className="flex items-center gap-1 bg-white/20 px-2 py-0.5 rounded-full">
+                        <Clock className="h-3 w-3" />
+                        {exam.duration_minutes || 60} Phút
+                      </span>
+                      <span className="flex items-center gap-1 bg-white/20 px-2 py-0.5 rounded-full">
+                        <FileText className="h-3 w-3" />
+                        {exam.question_count || 0}
+                      </span>
                     </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-foreground truncate mb-1">
-                        {exam.title}
-                      </h3>
-                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Clock className="h-3.5 w-3.5" />
-                          {exam.duration_minutes || 60} Phút
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <FileText className="h-3.5 w-3.5" />
-                          {exam.question_count || 0} Câu
-                        </span>
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="p-4">
+                    {/* Attempt count */}
+                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-3">
+                      <Users className="h-4 w-4" />
+                      <span>{(exam.attempt_count || 0).toLocaleString()} lượt thi</span>
+                    </div>
+                    
+                    {/* Creator */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={exam.creator_avatar || undefined} alt={exam.creator_name || ''} />
+                        <AvatarFallback className={cn(
+                          "text-xs font-medium",
+                          exam.source === 'question_set' ? "bg-orange-500/10 text-orange-600" : "bg-violet-500/10 text-violet-600"
+                        )}>
+                          {exam.creator_name?.charAt(0)?.toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-xs text-muted-foreground">Người tạo</p>
+                        <p className="font-medium text-sm">
+                          {exam.creator_name || 'Ẩn danh'}
+                        </p>
                       </div>
                     </div>
-
-                    {/* Start Button - Always goes to exam detail for "Thi thật" mode */}
+                    
+                    {/* Action Button */}
                     <Button 
+                      className="w-full gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white"
                       size="sm"
-                      className="shrink-0"
                       onClick={() => navigate(exam.source === 'question_set' ? `/exam/${exam.slug || exam.id}?type=practice` : `/exam/${exam.slug}`)}
                     >
-                      Bắt đầu
+                      <Play className="h-4 w-4" />
+                      Bắt đầu làm bài
                     </Button>
                   </div>
                 </div>
@@ -936,6 +1416,7 @@ const Exams = () => {
         </div>
       </nav>
     </div>
+    </TooltipProvider>
   );
 };
 

@@ -1,10 +1,11 @@
-import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Link } from 'react-router-dom';
 import { 
   Trophy, 
   Star,
@@ -12,12 +13,29 @@ import {
   Flame,
   BookOpen,
   CheckCircle2,
-  Lock
+  Lock,
+  Crown,
+  Medal
 } from 'lucide-react';
 import { useAchievements } from '@/hooks/useAchievements';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { useState, useEffect } from 'react';
 
+interface LeaderboardEntry {
+  user_id: string;
+  username: string;
+  full_name: string;
+  avatar_url: string | null;
+  points: number;
+  level: number;
+  total_exams_taken: number;
+  total_correct_answers: number;
+  rank: number;
+}
+
 export function AchievementsSection() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('earned');
   const { 
     earnedAchievements, 
@@ -35,13 +53,39 @@ export function AchievementsSection() {
     flashcards_mastered: 0,
   });
 
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
+
   useEffect(() => {
     loadProgress();
   }, []);
 
+  useEffect(() => {
+    if (activeTab === 'leaderboard') {
+      fetchLeaderboard();
+    }
+  }, [activeTab]);
+
   const loadProgress = async () => {
     const p = await getUserProgress();
     setProgress(p);
+  };
+
+  const fetchLeaderboard = async () => {
+    if (leaderboard.length > 0) return; // Already loaded
+    
+    setLeaderboardLoading(true);
+    try {
+      const { data, error } = await supabase
+        .rpc('get_leaderboard', { limit_count: 20 });
+
+      if (error) throw error;
+      setLeaderboard(data || []);
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+    } finally {
+      setLeaderboardLoading(false);
+    }
   };
 
   const totalPoints = earnedAchievements.reduce((acc, a) => acc + (a.points_reward || 0), 0);
@@ -66,11 +110,6 @@ export function AchievementsSection() {
           <Trophy className="w-6 h-6 text-yellow-500" />
           Thành tích
         </h2>
-        <Link to="/achievements">
-          <Button size="sm" variant="outline">
-            Xem tất cả
-          </Button>
-        </Link>
       </div>
 
       {/* Summary Stats */}
@@ -155,7 +194,7 @@ export function AchievementsSection() {
             />
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {earnedAchievements.slice(0, 6).map((achievement) => (
+              {earnedAchievements.map((achievement) => (
                 <AchievementCard key={achievement.id} achievement={achievement} earned />
               ))}
             </div>
@@ -164,7 +203,7 @@ export function AchievementsSection() {
 
         <TabsContent value="in-progress" className="mt-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {unearnedAchievements.slice(0, 6).map((achievement) => (
+            {unearnedAchievements.map((achievement) => (
               <AchievementCard key={achievement.id} achievement={achievement} progress={progress} />
             ))}
           </div>
@@ -172,23 +211,100 @@ export function AchievementsSection() {
 
         <TabsContent value="locked" className="mt-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {unearnedAchievements.slice(6).map((achievement) => (
+            {unearnedAchievements.map((achievement) => (
               <AchievementCard key={achievement.id} achievement={achievement} locked />
             ))}
           </div>
         </TabsContent>
 
         <TabsContent value="leaderboard" className="mt-4">
-          <div className="text-center py-8">
-            <Trophy className="w-12 h-12 mx-auto text-yellow-500 mb-3" />
-            <h3 className="font-semibold mb-2">Bảng xếp hạng</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Xem thứ hạng của bạn so với người khác
-            </p>
-            <Link to="/leaderboard">
-              <Button>Xem bảng xếp hạng</Button>
-            </Link>
-          </div>
+          {leaderboardLoading ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          ) : leaderboard.length === 0 ? (
+            <EmptyState 
+              message="Chưa có dữ liệu"
+              description="Bảng xếp hạng đang được cập nhật"
+            />
+          ) : (
+            <div className="space-y-2">
+              {/* Top 3 */}
+              {leaderboard.slice(0, 3).map((entry, index) => (
+                <Link key={entry.user_id} to={`/@${entry.username}`}>
+                  <Card className={`border-border/50 transition-colors hover:bg-muted/50 ${
+                    index === 0 ? 'bg-gradient-to-r from-yellow-500/10 to-transparent border-yellow-500/30' :
+                    index === 1 ? 'bg-gradient-to-r from-gray-400/10 to-transparent border-gray-400/30' :
+                    'bg-gradient-to-r from-amber-600/10 to-transparent border-amber-600/30'
+                  }`}>
+                    <CardContent className="p-3 flex items-center gap-3">
+                      <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                        {index === 0 ? <Crown className="w-6 h-6 text-yellow-500" /> :
+                         index === 1 ? <Medal className="w-6 h-6 text-gray-400" /> :
+                         <Medal className="w-6 h-6 text-amber-600" />}
+                      </div>
+                      <Avatar className="w-10 h-10 flex-shrink-0">
+                        <AvatarImage src={entry.avatar_url || undefined} />
+                        <AvatarFallback className="text-sm">
+                          {(entry.full_name || entry.username).charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{entry.full_name || entry.username}</p>
+                        <p className="text-xs text-muted-foreground">Level {entry.level}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className={`font-bold ${
+                          index === 0 ? 'text-yellow-500' :
+                          index === 1 ? 'text-gray-400' :
+                          'text-amber-600'
+                        }`}>{entry.points.toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground">điểm</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+
+              {/* Rest of leaderboard */}
+              {leaderboard.slice(3, 10).map((entry) => (
+                <Link key={entry.user_id} to={`/@${entry.username}`}>
+                  <Card className="border-border/50 transition-colors hover:bg-muted/50">
+                    <CardContent className="p-3 flex items-center gap-3">
+                      <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                        <span className="text-sm font-bold text-muted-foreground">#{entry.rank}</span>
+                      </div>
+                      <Avatar className="w-10 h-10 flex-shrink-0">
+                        <AvatarImage src={entry.avatar_url || undefined} />
+                        <AvatarFallback className="text-sm">
+                          {(entry.full_name || entry.username).charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{entry.full_name || entry.username}</p>
+                        <p className="text-xs text-muted-foreground">Level {entry.level}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="font-bold text-foreground">{entry.points.toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground">điểm</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+
+              {/* View full leaderboard link */}
+              <div className="pt-2 text-center">
+                <Link to="/leaderboard">
+                  <Button variant="outline" size="sm" className="w-full">
+                    Xem đầy đủ bảng xếp hạng
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
