@@ -18,7 +18,7 @@ export function useArticle(slug: string | undefined) {
         .from('articles')
         .select(`
           *,
-          author:profiles!articles_author_id_fkey(user_id, full_name, username, avatar_url),
+          author:profiles(user_id, full_name, username, avatar_url),
           category:article_categories(*)
         `)
         .eq('slug', slug)

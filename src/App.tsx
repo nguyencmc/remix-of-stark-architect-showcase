@@ -80,6 +80,13 @@ const JoinClassPage = lazy(() => import("./features/classroom/pages/JoinClassPag
 const ClassDetailPage = lazy(() => import("./features/classroom/pages/ClassDetailPage"));
 const TodayPage = lazy(() => import("./features/flashcards/pages/TodayPage"));
 
+// Articles feature pages
+const ArticlesListPage = lazy(() => import("./features/articles/pages/ArticlesListPage"));
+const ArticleDetailPage = lazy(() => import("./features/articles/pages/ArticleDetailPage"));
+const ArticleEditorPage = lazy(() => import("./features/articles/pages/ArticleEditorPage"));
+const MyArticlesPage = lazy(() => import("./features/articles/pages/MyArticlesPage"));
+const ArticleModerationPage = lazy(() => import("./features/articles/pages/ArticleModerationPage"));
+
 // Layout
 const MainLayout = lazy(() => import("./components/layouts/MainLayout"));
 
@@ -164,8 +171,16 @@ const App = () => (
                     <Route path="/classes/join" element={<JoinClassPage />} />
                     <Route path="/classes/:classId" element={<ClassDetailPage />} />
                     
+                    {/* Articles feature routes */}
+                    <Route path="/articles" element={<ArticlesListPage />} />
+                    <Route path="/articles/my" element={<MyArticlesPage />} />
+                    <Route path="/articles/create" element={<ArticleEditorPage />} />
+                    <Route path="/articles/edit/:slug" element={<ArticleEditorPage />} />
+                    <Route path="/articles/:slug" element={<ArticleDetailPage />} />
+                    
                     {/* Admin & Teacher routes */}
                     <Route path="/admin" element={<AdminDashboard />} />
+                    <Route path="/admin/articles" element={<ArticleModerationPage />} />
                     <Route path="/teacher" element={<TeacherDashboard />} />
                     <Route path="/admin/users" element={<UserManagement />} />
                     <Route path="/admin/permissions" element={<PermissionManagement />} />
