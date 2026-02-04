@@ -22,7 +22,7 @@ export function useArticleComments(articleId: string | undefined) {
         .from('article_comments')
         .select(`
           *,
-          author:profiles!article_comments_user_id_fkey(user_id, full_name, username, avatar_url)
+          author:profiles(user_id, full_name, username, avatar_url)
         `)
         .eq('article_id', articleId)
         .order('created_at', { ascending: true });

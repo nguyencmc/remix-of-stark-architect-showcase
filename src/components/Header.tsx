@@ -22,6 +22,7 @@ import { ThemeToggle } from "./ThemeToggle";
 const navLinks = [
   { name: "Đề thi", href: "/exams" },
   { name: "Flashcards", href: "/flashcards" },
+  { name: "Bài viết", href: "/articles" },
   { name: "Podcasts", href: "/podcasts" },
   { name: "Khóa học", href: "/courses" },
   { name: "Sách", href: "/books" },

@@ -33,7 +33,8 @@ import {
   Server,
   RefreshCw,
   PieChart,
-  LineChart as LineChartIcon
+  LineChart as LineChartIcon,
+  Newspaper
 } from 'lucide-react';
 import {
   Table,
@@ -426,6 +427,7 @@ const AdminDashboard = () => {
 
   const systemLinks = [
     { title: 'Quản lý người dùng', desc: 'Xem và quản lý tất cả users', icon: Users, href: '/admin/users', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { title: 'Duyệt bài viết', desc: 'Xem xét và phê duyệt bài viết', icon: Newspaper, href: '/admin/articles', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
     { title: 'Phân quyền RBAC', desc: 'Cấu hình vai trò và quyền', icon: Shield, href: '/admin/permissions', color: 'text-red-500', bg: 'bg-red-500/10' },
     { title: 'Audit Logs', desc: 'Theo dõi hoạt động hệ thống', icon: Activity, href: '/admin/audit-logs', color: 'text-amber-500', bg: 'bg-amber-500/10' },
     { title: 'Quản lý danh mục', desc: 'Phân loại nội dung', icon: FolderOpen, href: '/admin/categories', color: 'text-purple-500', bg: 'bg-purple-500/10' },
