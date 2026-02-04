@@ -3,3 +3,4 @@ export { default as ArticleDetailPage } from './ArticleDetailPage';
 export { default as ArticleEditorPage } from './ArticleEditorPage';
 export { default as MyArticlesPage } from './MyArticlesPage';
 export { default as ArticleModerationPage } from './ArticleModerationPage';
+export { default as ArticlePreviewPage } from './ArticlePreviewPage';

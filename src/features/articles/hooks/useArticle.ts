@@ -8,7 +8,10 @@ export function useArticle(slug: string | undefined) {
   const [error, setError] = useState<Error | null>(null);
 
   const fetchArticle = useCallback(async () => {
-    if (!slug) return;
+    if (!slug) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);

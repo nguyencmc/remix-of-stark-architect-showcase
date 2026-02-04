@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { RichTextEditor } from '@/components/editor/RichTextEditor';
 import { Badge } from '@/components/ui/badge';
 import {
   Select,
@@ -141,8 +142,8 @@ const ArticleEditorPage = () => {
 
         toast({
           title: 'Thành công',
-          description: status === 'pending' 
-            ? 'Bài viết đã được gửi để duyệt' 
+          description: status === 'pending'
+            ? 'Bài viết đã được gửi để duyệt'
             : 'Đã lưu bản nháp',
         });
       } else {
@@ -157,8 +158,8 @@ const ArticleEditorPage = () => {
 
         toast({
           title: 'Thành công',
-          description: status === 'pending' 
-            ? 'Bài viết đã được gửi để duyệt' 
+          description: status === 'pending'
+            ? 'Bài viết đã được gửi để duyệt'
             : 'Đã lưu bản nháp',
         });
       }
@@ -232,8 +233,8 @@ const ArticleEditorPage = () => {
               {/* Category */}
               <div className="space-y-2">
                 <Label>Chuyên mục</Label>
-                <Select 
-                  value={formData.category_id} 
+                <Select
+                  value={formData.category_id}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, category_id: value }))}
                 >
                   <SelectTrigger>
@@ -262,8 +263,8 @@ const ArticleEditorPage = () => {
                 </div>
                 {formData.thumbnail_url && (
                   <div className="mt-2 rounded-lg overflow-hidden border aspect-video max-w-sm">
-                    <img 
-                      src={formData.thumbnail_url} 
+                    <img
+                      src={formData.thumbnail_url}
                       alt="Thumbnail preview"
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -321,32 +322,26 @@ const ArticleEditorPage = () => {
 
               {/* Content */}
               <div className="space-y-2">
-                <Label htmlFor="content">Nội dung *</Label>
-                <Textarea
-                  id="content"
-                  placeholder="Viết nội dung bài viết của bạn... (Hỗ trợ HTML)"
-                  value={formData.content}
-                  onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                  rows={15}
-                  className="font-mono"
+                <Label>Nội dung *</Label>
+                <RichTextEditor
+                  content={formData.content}
+                  onChange={(content) => setFormData(prev => ({ ...prev, content }))}
+                  placeholder="Viết nội dung bài viết của bạn..."
                 />
-                <p className="text-xs text-muted-foreground">
-                  Bạn có thể sử dụng HTML để định dạng nội dung
-                </p>
               </div>
             </CardContent>
           </Card>
 
           {/* Actions */}
           <div className="flex justify-end gap-3">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => navigate('/articles')}
               disabled={loading}
             >
               Hủy
             </Button>
-            <Button 
+            <Button
               variant="secondary"
               onClick={() => handleSave('draft')}
               disabled={loading}
@@ -355,7 +350,7 @@ const ArticleEditorPage = () => {
               <Save className="w-4 h-4" />
               Lưu nháp
             </Button>
-            <Button 
+            <Button
               onClick={() => handleSave('pending')}
               disabled={loading}
               className="gap-2"

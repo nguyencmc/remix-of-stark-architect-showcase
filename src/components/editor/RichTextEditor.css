@@ -1,0 +1,40 @@
+.rich-text-editor .ck-editor__editable_inline {
+    min-height: 300px;
+}
+
+/* Dark mode adjustments */
+:root[class~="dark"] .ck.ck-editor__main > .ck-editor__editable {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    border-color: hsl(var(--border));
+}
+
+:root[class~="dark"] .ck.ck-toolbar {
+    background-color: hsl(var(--muted));
+    border-color: hsl(var(--border));
+}
+
+:root[class~="dark"] .ck.ck-button {
+    color: hsl(var(--foreground));
+}
+
+:root[class~="dark"] .ck.ck-button:hover {
+    background-color: hsl(var(--accent));
+}
+
+:root[class~="dark"] .ck.ck-dropdown__panel {
+    background-color: hsl(var(--popover));
+    border-color: hsl(var(--border));
+}
+
+:root[class~="dark"] .ck.ck-list {
+    background-color: hsl(var(--popover));
+}
+
+:root[class~="dark"] .ck.ck-list__item .ck-button {
+    color: hsl(var(--foreground));
+}
+
+:root[class~="dark"] .ck.ck-list__item .ck-button:hover {
+    background-color: hsl(var(--accent));
+}
