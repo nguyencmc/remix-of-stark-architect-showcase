@@ -56,6 +56,167 @@ export type Database = {
         }
         Relationships: []
       }
+      article_categories: {
+        Row: {
+          article_count: number | null
+          created_at: string
+          creator_id: string | null
+          description: string | null
+          display_order: number | null
+          icon_url: string | null
+          id: string
+          is_featured: boolean | null
+          name: string
+          slug: string
+        }
+        Insert: {
+          article_count?: number | null
+          created_at?: string
+          creator_id?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon_url?: string | null
+          id?: string
+          is_featured?: boolean | null
+          name: string
+          slug: string
+        }
+        Update: {
+          article_count?: number | null
+          created_at?: string
+          creator_id?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon_url?: string | null
+          id?: string
+          is_featured?: boolean | null
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      article_comments: {
+        Row: {
+          article_id: string
+          content: string
+          created_at: string
+          id: string
+          is_edited: boolean | null
+          parent_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          article_id: string
+          content: string
+          created_at?: string
+          id?: string
+          is_edited?: boolean | null
+          parent_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          article_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_edited?: boolean | null
+          parent_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_comments_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "article_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "article_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      articles: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          author_id: string
+          category_id: string | null
+          comment_count: number | null
+          content: string
+          created_at: string
+          excerpt: string | null
+          id: string
+          is_featured: boolean | null
+          published_at: string | null
+          rejection_reason: string | null
+          slug: string
+          status: string
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          view_count: number | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          author_id: string
+          category_id?: string | null
+          comment_count?: number | null
+          content: string
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          is_featured?: boolean | null
+          published_at?: string | null
+          rejection_reason?: string | null
+          slug: string
+          status?: string
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          author_id?: string
+          category_id?: string | null
+          comment_count?: number | null
+          content?: string
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          is_featured?: boolean | null
+          published_at?: string | null
+          rejection_reason?: string | null
+          slug?: string
+          status?: string
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "articles_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "article_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assignment_submissions: {
         Row: {
           assignment_id: string
