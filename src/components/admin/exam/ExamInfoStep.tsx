@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+ import { Input } from '@/components/ui/input';
+ import { Label } from '@/components/ui/label';
+ import { RichTextEditor } from '@/components/editor';
 import {
   Select,
   SelectContent,
@@ -112,13 +112,12 @@ export const ExamInfoStep = ({
           {/* Description */}
           <div className="space-y-2">
             <Label htmlFor="description">Mô tả</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => onDescriptionChange(e.target.value)}
-              placeholder="Mô tả ngắn về nội dung và mục đích của đề thi..."
-              rows={3}
-            />
+             <RichTextEditor
+               content={description}
+               onChange={onDescriptionChange}
+               placeholder="Mô tả ngắn về nội dung và mục đích của đề thi..."
+               minHeight="150px"
+             />
           </div>
 
           {/* Category & Difficulty */}

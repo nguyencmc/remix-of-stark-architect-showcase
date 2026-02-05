@@ -1,7 +1,6 @@
-import { useState, useRef } from 'react';
+ import { useState, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -18,16 +17,15 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { 
-  Trash2, 
-  GripVertical, 
-  ChevronDown, 
-  ChevronUp,
-  Image as ImageIcon,
-  Plus,
-  X,
-  Type
-} from 'lucide-react';
+ import { 
+   Trash2, 
+   GripVertical, 
+   ChevronDown, 
+   ChevronUp,
+   Plus,
+   X
+ } from 'lucide-react';
+ import { MiniRichTextEditor } from '@/components/editor';
 import { useToast } from '@/hooks/use-toast';
 
 export interface PracticeQuestion {
@@ -151,11 +149,16 @@ export const PracticeQuestionEditor = ({
     onUpdate(index, field as keyof PracticeQuestion, '');
   };
 
-  const insertFormula = (field: keyof PracticeQuestion) => {
-    const currentValue = question[field] as string || '';
-    const formulaTemplate = ' $\\frac{a}{b}$ ';
-    onUpdate(index, field, currentValue + formulaTemplate);
-  };
+   const handleEditorImageUpload = useCallback(async (file: File): Promise<string> => {
+     if (!onImageUpload) throw new Error('Image upload not configured');
+     return await onImageUpload(file, index, 'inline_image');
+   }, [onImageUpload, index]);
+ 
+   const getPreviewText = (html: string) => {
+     const tmp = document.createElement('div');
+     tmp.innerHTML = html;
+     return tmp.textContent || tmp.innerText || '';
+   };
 
   const getDifficultyBadge = (diff: string) => {
     switch (diff) {
@@ -191,7 +194,7 @@ export const PracticeQuestionEditor = ({
                   {diffInfo.label}
                 </Badge>
                 <span className="text-sm text-muted-foreground truncate">
-                  {question.question_text || 'Chưa nhập câu hỏi...'}
+                   {getPreviewText(question.question_text) || 'Chưa nhập câu hỏi...'}
                 </span>
                 {isExpanded ? (
                   <ChevronUp className="w-4 h-4 text-muted-foreground flex-shrink-0" />
@@ -228,42 +231,17 @@ export const PracticeQuestionEditor = ({
         
         <CollapsibleContent>
           <CardContent className="pt-4 space-y-4">
-            {/* Question Text */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>Nội dung câu hỏi *</Label>
-                <div className="flex gap-1">
-                  {onImageUpload && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-2 text-xs"
-                      onClick={() => handleImageSelect('question_image')}
-                      disabled={uploadingField === 'question_image'}
-                    >
-                      <ImageIcon className="w-3 h-3 mr-1" />
-                      Ảnh
-                    </Button>
-                  )}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 px-2 text-xs"
-                    onClick={() => insertFormula('question_text')}
-                  >
-                    <Type className="w-3 h-3 mr-1" />
-                    Công thức
-                  </Button>
-                </div>
-              </div>
-              <Textarea
-                value={question.question_text}
-                onChange={(e) => onUpdate(index, 'question_text', e.target.value)}
-                placeholder="Nhập câu hỏi... (Hỗ trợ LaTeX: $công thức$)"
-                rows={3}
-              />
+             {/* Question Text */}
+             <div className="space-y-2">
+               <Label>Nội dung câu hỏi *</Label>
+               <MiniRichTextEditor
+                 content={question.question_text}
+                 onChange={(value) => onUpdate(index, 'question_text', value)}
+                 placeholder="Nhập câu hỏi..."
+                 minHeight="80px"
+                 showImageUpload={!!onImageUpload}
+                 onImageUpload={onImageUpload ? handleEditorImageUpload : undefined}
+               />
               {question.question_image && (
                 <div className="relative inline-block">
                   <img 
@@ -294,7 +272,6 @@ export const PracticeQuestionEditor = ({
                   isCorrect={isCorrectAnswer(letter)}
                   required={letter === 'A' || letter === 'B'}
                   onChange={(value) => onUpdate(index, getOptionField(letter), value)}
-                  onInsertFormula={() => insertFormula(getOptionField(letter))}
                   onToggleCorrect={() => toggleCorrectAnswer(letter)}
                 />
               ))}
@@ -309,7 +286,6 @@ export const PracticeQuestionEditor = ({
                     isCorrect={isCorrectAnswer(letter)}
                     required={false}
                     onChange={(value) => onUpdate(index, getOptionField(letter), value)}
-                    onInsertFormula={() => insertFormula(getOptionField(letter))}
                     onToggleCorrect={() => toggleCorrectAnswer(letter)}
                   />
                 ))
@@ -351,12 +327,12 @@ export const PracticeQuestionEditor = ({
               
               <div className="space-y-2">
                 <Label>Giải thích (tùy chọn)</Label>
-                <Textarea
-                  value={question.explanation}
-                  onChange={(e) => onUpdate(index, 'explanation', e.target.value)}
-                  placeholder="Giải thích đáp án đúng..."
-                  rows={2}
-                />
+                 <MiniRichTextEditor
+                   content={question.explanation}
+                   onChange={(value) => onUpdate(index, 'explanation', value)}
+                   placeholder="Giải thích đáp án đúng..."
+                   minHeight="60px"
+                 />
               </div>
             </div>
           </CardContent>
@@ -366,57 +342,47 @@ export const PracticeQuestionEditor = ({
   );
 };
 
-// Option Input Component
-interface OptionInputProps {
-  letter: string;
-  value: string;
-  isCorrect: boolean;
-  required: boolean;
-  onChange: (value: string) => void;
-  onInsertFormula: () => void;
-  onToggleCorrect: () => void;
-}
-
-const OptionInput = ({
-  letter,
-  value,
-  isCorrect,
-  required,
-  onChange,
-  onInsertFormula,
-  onToggleCorrect,
-}: OptionInputProps) => {
-  return (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={onToggleCorrect}
-        className={`w-7 h-7 rounded-full flex items-center justify-center font-semibold text-sm transition-all flex-shrink-0 ${
-          isCorrect
-            ? 'bg-green-500 text-white shadow-md'
-            : 'bg-muted text-muted-foreground hover:bg-primary/20 hover:text-primary border border-border'
-        }`}
-        title={isCorrect ? 'Click để bỏ chọn đáp án đúng' : 'Click để chọn làm đáp án đúng'}
-      >
-        {isCorrect ? <Check className="w-4 h-4" /> : letter}
-      </button>
-      <div className="flex-1">
-        <Input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={`Đáp án ${letter}${required ? ' *' : ''}`}
-          className={isCorrect ? "border-green-500 focus-visible:ring-green-500" : ""}
-        />
-      </div>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 flex-shrink-0"
-        onClick={onInsertFormula}
-      >
-        <Type className="w-4 h-4" />
-      </Button>
-    </div>
-  );
-};
+ // Option Input Component
+ interface OptionInputProps {
+   letter: string;
+   value: string;
+   isCorrect: boolean;
+   required: boolean;
+   onChange: (value: string) => void;
+   onToggleCorrect: () => void;
+ }
+ 
+ const OptionInput = ({
+   letter,
+   value,
+   isCorrect,
+   required,
+   onChange,
+   onToggleCorrect,
+ }: OptionInputProps) => {
+   return (
+     <div className="flex items-start gap-2">
+       <button
+         type="button"
+         onClick={onToggleCorrect}
+         className={`w-7 h-7 mt-1 rounded-full flex items-center justify-center font-semibold text-sm transition-all flex-shrink-0 ${
+           isCorrect
+             ? 'bg-green-600 text-white shadow-md'
+             : 'bg-muted text-muted-foreground hover:bg-primary/20 hover:text-primary border border-border'
+         }`}
+         title={isCorrect ? 'Click để bỏ chọn đáp án đúng' : 'Click để chọn làm đáp án đúng'}
+       >
+         {isCorrect ? <Check className="w-4 h-4" /> : letter}
+       </button>
+       <div className="flex-1">
+         <MiniRichTextEditor
+           content={value}
+           onChange={onChange}
+           placeholder={`Đáp án ${letter}${required ? ' *' : ''}`}
+           className={isCorrect ? "border-green-600" : ""}
+           minHeight="40px"
+         />
+       </div>
+     </div>
+   );
+ };
