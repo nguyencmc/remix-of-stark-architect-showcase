@@ -25,7 +25,7 @@ import {
    Plus,
    X
  } from 'lucide-react';
- import { MiniRichTextEditor } from '@/components/editor';
+ import { SmartEditor } from '@/components/editor';
 import { useToast } from '@/hooks/use-toast';
 
 export interface PracticeQuestion {
@@ -234,14 +234,14 @@ export const PracticeQuestionEditor = ({
              {/* Question Text */}
              <div className="space-y-2">
                <Label>Nội dung câu hỏi *</Label>
-               <MiniRichTextEditor
-                 content={question.question_text}
-                 onChange={(value) => onUpdate(index, 'question_text', value)}
-                 placeholder="Nhập câu hỏi..."
-                 minHeight="80px"
-                 showImageUpload={!!onImageUpload}
-                 onImageUpload={onImageUpload ? handleEditorImageUpload : undefined}
-               />
+                <SmartEditor
+                  content={question.question_text}
+                  onChange={(value) => onUpdate(index, 'question_text', value)}
+                  placeholder="Nhập câu hỏi..."
+                  miniMinHeight="80px"
+                  showImageUpload={!!onImageUpload}
+                  onImageUpload={onImageUpload ? handleEditorImageUpload : undefined}
+                />
               {question.question_image && (
                 <div className="relative inline-block">
                   <img 
@@ -327,11 +327,11 @@ export const PracticeQuestionEditor = ({
               
               <div className="space-y-2">
                 <Label>Giải thích (tùy chọn)</Label>
-                 <MiniRichTextEditor
+                 <SmartEditor
                    content={question.explanation}
                    onChange={(value) => onUpdate(index, 'explanation', value)}
                    placeholder="Giải thích đáp án đúng..."
-                   minHeight="60px"
+                   miniMinHeight="60px"
                  />
               </div>
             </div>
@@ -375,13 +375,13 @@ export const PracticeQuestionEditor = ({
          {isCorrect ? <Check className="w-4 h-4" /> : letter}
        </button>
        <div className="flex-1">
-         <MiniRichTextEditor
-           content={value}
-           onChange={onChange}
-           placeholder={`Đáp án ${letter}${required ? ' *' : ''}`}
-           className={isCorrect ? "border-green-600" : ""}
-           minHeight="40px"
-         />
+          <SmartEditor
+            content={value}
+            onChange={onChange}
+            placeholder={`Đáp án ${letter}${required ? ' *' : ''}`}
+            className={isCorrect ? "border-green-600" : ""}
+            miniMinHeight="40px"
+          />
        </div>
      </div>
    );
