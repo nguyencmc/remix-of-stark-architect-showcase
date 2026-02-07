@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { DatabaseBackup } from '@/components/admin/DatabaseBackup';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -125,7 +126,6 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [exporting, setExporting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
@@ -344,42 +344,7 @@ const AdminDashboard = () => {
     fetchUsers();
   };
 
-  const handleExportDatabase = async () => {
-    setExporting(true);
-    try {
-      const response = await supabase.functions.invoke('export-database');
-      
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-
-      const jsonData = JSON.stringify(response.data, null, 2);
-      const blob = new Blob([jsonData], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `database-export-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      toast({
-        title: "Thành công",
-        description: "Đã xuất database ra file JSON",
-      });
-    } catch (error) {
-      console.error('Export error:', error);
-      toast({
-        title: "Lỗi",
-        description: "Không thể xuất database",
-        variant: "destructive",
-      });
-    } finally {
-      setExporting(false);
-    }
-  };
+  // Export functionality moved to DatabaseBackup component
 
   if (roleLoading) {
     return (
@@ -978,26 +943,8 @@ const AdminDashboard = () => {
         ))}
       </div>
 
-      {/* Export Section */}
-      <Card className="border-border/50">
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Download className="w-4 h-4" />
-            Sao lưu dữ liệu
-          </CardTitle>
-          <CardDescription>Xuất toàn bộ dữ liệu hệ thống ra file JSON</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button 
-            onClick={handleExportDatabase}
-            disabled={exporting}
-            className="gap-2"
-          >
-            <Download className="w-4 h-4" />
-            {exporting ? 'Đang xuất...' : 'Xuất Database'}
-          </Button>
-        </CardContent>
-      </Card>
+      {/* Database Backup */}
+      <DatabaseBackup />
     </div>
   );
 

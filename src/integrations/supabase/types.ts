@@ -1295,9 +1295,9 @@ export type Database = {
           is_official: boolean | null
           is_published: boolean | null
           language: string | null
+          learning_path_order: number | null
           lesson_count: number | null
           level: string | null
-          learning_path_order: number | null
           original_price: number | null
           prerequisite_ids: string[] | null
           preview_video_url: string | null
@@ -1329,9 +1329,9 @@ export type Database = {
           is_official?: boolean | null
           is_published?: boolean | null
           language?: string | null
+          learning_path_order?: number | null
           lesson_count?: number | null
           level?: string | null
-          learning_path_order?: number | null
           original_price?: number | null
           prerequisite_ids?: string[] | null
           preview_video_url?: string | null
@@ -1363,9 +1363,9 @@ export type Database = {
           is_official?: boolean | null
           is_published?: boolean | null
           language?: string | null
+          learning_path_order?: number | null
           lesson_count?: number | null
           level?: string | null
-          learning_path_order?: number | null
           original_price?: number | null
           prerequisite_ids?: string[] | null
           preview_video_url?: string | null
@@ -1433,51 +1433,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "exam_attempts_exam_id_fkey"
-            columns: ["exam_id"]
-            isOneToOne: false
-            referencedRelation: "exams"
-          referencedColumns: ["id"]
-        },
-      ]
-      }
-      exam_versions: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          exam_id: string
-          id: string
-          payload: Json
-          published_at: string | null
-          version: number
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          exam_id: string
-          id?: string
-          payload: Json
-          published_at?: string | null
-          version: number
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          exam_id?: string
-          id?: string
-          payload?: Json
-          published_at?: string | null
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "exam_versions_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "exam_versions_exam_id_fkey"
             columns: ["exam_id"]
             isOneToOne: false
             referencedRelation: "exams"
@@ -1574,6 +1529,51 @@ export type Database = {
           },
           {
             foreignKeyName: "exam_proctoring_logs_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_versions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          exam_id: string
+          id: string
+          payload: Json
+          published_at: string | null
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          exam_id: string
+          id?: string
+          payload: Json
+          published_at?: string | null
+          version: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          exam_id?: string
+          id?: string
+          payload?: Json
+          published_at?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "exam_versions_exam_id_fkey"
             columns: ["exam_id"]
             isOneToOne: false
             referencedRelation: "exams"
@@ -2152,8 +2152,8 @@ export type Database = {
           option_f: string | null
           question_image: string | null
           question_order: number | null
+          question_tags: string[] | null
           question_text: string
-          question_tags: string[]
           set_id: string
           tags: string[] | null
         }
@@ -2173,8 +2173,8 @@ export type Database = {
           option_f?: string | null
           question_image?: string | null
           question_order?: number | null
+          question_tags?: string[] | null
           question_text: string
-          question_tags?: string[]
           set_id: string
           tags?: string[] | null
         }
@@ -2194,8 +2194,8 @@ export type Database = {
           option_f?: string | null
           question_image?: string | null
           question_order?: number | null
+          question_tags?: string[] | null
           question_text?: string
-          question_tags?: string[]
           set_id?: string
           tags?: string[] | null
         }
@@ -2205,6 +2205,38 @@ export type Database = {
             columns: ["set_id"]
             isOneToOne: false
             referencedRelation: "question_sets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proctoring_events: {
+        Row: {
+          captured_at: string
+          detail: Json | null
+          id: string
+          session_id: string
+          type: string
+        }
+        Insert: {
+          captured_at?: string
+          detail?: Json | null
+          id?: string
+          session_id: string
+          type: string
+        }
+        Update: {
+          captured_at?: string
+          detail?: Json | null
+          id?: string
+          session_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proctoring_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "practice_exam_sessions"
             referencedColumns: ["id"]
           },
         ]
@@ -2315,38 +2347,6 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "exam_categories"
-          referencedColumns: ["id"]
-        },
-      ]
-      }
-      proctoring_events: {
-        Row: {
-          captured_at: string
-          detail: Json | null
-          id: string
-          session_id: string
-          type: string
-        }
-        Insert: {
-          captured_at?: string
-          detail?: Json | null
-          id?: string
-          session_id: string
-          type: string
-        }
-        Update: {
-          captured_at?: string
-          detail?: Json | null
-          id?: string
-          session_id?: string
-          type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "proctoring_events_session_id_fkey"
-            columns: ["session_id"]
-            isOneToOne: false
-            referencedRelation: "practice_exam_sessions"
             referencedColumns: ["id"]
           },
         ]
@@ -2386,7 +2386,7 @@ export type Database = {
           {
             foreignKeyName: "question_stats_question_id_fkey"
             columns: ["question_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "questions"
             referencedColumns: ["id"]
           },
@@ -2397,6 +2397,7 @@ export type Database = {
           correct_answer: string
           created_at: string
           creator_id: string | null
+          difficulty_rating: number | null
           exam_id: string | null
           explanation: string | null
           id: string
@@ -2409,14 +2410,14 @@ export type Database = {
           option_g: string | null
           option_h: string | null
           question_order: number | null
-          question_tags: string[]
+          question_tags: string[] | null
           question_text: string
-          difficulty_rating: number | null
         }
         Insert: {
           correct_answer: string
           created_at?: string
           creator_id?: string | null
+          difficulty_rating?: number | null
           exam_id?: string | null
           explanation?: string | null
           id?: string
@@ -2429,14 +2430,14 @@ export type Database = {
           option_g?: string | null
           option_h?: string | null
           question_order?: number | null
-          question_tags?: string[]
+          question_tags?: string[] | null
           question_text: string
-          difficulty_rating?: number | null
         }
         Update: {
           correct_answer?: string
           created_at?: string
           creator_id?: string | null
+          difficulty_rating?: number | null
           exam_id?: string | null
           explanation?: string | null
           id?: string
@@ -2449,9 +2450,8 @@ export type Database = {
           option_g?: string | null
           option_h?: string | null
           question_order?: number | null
-          question_tags?: string[]
+          question_tags?: string[] | null
           question_text?: string
-          difficulty_rating?: number | null
         }
         Relationships: [
           {
