@@ -4,8 +4,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import {
   Dialog,
   DialogContent,
@@ -261,31 +261,33 @@ export function DatabaseBackup() {
               </Badge>
             </div>
 
-            {/* Table groups */}
-            <ScrollArea className="h-[400px] pr-4">
-              <div className="space-y-4">
-                {Object.entries(TABLE_GROUPS).map(([groupKey, group]) => {
-                  const groupSelected = group.tables.filter(t => selectedTables.has(t)).length;
-                  const allGroupSelected = groupSelected === group.tables.length;
-                  const someGroupSelected = groupSelected > 0 && !allGroupSelected;
+            {/* Table groups as collapsible accordion */}
+            <Accordion type="multiple" className="w-full">
+              {Object.entries(TABLE_GROUPS).map(([groupKey, group]) => {
+                const groupSelected = group.tables.filter(t => selectedTables.has(t)).length;
+                const allGroupSelected = groupSelected === group.tables.length;
+                const someGroupSelected = groupSelected > 0 && !allGroupSelected;
 
-                  return (
-                    <div key={groupKey} className="space-y-2">
-                      <div
-                        className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 rounded-md p-1.5 -ml-1.5"
-                        onClick={() => toggleGroup(group.tables)}
-                      >
-                        <Checkbox
-                          checked={allGroupSelected ? true : someGroupSelected ? 'indeterminate' : false}
-                          onCheckedChange={() => toggleGroup(group.tables)}
-                        />
-                        <Package className="w-4 h-4 text-muted-foreground" />
-                        <span className="font-medium text-sm">{group.label}</span>
-                        <Badge variant="outline" className="ml-auto text-xs">
-                          {groupSelected}/{group.tables.length}
-                        </Badge>
-                      </div>
-                      <div className="ml-8 grid grid-cols-1 sm:grid-cols-2 gap-1">
+                return (
+                  <AccordionItem key={groupKey} value={groupKey} className="border-b-0">
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        checked={allGroupSelected ? true : someGroupSelected ? 'indeterminate' : false}
+                        onCheckedChange={() => toggleGroup(group.tables)}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                      <AccordionTrigger className="flex-1 py-2 hover:no-underline">
+                        <div className="flex items-center gap-2 flex-1">
+                          <Package className="w-4 h-4 text-muted-foreground" />
+                          <span className="font-medium text-sm">{group.label}</span>
+                          <Badge variant={groupSelected > 0 ? "default" : "outline"} className="ml-auto mr-2 text-xs">
+                            {groupSelected}/{group.tables.length}
+                          </Badge>
+                        </div>
+                      </AccordionTrigger>
+                    </div>
+                    <AccordionContent>
+                      <div className="ml-6 grid grid-cols-1 sm:grid-cols-2 gap-1 pt-1">
                         {group.tables.map(table => (
                           <label
                             key={table}
@@ -300,12 +302,11 @@ export function DatabaseBackup() {
                           </label>
                         ))}
                       </div>
-                      <Separator />
-                    </div>
-                  );
-                })}
-              </div>
-            </ScrollArea>
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
+            </Accordion>
 
             <Button
               onClick={handleExport}
