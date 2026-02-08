@@ -15,6 +15,9 @@ verify_jwt = false
 [functions.export-database]
 verify_jwt = false
 
+[functions.export-schema]
+verify_jwt = false
+
 [functions.generate-flashcards]
 verify_jwt = false
 
