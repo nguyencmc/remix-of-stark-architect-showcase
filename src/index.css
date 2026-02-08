@@ -1,12 +1,16 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+/* Plus Jakarta Sans - All weights with Vietnamese support */
+@import "@fontsource/plus-jakarta-sans/latin.css";
+@import "@fontsource/plus-jakarta-sans/latin-ext.css";
+@import "@fontsource/plus-jakarta-sans/vietnamese.css";
 @import "@fontsource/plus-jakarta-sans/400.css";
 @import "@fontsource/plus-jakarta-sans/500.css";
 @import "@fontsource/plus-jakarta-sans/600.css";
 @import "@fontsource/plus-jakarta-sans/700.css";
 @import "@fontsource/plus-jakarta-sans/800.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Design System - AI-Exam.cloud */
 
@@ -47,7 +51,7 @@
     --gradient-accent: linear-gradient(135deg, hsl(142 71% 45%) 0%, hsl(168 76% 42%) 100%);
     --gradient-hero: linear-gradient(180deg, hsl(220 20% 99%) 0%, hsl(220 30% 96%) 100%);
     --gradient-section: linear-gradient(180deg, hsl(220 30% 96%) 0%, hsl(220 20% 99%) 100%);
-    
+
     --wave-blue: 221 83% 53%;
     --feature-bg: 220 30% 96%;
     --testimonial-bg: 220 20% 98%;
@@ -130,13 +134,27 @@
   }
 
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
   }
 
   @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .animate-slide-up {
@@ -144,8 +162,13 @@
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
 
   .animate-fade-in {

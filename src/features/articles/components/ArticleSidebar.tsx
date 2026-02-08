@@ -75,7 +75,7 @@ export const ArticleSidebar = ({
                                     </h4>
                                     <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                                         <Eye className="w-3 h-3" />
-                                        <span>{article.view_count.toLocaleString()}</span>
+                                        <span>{(article.view_count ?? 0).toLocaleString()}</span>
                                     </div>
                                 </div>
                             </Link>
@@ -135,7 +135,7 @@ export const ArticleSidebar = ({
                                         {category.name}
                                     </span>
                                     <Badge variant="outline" className="text-xs">
-                                        {category.article_count}
+                                        {category.article_count ?? 0}
                                     </Badge>
                                 </Link>
                             ))}

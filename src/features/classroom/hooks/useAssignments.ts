@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { ClassAssignment, CreateAssignmentInput, AssignmentSubmission, AssignmentType } from '../types';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import type { Database } from '@/integrations/supabase/types';
 
 type ClassAssignmentInsert = Database['public']['Tables']['class_assignments']['Insert'];

@@ -20,8 +20,7 @@ import {
   BookOpen,
   Save,
   X,
-  GripVertical,
-  Newspaper
+  GripVertical
 } from 'lucide-react';
 import {
   Table,
@@ -50,7 +49,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import { createAuditLog } from '@/hooks/useAuditLogs';
 
 interface BaseCategory {
@@ -83,12 +82,7 @@ interface BookCategory extends BaseCategory {
   creator_id: string | null;
 }
 
-interface ArticleCategory extends BaseCategory {
-  article_count: number | null;
-  creator_id: string | null;
-}
-
-type CategoryType = 'exam' | 'podcast' | 'book' | 'article';
+type CategoryType = 'exam' | 'podcast' | 'book';
 
 const CategoryManagement = () => {
   const { isAdmin, hasPermission, loading: roleLoading } = usePermissionsContext();
@@ -99,7 +93,6 @@ const CategoryManagement = () => {
   const [examCategories, setExamCategories] = useState<ExamCategory[]>([]);
   const [podcastCategories, setPodcastCategories] = useState<PodcastCategory[]>([]);
   const [bookCategories, setBookCategories] = useState<BookCategory[]>([]);
-  const [articleCategories, setArticleCategories] = useState<ArticleCategory[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Dialog state
@@ -143,19 +136,16 @@ const CategoryManagement = () => {
     const [
       { data: examData },
       { data: podcastData },
-      { data: bookData },
-      { data: articleData }
+      { data: bookData }
     ] = await Promise.all([
       supabase.from('exam_categories').select('*').order('display_order', { ascending: true }),
       supabase.from('podcast_categories').select('*').order('display_order', { ascending: true }),
       supabase.from('book_categories').select('*').order('display_order', { ascending: true }),
-      supabase.from('article_categories').select('*').order('display_order', { ascending: true }),
     ]);
 
     setExamCategories((examData || []) as ExamCategory[]);
     setPodcastCategories((podcastData || []) as PodcastCategory[]);
     setBookCategories((bookData || []) as BookCategory[]);
-    setArticleCategories((articleData || []) as ArticleCategory[]);
     setLoading(false);
   };
 
@@ -200,7 +190,6 @@ const CategoryManagement = () => {
       case 'exam': return 'exam_categories';
       case 'podcast': return 'podcast_categories';
       case 'book': return 'book_categories';
-      case 'article': return 'article_categories';
     }
   };
 
@@ -342,7 +331,6 @@ const CategoryManagement = () => {
       case 'exam': return examCategories;
       case 'podcast': return podcastCategories;
       case 'book': return bookCategories;
-      case 'article': return articleCategories;
     }
   };
 
@@ -351,7 +339,6 @@ const CategoryManagement = () => {
       case 'exam': return <FileText className="w-4 h-4" />;
       case 'podcast': return <Headphones className="w-4 h-4" />;
       case 'book': return <BookOpen className="w-4 h-4" />;
-      case 'article': return <Newspaper className="w-4 h-4" />;
     }
   };
 
@@ -360,10 +347,8 @@ const CategoryManagement = () => {
       return (category as ExamCategory).exam_count || 0;
     } else if (activeTab === 'podcast') {
       return (category as PodcastCategory).podcast_count || 0;
-    } else if (activeTab === 'book') {
-      return (category as BookCategory).book_count || 0;
     } else {
-      return (category as ArticleCategory).article_count || 0;
+      return (category as BookCategory).book_count || 0;
     }
   };
 
@@ -427,10 +412,6 @@ const CategoryManagement = () => {
               <BookOpen className="w-4 h-4" />
               Sách ({bookCategories.length})
             </TabsTrigger>
-            <TabsTrigger value="article" className="gap-2">
-              <Newspaper className="w-4 h-4" />
-              Bài viết ({articleCategories.length})
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value={activeTab}>
@@ -438,7 +419,7 @@ const CategoryManagement = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   {getTabIcon(activeTab)}
-                  Danh mục {activeTab === 'exam' ? 'Đề thi' : activeTab === 'podcast' ? 'Podcast' : activeTab === 'book' ? 'Sách' : 'Bài viết'}
+                  Danh mục {activeTab === 'exam' ? 'Đề thi' : activeTab === 'podcast' ? 'Podcast' : 'Sách'}
                 </CardTitle>
                 <CardDescription>
                   Quản lý các danh mục để phân loại nội dung
@@ -555,7 +536,7 @@ const CategoryManagement = () => {
               {editingCategory ? 'Chỉnh sửa danh mục' : 'Tạo danh mục mới'}
             </DialogTitle>
             <DialogDescription>
-              {activeTab === 'exam' ? 'Danh mục đề thi' : activeTab === 'podcast' ? 'Danh mục Podcast' : activeTab === 'book' ? 'Danh mục Sách' : 'Danh mục Bài viết'}
+              {activeTab === 'exam' ? 'Danh mục đề thi' : activeTab === 'podcast' ? 'Danh mục Podcast' : 'Danh mục Sách'}
             </DialogDescription>
           </DialogHeader>
 
@@ -639,8 +620,8 @@ const CategoryManagement = () => {
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog >
-    </div >
+      </Dialog>
+    </div>
   );
 };
 

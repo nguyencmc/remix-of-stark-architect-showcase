@@ -190,7 +190,7 @@ const MyArticlesPage = () => {
                             <TableCell>
                               <span className="flex items-center gap-1 text-muted-foreground">
                                 <Eye className="w-4 h-4" />
-                                {article.view_count}
+                                {article.view_count ?? 0}
                               </span>
                             </TableCell>
                             <TableCell className="text-muted-foreground">

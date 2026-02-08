@@ -24,7 +24,7 @@ const ExamDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  
+
   // Check if this is a practice/community exam
   const isPracticeMode = searchParams.get('type') === 'practice';
 
@@ -38,7 +38,7 @@ const ExamDetail = () => {
           .select("*, exam_categories(name)")
           .eq("slug", slug)
           .maybeSingle();
-        
+
         // If not found by slug, try by ID
         if (!data && !error) {
           const idQuery = await supabase
@@ -52,7 +52,7 @@ const ExamDetail = () => {
 
         if (error) throw error;
         if (!data) return null;
-        
+
         return {
           id: data.id,
           title: data.title,
@@ -74,7 +74,7 @@ const ExamDetail = () => {
 
         if (error) throw error;
         if (!data) return null;
-        
+
         return {
           id: data.id,
           title: data.title,
@@ -213,7 +213,7 @@ const ExamDetail = () => {
               <h1 className="text-3xl md:text-4xl font-bold mb-4">{exam.title}</h1>
               {exam.description && (
                 <p className="text-muted-foreground text-lg max-w-2xl">
-                  {exam.description}
+                  {exam.description.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ')}
                 </p>
               )}
             </div>
@@ -314,7 +314,7 @@ const ExamDetail = () => {
               <Alert className="mb-6 border-orange-500/30 bg-orange-500/10">
                 <Shield className="h-4 w-4 text-orange-500" />
                 <AlertDescription className="text-sm">
-                  <strong className="text-orange-600 dark:text-orange-400">Chế độ thi thật</strong> - Bài thi sẽ được giám sát bằng webcam. 
+                  <strong className="text-orange-600 dark:text-orange-400">Chế độ thi thật</strong> - Bài thi sẽ được giám sát bằng webcam.
                   Hãy đảm bảo bạn có camera hoạt động và ở trong môi trường yên tĩnh.
                 </AlertDescription>
               </Alert>

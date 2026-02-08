@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  FileText, 
-  Clock, 
-  BarChart3, 
-  CheckCircle2, 
+import {
+  FileText,
+  Clock,
+  BarChart3,
+  CheckCircle2,
   AlertCircle,
   Edit,
   FolderOpen,
@@ -14,7 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
-  ChevronsRight
+  ChevronsRight,
+  ImageIcon
 } from 'lucide-react';
 import { type Question } from './QuestionEditor';
 
@@ -24,6 +25,7 @@ interface ReviewStepProps {
   categoryName?: string;
   difficulty: string;
   durationMinutes: number;
+  thumbnailUrl?: string;
   questions: Question[];
   onEditInfo: () => void;
   onEditQuestions: () => void;
@@ -38,6 +40,7 @@ export const ReviewStep = ({
   categoryName,
   difficulty,
   durationMinutes,
+  thumbnailUrl,
   questions,
   onEditInfo,
   onEditQuestions,
@@ -60,24 +63,24 @@ export const ReviewStep = ({
   };
 
   const diffInfo = getDifficultyLabel(difficulty);
-  
+
   const validQuestions = questions.filter(q => q.question_text && q.option_a && q.option_b);
   const hasIssues = validQuestions.length < questions.length || questions.length === 0;
 
   const optionLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-  
+
   const getOptionField = (letter: string) => `option_${letter.toLowerCase()}` as keyof Question;
 
   // Toggle correct answer (supports multiple)
   const toggleCorrectAnswer = (questionIndex: number, letter: string) => {
     if (!onUpdateQuestion) return;
-    
+
     const question = questions[questionIndex];
     const currentAnswers = question.correct_answer.split(',').map(a => a.trim()).filter(Boolean);
-    
+
     const letterIndex = currentAnswers.indexOf(letter);
     let newAnswers: string[];
-    
+
     if (letterIndex === -1) {
       // Add this answer
       newAnswers = [...currentAnswers, letter].sort();
@@ -89,7 +92,7 @@ export const ReviewStep = ({
         return; // Don't allow removing the last answer
       }
     }
-    
+
     onUpdateQuestion(questionIndex, 'correct_answer', newAnswers.join(','));
   };
 
@@ -106,7 +109,7 @@ export const ReviewStep = ({
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
     const maxVisible = 5;
-    
+
     if (totalPages <= maxVisible) {
       for (let i = 1; i <= totalPages; i++) pages.push(i);
     } else {
@@ -170,9 +173,8 @@ export const ReviewStep = ({
         </Card>
         <Card className="p-4">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-              hasIssues ? 'bg-yellow-500/10' : 'bg-green-500/10'
-            }`}>
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${hasIssues ? 'bg-yellow-500/10' : 'bg-green-500/10'
+              }`}>
               {hasIssues ? (
                 <AlertCircle className="w-5 h-5 text-yellow-500" />
               ) : (
@@ -200,6 +202,20 @@ export const ReviewStep = ({
           </Button>
         </CardHeader>
         <CardContent className="space-y-3">
+          {/* Thumbnail Preview */}
+          {thumbnailUrl && (
+            <div className="mb-4">
+              <p className="text-sm text-muted-foreground mb-2 flex items-center gap-2">
+                <ImageIcon className="w-4 h-4" />
+                Ảnh bìa
+              </p>
+              <img
+                src={thumbnailUrl}
+                alt="Thumbnail"
+                className="w-full max-w-md h-40 object-cover rounded-lg border"
+              />
+            </div>
+          )}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-muted-foreground mb-1">Tiêu đề</p>
@@ -272,7 +288,7 @@ export const ReviewStep = ({
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    
+
                     {getPageNumbers().map((page, idx) => (
                       typeof page === 'number' ? (
                         <Button
@@ -288,7 +304,7 @@ export const ReviewStep = ({
                         <span key={idx} className="px-2 text-muted-foreground">...</span>
                       )
                     ))}
-                    
+
                     <Button
                       variant="outline"
                       size="icon"
@@ -320,13 +336,12 @@ export const ReviewStep = ({
                     letter => q[getOptionField(letter)]
                   );
                   const correctAnswers = q.correct_answer.split(',').map(a => a.trim()).filter(Boolean);
-                  
+
                   return (
-                    <div 
-                      key={actualIndex} 
-                      className={`p-4 rounded-lg border ${
-                        isValid ? 'bg-muted/30 border-border' : 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20'
-                      }`}
+                    <div
+                      key={actualIndex}
+                      className={`p-4 rounded-lg border ${isValid ? 'bg-muted/30 border-border' : 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20'
+                        }`}
                     >
                       {/* Question Header */}
                       <div className="flex items-start gap-3 mb-3">
@@ -338,9 +353,9 @@ export const ReviewStep = ({
                             {q.question_text || '(Chưa nhập câu hỏi)'}
                           </p>
                           {q.question_image && (
-                            <img 
-                              src={q.question_image} 
-                              alt="Question" 
+                            <img
+                              src={q.question_image}
+                              alt="Question"
                               className="mt-2 max-h-32 rounded-lg border"
                             />
                           )}
@@ -357,24 +372,22 @@ export const ReviewStep = ({
                         {availableOptions.map((letter) => {
                           const optionText = q[getOptionField(letter)] as string;
                           const isCorrect = isCorrectAnswer(q, letter);
-                          
+
                           return (
-                            <div 
-                              key={letter} 
-                              className={`flex items-center gap-2 p-2 rounded-md transition-colors ${
-                                isCorrect 
-                                  ? 'bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700' 
+                            <div
+                              key={letter}
+                              className={`flex items-center gap-2 p-2 rounded-md transition-colors ${isCorrect
+                                  ? 'bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700'
                                   : 'bg-muted/50 border border-transparent hover:bg-muted'
-                              }`}
+                                }`}
                             >
                               <button
                                 type="button"
                                 onClick={() => toggleCorrectAnswer(actualIndex, letter)}
-                                className={`w-7 h-7 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${
-                                  isCorrect
+                                className={`w-7 h-7 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${isCorrect
                                     ? 'bg-green-500 text-white shadow-md'
                                     : 'bg-muted-foreground/20 text-muted-foreground hover:bg-primary/20 hover:text-primary'
-                                }`}
+                                  }`}
                                 title={isCorrect ? 'Click để bỏ chọn' : 'Click để chọn làm đáp án đúng'}
                               >
                                 {isCorrect ? <Check className="w-4 h-4" /> : letter}
@@ -392,9 +405,9 @@ export const ReviewStep = ({
                         <span>Đáp án đúng:</span>
                         <div className="flex gap-1">
                           {correctAnswers.map(answer => (
-                            <Badge 
-                              key={answer} 
-                              variant="default" 
+                            <Badge
+                              key={answer}
+                              variant="default"
                               className="bg-green-500 hover:bg-green-600 text-xs px-1.5 py-0"
                             >
                               {answer}
@@ -433,7 +446,7 @@ export const ReviewStep = ({
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  
+
                   {getPageNumbers().map((page, idx) => (
                     typeof page === 'number' ? (
                       <Button
@@ -449,7 +462,7 @@ export const ReviewStep = ({
                       <span key={idx} className="px-2 text-muted-foreground">...</span>
                     )
                   ))}
-                  
+
                   <Button
                     variant="outline"
                     size="icon"

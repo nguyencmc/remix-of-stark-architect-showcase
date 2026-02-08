@@ -1,7 +1,9 @@
- import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
- import { Input } from '@/components/ui/input';
- import { Label } from '@/components/ui/label';
- import { SmartEditor } from '@/components/editor';
+import { useRef, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { SmartEditor } from '@/components/editor';
 import {
   Select,
   SelectContent,
@@ -9,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileText, Clock, BarChart3, FolderOpen } from 'lucide-react';
+import { FileText, Clock, BarChart3, FolderOpen, ImagePlus, X, Upload, Loader2 } from 'lucide-react';
 
 interface ExamCategory {
   id: string;
@@ -23,6 +25,7 @@ interface ExamInfoStepProps {
   categoryId: string;
   difficulty: string;
   durationMinutes: number;
+  thumbnailUrl: string;
   categories: ExamCategory[];
   isEditing: boolean;
   onTitleChange: (value: string) => void;
@@ -31,6 +34,8 @@ interface ExamInfoStepProps {
   onCategoryChange: (value: string) => void;
   onDifficultyChange: (value: string) => void;
   onDurationChange: (value: number) => void;
+  onThumbnailUpload: (file: File) => Promise<string>;
+  onThumbnailRemove: () => void;
 }
 
 export const ExamInfoStep = ({
@@ -40,6 +45,7 @@ export const ExamInfoStep = ({
   categoryId,
   difficulty,
   durationMinutes,
+  thumbnailUrl,
   categories,
   isEditing,
   onTitleChange,
@@ -48,7 +54,13 @@ export const ExamInfoStep = ({
   onCategoryChange,
   onDifficultyChange,
   onDurationChange,
+  onThumbnailUpload,
+  onThumbnailRemove,
 }: ExamInfoStepProps) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+
   const generateSlug = (text: string) => {
     return text
       .toLowerCase()
@@ -66,6 +78,37 @@ export const ExamInfoStep = ({
     }
   };
 
+  const handleFileSelect = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      return;
+    }
+
+    setUploading(true);
+    try {
+      await onThumbnailUpload(file);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setDragOver(false);
+  };
+
   return (
     <div className="max-w-2xl mx-auto">
       <Card className="border-border/50">
@@ -79,6 +122,75 @@ export const ExamInfoStep = ({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 pt-4">
+          {/* Thumbnail Upload */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <ImagePlus className="w-4 h-4" />
+              Ảnh bìa đề thi
+            </Label>
+            {thumbnailUrl ? (
+              <div className="relative group rounded-xl overflow-hidden border border-border">
+                <img
+                  src={thumbnailUrl}
+                  alt="Thumbnail"
+                  className="w-full h-48 object-cover"
+                />
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={onThumbnailRemove}
+                    className="gap-2"
+                  >
+                    <X className="w-4 h-4" />
+                    Xóa ảnh
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onClick={() => fileInputRef.current?.click()}
+                className={`
+                  border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all
+                  ${dragOver
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50 hover:bg-muted/30'
+                  }
+                `}
+              >
+                {uploading ? (
+                  <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                    <p className="text-sm text-muted-foreground">Đang tải lên...</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Upload className="w-7 h-7 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">Kéo thả ảnh hoặc click để chọn</p>
+                      <p className="text-sm text-muted-foreground mt-1">PNG, JPG, WEBP (tối đa 5MB)</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFileSelect(file);
+              }}
+            />
+          </div>
+
           {/* Title & Slug */}
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -112,13 +224,13 @@ export const ExamInfoStep = ({
           {/* Description */}
           <div className="space-y-2">
             <Label htmlFor="description">Mô tả</Label>
-             <SmartEditor
-               content={description}
-               onChange={onDescriptionChange}
-               placeholder="Mô tả ngắn về nội dung và mục đích của đề thi..."
-               miniMinHeight="100px"
-               fullMinHeight="200px"
-             />
+            <SmartEditor
+              content={description}
+              onChange={onDescriptionChange}
+              placeholder="Mô tả ngắn về nội dung và mục đích của đề thi..."
+              miniMinHeight="100px"
+              fullMinHeight="200px"
+            />
           </div>
 
           {/* Category & Difficulty */}
@@ -194,11 +306,10 @@ export const ExamInfoStep = ({
                     key={mins}
                     type="button"
                     onClick={() => onDurationChange(mins)}
-                    className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
-                      durationMinutes === mins
+                    className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${durationMinutes === mins
                         ? 'bg-primary text-primary-foreground border-primary'
                         : 'bg-muted hover:bg-muted/80 border-border'
-                    }`}
+                      }`}
                   >
                     {mins}p
                   </button>

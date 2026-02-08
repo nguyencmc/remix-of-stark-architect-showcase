@@ -26,7 +26,7 @@ import {
    X
  } from 'lucide-react';
  import { SmartEditor } from '@/components/editor';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 
 export interface PracticeQuestion {
   id?: string;

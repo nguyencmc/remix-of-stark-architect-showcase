@@ -5,7 +5,7 @@ import { useClass, useMyClassRole } from '../hooks';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import CoursesTab from '../components/CoursesTab';
 import MembersTab from '../components/MembersTab';
 import AssignmentsTab from '../components/AssignmentsTab';

@@ -31,7 +31,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Switch } from '@/components/ui/switch';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import { LessonEditor, CourseLesson, LessonAttachment } from '@/components/admin/course/LessonEditor';
 import { CourseTestEditor } from '@/components/admin/course/CourseTestEditor';
 import { createAuditLog } from '@/hooks/useAuditLogs';

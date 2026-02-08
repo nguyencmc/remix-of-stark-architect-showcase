@@ -64,7 +64,7 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
 import { useAuditLogs, AuditLog } from '@/hooks/useAuditLogs';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 
 const ACTION_CONFIG: Record<string, { label: string; icon: React.ReactNode; bgColor: string; textColor: string }> = {
   permission_granted: { 

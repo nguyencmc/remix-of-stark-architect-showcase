@@ -37,7 +37,7 @@ const ArticlesListPage = () => {
 
   // Separate featured and regular articles
   const featuredArticles = useMemo(() =>
-    articles.filter(a => a.is_featured).slice(0, 5),
+    articles.filter(a => a.is_featured === true).slice(0, 5),
     [articles]
   );
 

@@ -25,7 +25,7 @@ import {
   Package,
   FileCode2,
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import { supabase } from '@/integrations/supabase/client';
 
 const TABLE_GROUPS: Record<string, { label: string; tables: string[] }> = {

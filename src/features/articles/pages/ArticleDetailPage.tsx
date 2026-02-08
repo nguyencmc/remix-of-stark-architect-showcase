@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useArticle, useArticleComments, useArticles } from '../hooks';
@@ -72,13 +72,13 @@ const ArticleDetailPage = () => {
   const [showBackToTop, setShowBackToTop] = useState(false);
 
   // Show back to top button on scroll
-  useState(() => {
+  useEffect(() => {
     const handleScroll = () => {
       setShowBackToTop(window.scrollY > 400);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  });
+  }, []);
 
   const handleSubmitComment = async () => {
     if (!newComment.trim()) return;
@@ -246,11 +246,11 @@ const ArticleDetailPage = () => {
                         </span>
                         <span className="flex items-center gap-1">
                           <Eye className="w-3.5 h-3.5" />
-                          {article.view_count.toLocaleString()}
+                          {(article.view_count ?? 0).toLocaleString()}
                         </span>
                         <span className="flex items-center gap-1">
                           <MessageSquare className="w-3.5 h-3.5" />
-                          {article.comment_count}
+                          {article.comment_count ?? 0}
                         </span>
                       </div>
                     </div>
@@ -374,7 +374,7 @@ const ArticleDetailPage = () => {
               <section>
                 <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
                   <MessageSquare className="w-5 h-5 text-primary" />
-                  Bình luận ({article.comment_count})
+                  Bình luận ({article.comment_count ?? 0})
                 </h2>
 
                 {/* New Comment Form */}

@@ -119,11 +119,11 @@ export const ArticleCard = ({ article, variant = 'default', className }: Article
                         <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                             <span className="flex items-center gap-1">
                                 <Eye className="w-3.5 h-3.5" />
-                                {article.view_count.toLocaleString()}
+                                {(article.view_count ?? 0).toLocaleString()}
                             </span>
                             <span className="flex items-center gap-1">
                                 <MessageSquare className="w-3.5 h-3.5" />
-                                {article.comment_count}
+                                {article.comment_count ?? 0}
                             </span>
                         </div>
                     )}

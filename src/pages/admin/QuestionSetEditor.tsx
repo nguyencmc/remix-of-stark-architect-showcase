@@ -24,7 +24,7 @@ import {
   Save,
   X
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import { createAuditLog } from '@/hooks/useAuditLogs';
 import { CreatePracticeQuestionsStep } from '@/components/admin/practice/CreatePracticeQuestionsStep';
 import type { PracticeQuestion } from '@/components/admin/practice/PracticeQuestionEditor';

@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import { Download, MoreHorizontal, Shield, UserX, Users, CheckSquare, XSquare } from 'lucide-react';
 
 interface UserWithRole {

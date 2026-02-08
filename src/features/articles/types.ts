@@ -4,9 +4,9 @@ export interface ArticleCategory {
   slug: string;
   description: string | null;
   icon_url: string | null;
-  display_order: number;
-  is_featured: boolean;
-  article_count: number;
+  display_order: number | null;
+  is_featured: boolean | null;
+  article_count: number | null;
   creator_id: string | null;
   created_at: string;
 }
@@ -24,10 +24,10 @@ export interface Article {
   rejection_reason: string | null;
   approved_by: string | null;
   approved_at: string | null;
-  view_count: number;
-  comment_count: number;
-  is_featured: boolean;
-  tags: string[];
+  view_count: number | null;
+  comment_count: number | null;
+  is_featured: boolean | null;
+  tags: string[] | null;
   created_at: string;
   updated_at: string;
   published_at: string | null;
@@ -47,7 +47,7 @@ export interface ArticleComment {
   user_id: string;
   parent_id: string | null;
   content: string;
-  is_edited: boolean;
+  is_edited: boolean | null;
   created_at: string;
   updated_at: string;
   // Joined fields

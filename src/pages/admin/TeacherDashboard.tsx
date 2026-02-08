@@ -28,7 +28,7 @@ import {
   Target,
   Award
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import { cn } from '@/lib/utils';
 
 interface Stats {

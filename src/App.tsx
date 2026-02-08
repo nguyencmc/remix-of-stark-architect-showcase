@@ -41,6 +41,8 @@ const FlashcardManagement = lazy(() => import("./pages/admin/FlashcardManagement
 const FlashcardEditor = lazy(() => import("./pages/admin/FlashcardEditor"));
 const PodcastManagement = lazy(() => import("./pages/admin/PodcastManagement"));
 const PodcastEditor = lazy(() => import("./pages/admin/PodcastEditor"));
+const BookManagement = lazy(() => import("./pages/admin/BookManagement"));
+const BookEditor = lazy(() => import("./pages/admin/BookEditor"));
 const CategoryManagement = lazy(() => import("./pages/admin/CategoryManagement"));
 const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
 const CourseManagement = lazy(() => import("./pages/admin/CourseManagement"));
@@ -197,6 +199,9 @@ const App = () => (
                       <Route path="/admin/podcasts" element={<PodcastManagement />} />
                       <Route path="/admin/podcasts/create" element={<PodcastEditor />} />
                       <Route path="/admin/podcasts/:id" element={<PodcastEditor />} />
+                      <Route path="/admin/books" element={<BookManagement />} />
+                      <Route path="/admin/books/create" element={<BookEditor />} />
+                      <Route path="/admin/books/:id" element={<BookEditor />} />
                       <Route path="/admin/courses" element={<CourseManagement />} />
                       <Route path="/admin/courses/create" element={<CourseEditor />} />
                       <Route path="/admin/courses/:id" element={<CourseEditor />} />

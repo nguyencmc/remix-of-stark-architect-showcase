@@ -4,14 +4,14 @@ import { usePermissionsContext } from '@/contexts/PermissionsContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { 
-  FileText, 
+import {
+  FileText,
   ArrowLeft,
   ArrowRight,
   Save,
   Loader2,
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/useToast';
 import { StepIndicator } from '@/components/admin/exam/StepIndicator';
 import { ExamInfoStep } from '@/components/admin/exam/ExamInfoStep';
 import { CreateQuestionsStep } from '@/components/admin/exam/CreateQuestionsStep';
@@ -37,12 +37,12 @@ const ExamEditor = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [currentStep, setCurrentStep] = useState(1);
   const [categories, setCategories] = useState<ExamCategory[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  
+
   // Exam fields
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
@@ -50,7 +50,8 @@ const ExamEditor = () => {
   const [categoryId, setCategoryId] = useState('');
   const [difficulty, setDifficulty] = useState('medium');
   const [durationMinutes, setDurationMinutes] = useState(60);
-  
+  const [thumbnailUrl, setThumbnailUrl] = useState('');
+
   // Questions
   const [questions, setQuestions] = useState<Question[]>([]);
 
@@ -78,7 +79,7 @@ const ExamEditor = () => {
 
   const fetchExam = async () => {
     setLoading(true);
-    
+
     const { data: exam, error } = await supabase
       .from('exams')
       .select('*')
@@ -101,6 +102,7 @@ const ExamEditor = () => {
     setCategoryId(exam.category_id || '');
     setDifficulty(exam.difficulty || 'medium');
     setDurationMinutes(exam.duration_minutes || 60);
+    setThumbnailUrl(exam.thumbnail_url || '');
 
     // Fetch questions
     const { data: questionsData } = await supabase
@@ -166,6 +168,7 @@ const ExamEditor = () => {
             difficulty,
             duration_minutes: durationMinutes,
             question_count: questions.length,
+            thumbnail_url: thumbnailUrl || null,
           })
           .eq('id', id);
 
@@ -182,6 +185,7 @@ const ExamEditor = () => {
             duration_minutes: durationMinutes,
             question_count: questions.length,
             creator_id: user?.id,
+            thumbnail_url: thumbnailUrl || null,
           })
           .select()
           .single();
@@ -271,18 +275,48 @@ const ExamEditor = () => {
     return categories.find(c => c.id === categoryId)?.name;
   };
 
+  // Thumbnail upload handler
+  const handleThumbnailUpload = async (file: File): Promise<string> => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+
+    const ext = file.name.split('.').pop();
+    const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const fileName = `exam-thumbnails/${year}/${month}/${day}/${uniqueId}.${ext}`;
+
+    const { data, error } = await supabase.storage
+      .from('public-assets')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false,
+      });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('public-assets')
+      .getPublicUrl(data.path);
+
+    setThumbnailUrl(urlData.publicUrl);
+    return urlData.publicUrl;
+  };
+
   // Image upload handler with date-based folder structure
   const handleImageUpload = async (file: File, questionIndex: number, field: string): Promise<string> => {
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
-    
+
     // Generate unique filename
     const ext = file.name.split('.').pop();
     const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     const fileName = `${year}/${month}/${day}/${uniqueId}.${ext}`;
-    
+
     const { data, error } = await supabase.storage
       .from('question-images')
       .upload(fileName, file, {
@@ -305,7 +339,7 @@ const ExamEditor = () => {
   if (roleLoading || loading) {
     return (
       <div className="min-h-screen bg-background">
-<div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
@@ -320,7 +354,7 @@ const ExamEditor = () => {
 
   return (
     <div className="min-h-screen bg-background">
-<main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Link to="/admin/exams">
@@ -341,8 +375,8 @@ const ExamEditor = () => {
 
         {/* Step Indicator */}
         <div className="mb-8 max-w-3xl mx-auto">
-          <StepIndicator 
-            steps={STEPS} 
+          <StepIndicator
+            steps={STEPS}
             currentStep={currentStep}
             onStepClick={(step) => {
               if (step < currentStep || (step === 2 && title && slug) || step === currentStep) {
@@ -362,6 +396,7 @@ const ExamEditor = () => {
               categoryId={categoryId}
               difficulty={difficulty}
               durationMinutes={durationMinutes}
+              thumbnailUrl={thumbnailUrl}
               categories={categories}
               isEditing={isEditing}
               onTitleChange={setTitle}
@@ -370,6 +405,8 @@ const ExamEditor = () => {
               onCategoryChange={setCategoryId}
               onDifficultyChange={setDifficulty}
               onDurationChange={setDurationMinutes}
+              onThumbnailUpload={handleThumbnailUpload}
+              onThumbnailRemove={() => setThumbnailUrl('')}
             />
           )}
 
@@ -388,11 +425,12 @@ const ExamEditor = () => {
               categoryName={getCategoryName()}
               difficulty={difficulty}
               durationMinutes={durationMinutes}
+              thumbnailUrl={thumbnailUrl}
               questions={questions}
               onEditInfo={() => setCurrentStep(1)}
               onEditQuestions={() => setCurrentStep(2)}
               onUpdateQuestion={(index, field, value) => {
-                setQuestions(prev => prev.map((q, i) => 
+                setQuestions(prev => prev.map((q, i) =>
                   i === index ? { ...q, [field]: value } : q
                 ));
               }}
