@@ -273,9 +273,9 @@ export default function PracticeEditorPage() {
 
       toast.success(isEditMode ? 'Đã cập nhật bộ đề' : 'Đã tạo bộ đề mới');
       navigate('/practice/my-sets');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Save error:', error);
-      toast.error('Không thể lưu bộ đề');
+      toast.error(`Không thể lưu bộ đề: ${error?.message || 'Lỗi không xác định'}`);
     } finally {
       setSaving(false);
     }

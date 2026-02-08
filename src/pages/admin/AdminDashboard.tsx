@@ -5,6 +5,10 @@ import { usePermissionsContext } from '@/contexts/PermissionsContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { DatabaseBackup } from '@/components/admin/DatabaseBackup';
+import { UserGrowthChart, PopularExamsChart, RecentActivitiesCard } from '@/components/admin/EnhancedDashboardCharts';
+import { UserBulkActions, UserSelectCheckbox } from '@/components/admin/UserBulkActions';
+import { RealtimeNotifications } from '@/components/admin/RealtimeNotifications';
+import { SystemHealthCheck } from '@/components/admin/SystemHealthCheck';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -129,6 +133,7 @@ const AdminDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
 
   const canViewAnalytics = hasPermission('analytics.view');
   const canManageUsers = hasPermission('users.view');
@@ -536,84 +541,47 @@ const AdminDashboard = () => {
         </Card>
       </div>
 
-      {/* Charts Row */}
+      {/* Charts Row - Enhanced with real recharts */}
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Activity Chart */}
-        <Card className="border-border/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <LineChartIcon className="w-4 h-4 text-primary" />
-              Hoạt động 7 ngày qua
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* Simple bar chart visualization */}
-              <div className="flex items-end justify-between h-40 gap-2">
-                {dailyStats.map((day, index) => {
-                  const maxAttempts = Math.max(...dailyStats.map(d => d.attempts));
-                  const height = maxAttempts > 0 ? (day.attempts / maxAttempts) * 100 : 0;
-                  return (
-                    <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                      <div className="w-full flex flex-col items-center justify-end h-32">
-                        <div 
-                          className="w-full bg-primary/20 rounded-t-sm transition-all hover:bg-primary/30"
-                          style={{ height: `${height}%`, minHeight: '4px' }}
-                        >
-                          <div className="w-full h-full bg-primary/60 rounded-t-sm" />
-                        </div>
-                      </div>
-                      <span className="text-xs text-muted-foreground">{day.date}</span>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="flex items-center justify-center gap-6 pt-2 border-t">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-sm bg-primary/60" />
-                  <span className="text-xs text-muted-foreground">Lượt làm bài</span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <UserGrowthChart />
+        <PopularExamsChart />
+      </div>
 
-        {/* Content Distribution */}
-        <Card className="border-border/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <PieChart className="w-4 h-4 text-primary" />
-              Phân bố nội dung
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {contentDistribution.map((item) => {
-                const percentage = totalContent > 0 ? (item.value / totalContent) * 100 : 0;
-                return (
-                  <div key={item.name} className="flex items-center gap-3">
-                    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", item.color + '/10')}>
-                      <item.icon className={cn("w-4 h-4", item.color.replace('bg-', 'text-'))} />
+      {/* Content Distribution */}
+      <Card className="border-border/50">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <PieChart className="w-4 h-4 text-primary" />
+            Phân bố nội dung
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {contentDistribution.map((item) => {
+              const percentage = totalContent > 0 ? (item.value / totalContent) * 100 : 0;
+              return (
+                <div key={item.name} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", item.color + '/10')}>
+                    <item.icon className={cn("w-4 h-4", item.color.replace('bg-', 'text-'))} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-sm font-medium">{item.name}</span>
+                      <span className="text-sm text-muted-foreground">{item.value}</span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium">{item.name}</span>
-                        <span className="text-sm text-muted-foreground">{item.value}</span>
-                      </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div 
-                          className={cn("h-full rounded-full transition-all", item.color)}
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
+                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className={cn("h-full rounded-full transition-all", item.color)}
+                        style={{ width: `${Math.max(percentage, 2)}%` }}
+                      />
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* User Growth Stats */}
       <Card className="border-border/50">
@@ -687,40 +655,11 @@ const AdminDashboard = () => {
         </Card>
       </div>
 
-      {/* System Health */}
-      <Card className="border-border/50">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Server className="w-4 h-4 text-primary" />
-            Trạng thái hệ thống
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-3 gap-4">
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-green-500/5 border border-green-500/20">
-              <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
-              <div>
-                <p className="font-medium text-green-600">Database</p>
-                <p className="text-xs text-muted-foreground">Hoạt động tốt</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-green-500/5 border border-green-500/20">
-              <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
-              <div>
-                <p className="font-medium text-green-600">API Server</p>
-                <p className="text-xs text-muted-foreground">Phản hồi nhanh</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-green-500/5 border border-green-500/20">
-              <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
-              <div>
-                <p className="font-medium text-green-600">Storage</p>
-                <p className="text-xs text-muted-foreground">Đủ dung lượng</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Recent Activities + System Health */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        <RecentActivitiesCard />
+        <SystemHealthCheck />
+      </div>
     </div>
   );
 
@@ -761,6 +700,14 @@ const AdminDashboard = () => {
         </CardContent>
       </Card>
 
+      {/* Bulk Actions Bar */}
+      <UserBulkActions
+        users={filteredUsers}
+        selectedUsers={selectedUsers}
+        onSelectionChange={setSelectedUsers}
+        onRefresh={fetchUsers}
+      />
+
       {/* Users Table */}
       <Card className="border-border/50">
         <CardHeader className="pb-3">
@@ -783,6 +730,15 @@ const AdminDashboard = () => {
                   <div key={u.id} className="p-4 space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
+                        <UserSelectCheckbox
+                          userId={u.user_id}
+                          checked={selectedUsers.has(u.user_id)}
+                          onToggle={(id) => {
+                            const s = new Set(selectedUsers);
+                            s.has(id) ? s.delete(id) : s.add(id);
+                            setSelectedUsers(s);
+                          }}
+                        />
                         <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                           <span className="text-sm font-medium">
                             {(u.full_name?.[0] || u.email?.[0] || '?').toUpperCase()}
@@ -830,6 +786,7 @@ const AdminDashboard = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-10"></TableHead>
                       <TableHead>Người dùng</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Ngày tạo</TableHead>
@@ -840,6 +797,17 @@ const AdminDashboard = () => {
                   <TableBody>
                     {filteredUsers.slice(0, 20).map((u) => (
                       <TableRow key={u.id}>
+                        <TableCell>
+                          <UserSelectCheckbox
+                            userId={u.user_id}
+                            checked={selectedUsers.has(u.user_id)}
+                            onToggle={(id) => {
+                              const s = new Set(selectedUsers);
+                              s.has(id) ? s.delete(id) : s.add(id);
+                              setSelectedUsers(s);
+                            }}
+                          />
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -943,6 +911,9 @@ const AdminDashboard = () => {
         ))}
       </div>
 
+      {/* System Health Check - Full */}
+      <SystemHealthCheck />
+
       {/* Database Backup */}
       <DatabaseBackup />
     </div>
@@ -971,6 +942,19 @@ const AdminDashboard = () => {
               <h1 className="text-2xl font-bold">Admin Dashboard</h1>
               <p className="text-sm text-muted-foreground">Monitoring & Quản lý hệ thống</p>
             </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <RealtimeNotifications />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="gap-2"
+            >
+              <RefreshCw className={cn("w-4 h-4", refreshing && "animate-spin")} />
+              Làm mới
+            </Button>
           </div>
         </div>
 

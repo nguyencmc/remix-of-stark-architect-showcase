@@ -9,8 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  FolderOpen, 
+import {
+  FolderOpen,
   Plus,
   Edit,
   Trash2,
@@ -20,7 +20,8 @@ import {
   BookOpen,
   Save,
   X,
-  GripVertical
+  GripVertical,
+  Newspaper
 } from 'lucide-react';
 import {
   Table,
@@ -82,19 +83,25 @@ interface BookCategory extends BaseCategory {
   creator_id: string | null;
 }
 
-type CategoryType = 'exam' | 'podcast' | 'book';
+interface ArticleCategory extends BaseCategory {
+  article_count: number | null;
+  creator_id: string | null;
+}
+
+type CategoryType = 'exam' | 'podcast' | 'book' | 'article';
 
 const CategoryManagement = () => {
   const { isAdmin, hasPermission, loading: roleLoading } = usePermissionsContext();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [activeTab, setActiveTab] = useState<CategoryType>('exam');
   const [examCategories, setExamCategories] = useState<ExamCategory[]>([]);
   const [podcastCategories, setPodcastCategories] = useState<PodcastCategory[]>([]);
   const [bookCategories, setBookCategories] = useState<BookCategory[]>([]);
+  const [articleCategories, setArticleCategories] = useState<ArticleCategory[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<BaseCategory | null>(null);
@@ -132,20 +139,23 @@ const CategoryManagement = () => {
 
   const fetchAllCategories = async () => {
     setLoading(true);
-    
+
     const [
       { data: examData },
       { data: podcastData },
-      { data: bookData }
+      { data: bookData },
+      { data: articleData }
     ] = await Promise.all([
       supabase.from('exam_categories').select('*').order('display_order', { ascending: true }),
       supabase.from('podcast_categories').select('*').order('display_order', { ascending: true }),
       supabase.from('book_categories').select('*').order('display_order', { ascending: true }),
+      supabase.from('article_categories').select('*').order('display_order', { ascending: true }),
     ]);
 
     setExamCategories((examData || []) as ExamCategory[]);
     setPodcastCategories((podcastData || []) as PodcastCategory[]);
     setBookCategories((bookData || []) as BookCategory[]);
+    setArticleCategories((articleData || []) as ArticleCategory[]);
     setLoading(false);
   };
 
@@ -190,6 +200,7 @@ const CategoryManagement = () => {
       case 'exam': return 'exam_categories';
       case 'podcast': return 'podcast_categories';
       case 'book': return 'book_categories';
+      case 'article': return 'article_categories';
     }
   };
 
@@ -291,10 +302,10 @@ const CategoryManagement = () => {
 
   const handleDelete = async (categoryId: string) => {
     const tableName = getTableName(activeTab);
-    
+
     // Get category info for audit log
     const categoryToDelete = getCurrentCategories()?.find(c => c.id === categoryId);
-    
+
     const { error } = await supabase
       .from(tableName)
       .delete()
@@ -322,7 +333,7 @@ const CategoryManagement = () => {
       title: "Thành công",
       description: "Đã xóa danh mục",
     });
-    
+
     fetchAllCategories();
   };
 
@@ -331,6 +342,7 @@ const CategoryManagement = () => {
       case 'exam': return examCategories;
       case 'podcast': return podcastCategories;
       case 'book': return bookCategories;
+      case 'article': return articleCategories;
     }
   };
 
@@ -339,6 +351,7 @@ const CategoryManagement = () => {
       case 'exam': return <FileText className="w-4 h-4" />;
       case 'podcast': return <Headphones className="w-4 h-4" />;
       case 'book': return <BookOpen className="w-4 h-4" />;
+      case 'article': return <Newspaper className="w-4 h-4" />;
     }
   };
 
@@ -347,15 +360,17 @@ const CategoryManagement = () => {
       return (category as ExamCategory).exam_count || 0;
     } else if (activeTab === 'podcast') {
       return (category as PodcastCategory).podcast_count || 0;
-    } else {
+    } else if (activeTab === 'book') {
       return (category as BookCategory).book_count || 0;
+    } else {
+      return (category as ArticleCategory).article_count || 0;
     }
   };
 
   if (roleLoading) {
     return (
       <div className="min-h-screen bg-background">
-<div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
@@ -372,7 +387,7 @@ const CategoryManagement = () => {
 
   return (
     <div className="min-h-screen bg-background">
-<main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
@@ -412,6 +427,10 @@ const CategoryManagement = () => {
               <BookOpen className="w-4 h-4" />
               Sách ({bookCategories.length})
             </TabsTrigger>
+            <TabsTrigger value="article" className="gap-2">
+              <Newspaper className="w-4 h-4" />
+              Bài viết ({articleCategories.length})
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value={activeTab}>
@@ -419,7 +438,7 @@ const CategoryManagement = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   {getTabIcon(activeTab)}
-                  Danh mục {activeTab === 'exam' ? 'Đề thi' : activeTab === 'podcast' ? 'Podcast' : 'Sách'}
+                  Danh mục {activeTab === 'exam' ? 'Đề thi' : activeTab === 'podcast' ? 'Podcast' : activeTab === 'book' ? 'Sách' : 'Bài viết'}
                 </CardTitle>
                 <CardDescription>
                   Quản lý các danh mục để phân loại nội dung
@@ -536,10 +555,10 @@ const CategoryManagement = () => {
               {editingCategory ? 'Chỉnh sửa danh mục' : 'Tạo danh mục mới'}
             </DialogTitle>
             <DialogDescription>
-              {activeTab === 'exam' ? 'Danh mục đề thi' : activeTab === 'podcast' ? 'Danh mục Podcast' : 'Danh mục Sách'}
+              {activeTab === 'exam' ? 'Danh mục đề thi' : activeTab === 'podcast' ? 'Danh mục Podcast' : activeTab === 'book' ? 'Danh mục Sách' : 'Danh mục Bài viết'}
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="name">Tên danh mục *</Label>
@@ -547,8 +566,8 @@ const CategoryManagement = () => {
                 id="name"
                 value={formData.name}
                 onChange={(e) => {
-                  setFormData({ 
-                    ...formData, 
+                  setFormData({
+                    ...formData,
                     name: e.target.value,
                     slug: editingCategory ? formData.slug : generateSlug(e.target.value)
                   });
@@ -556,7 +575,7 @@ const CategoryManagement = () => {
                 placeholder="VD: Toán học"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="slug">Slug (URL)</Label>
               <Input
@@ -567,7 +586,7 @@ const CategoryManagement = () => {
                 className="font-mono"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="description">Mô tả</Label>
               <Textarea
@@ -578,7 +597,7 @@ const CategoryManagement = () => {
                 rows={3}
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="icon_url">URL Icon</Label>
               <Input
@@ -588,7 +607,7 @@ const CategoryManagement = () => {
                 placeholder="https://example.com/icon.png"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="display_order">Thứ tự hiển thị</Label>
               <Input
@@ -598,7 +617,7 @@ const CategoryManagement = () => {
                 onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
               />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <Label htmlFor="is_featured">Đánh dấu nổi bật</Label>
               <Switch
@@ -620,8 +639,8 @@ const CategoryManagement = () => {
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
-    </div>
+      </Dialog >
+    </div >
   );
 };
 

@@ -401,21 +401,44 @@ const UserManagement = () => {
     setImporting(true);
     try {
       const text = await file.text();
-      const lines = text.split('\n').filter(line => line.trim());
+      let lines = text.split('\n').filter(line => line.trim());
+      
+      // Skip sep= line if present (Excel compatibility)
+      if (lines[0]?.toLowerCase().startsWith('sep=')) {
+        lines = lines.slice(1);
+      }
       
       // Skip header row if present
-      const startIndex = lines[0].toLowerCase().includes('email') ? 1 : 0;
+      const startIndex = lines[0]?.toLowerCase().includes('email') ? 1 : 0;
+      
+      // Helper to convert DD/MM/YYYY to ISO date
+      const parseDate = (dateStr: string): string | null => {
+        if (!dateStr) return null;
+        // Try DD/MM/YYYY format
+        const ddmmyyyy = dateStr.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (ddmmyyyy) {
+          const [, day, month, year] = ddmmyyyy;
+          return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        }
+        // Already in ISO format or other valid format
+        return dateStr;
+      };
       
       const usersToCreate = [];
       for (let i = startIndex; i < lines.length; i++) {
-        const cols = lines[i].split(',').map(c => c.trim());
-        if (cols.length >= 2) {
+        // Support both semicolon and comma separators
+        const separator = lines[i].includes(';') ? ';' : ',';
+        const cols = lines[i].split(separator).map(c => c.trim().replace(/^\r|\r$/g, ''));
+        if (cols.length >= 2 && cols[0]) {
+          // Columns: email, password, full_name, username, bio, role, expires_at
           usersToCreate.push({
             email: cols[0],
             password: cols[1],
             full_name: cols[2] || '',
-            role: cols[3] || 'user',
-            expires_at: cols[4] || null
+            username: cols[3] || null,
+            bio: cols[4] || null,
+            role: cols[5] || 'user',
+            expires_at: parseDate(cols[6] || '')
           });
         }
       }
@@ -457,12 +480,13 @@ const UserManagement = () => {
   };
 
   const downloadCSVTemplate = () => {
-    const template = 'email,password,full_name,role,expires_at\nuser@example.com,password123,Nguyen Van A,user,2025-12-31';
-    const blob = new Blob([template], { type: 'text/csv' });
+    // Use semicolon separator for better Excel compatibility
+    const template = 'sep=;;;;;;\nemail;password;full_name;username;bio;role;expires_at\nhocsinh1@demo.com;Matkhau123;Nguyễn Văn A;nguyenvana;Tôi là học sinh;user;31/12/2026';
+    const blob = new Blob([template], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'user_template.csv';
+    a.download = 'mau_import_nguoi_dung.csv';
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -532,10 +556,11 @@ const UserManagement = () => {
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="text-sm text-muted-foreground">
-                    <p className="mb-2">Format CSV:</p>
-                    <code className="bg-muted p-2 rounded block text-xs">
-                      email,password,full_name,role,expires_at
+                    <p className="mb-2">Format CSV (dùng dấu chấm phẩy):</p>
+                    <code className="bg-muted p-2 rounded block text-xs overflow-x-auto">
+                      email;password;full_name;username;bio;role;expires_at
                     </code>
+                    <p className="mt-2 text-xs">Ngày hết hạn: DD/MM/YYYY (ví dụ: 31/12/2026)</p>
                   </div>
                   <Button variant="outline" onClick={downloadCSVTemplate} className="gap-2">
                     <Download className="w-4 h-4" />
