@@ -23,6 +23,7 @@ import {
   FileJson,
   Table2,
   Package,
+  FileCode2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -86,6 +87,7 @@ export function DatabaseBackup() {
   // Export state
   const [selectedTables, setSelectedTables] = useState<Set<string>>(new Set(ALL_TABLES));
   const [exporting, setExporting] = useState(false);
+  const [exportingSchema, setExportingSchema] = useState(false);
   
   // Import state
   const [importing, setImporting] = useState(false);
@@ -123,6 +125,33 @@ export function DatabaseBackup() {
       return next;
     });
   }, []);
+
+  // Schema export handler
+  const handleExportSchema = async () => {
+    setExportingSchema(true);
+    try {
+      const response = await supabase.functions.invoke('export-schema', { method: 'POST' });
+      if (response.error) throw new Error(response.error.message);
+
+      const sqlContent = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+      const blob = new Blob([sqlContent], { type: 'application/sql' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `schema-export-${new Date().toISOString().split('T')[0]}.sql`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({ title: 'Xuất schema thành công', description: 'File SQL đã được tải về' });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      toast({ title: 'Lỗi xuất schema', description: msg, variant: 'destructive' });
+    } finally {
+      setExportingSchema(false);
+    }
+  };
 
   // Export handler
   const handleExport = async () => {
@@ -322,6 +351,38 @@ export function DatabaseBackup() {
                 <>
                   <Download className="w-4 h-4" />
                   Xuất {selectedTables.size} bảng
+                </>
+              )}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Schema Export Section */}
+        <Card className="border-border/50">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileCode2 className="w-4 h-4" />
+              Xuất Schema (SQL)
+            </CardTitle>
+            <CardDescription>
+              Xuất toàn bộ cấu trúc database (tables, RLS policies, functions, triggers, indexes, storage) ra file SQL để dùng cho Supabase riêng.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={handleExportSchema}
+              disabled={exportingSchema}
+              className="w-full gap-2"
+            >
+              {exportingSchema ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Đang xuất schema...
+                </>
+              ) : (
+                <>
+                  <FileCode2 className="w-4 h-4" />
+                  Xuất toàn bộ Schema
                 </>
               )}
             </Button>
