@@ -66,6 +66,20 @@ const ALL_TABLES = [
   "user_roles",
 ];
 
+function escapeSQL(val: unknown): string {
+  if (val === null || val === undefined) return "NULL";
+  if (typeof val === "number") return String(val);
+  if (typeof val === "boolean") return val ? "TRUE" : "FALSE";
+  if (Array.isArray(val)) {
+    const items = val.map((v) => `'${String(v).replace(/'/g, "''")}'`).join(",");
+    return `ARRAY[${items}]`;
+  }
+  if (typeof val === "object") {
+    return `'${JSON.stringify(val).replace(/'/g, "''")}'::jsonb`;
+  }
+  return `'${String(val).replace(/'/g, "''")}'`;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -78,11 +92,9 @@ serve(async (req) => {
 
     let selectedTables = ALL_TABLES;
 
-    // Support POST with selected tables, or GET for all
     if (req.method === "POST") {
       const body = await req.json();
       if (body.tables && Array.isArray(body.tables) && body.tables.length > 0) {
-        // Only allow valid table names
         selectedTables = body.tables.filter((t: string) => ALL_TABLES.includes(t));
       }
       if (body.action === "list_tables") {
@@ -92,8 +104,16 @@ serve(async (req) => {
       }
     }
 
-    const exportData: Record<string, unknown[]> = {};
+    const parts: string[] = [];
+    parts.push("-- =============================================");
+    parts.push("-- DATA EXPORT");
+    parts.push(`-- Generated at: ${new Date().toISOString()}`);
+    parts.push(`-- Tables: ${selectedTables.length}`);
+    parts.push("-- =============================================");
+    parts.push("");
+
     const errors: string[] = [];
+    const tableCounts: Record<string, number> = {};
 
     for (const table of selectedTables) {
       try {
@@ -104,28 +124,74 @@ serve(async (req) => {
 
         if (error) {
           errors.push(`Error fetching ${table}: ${error.message}`);
-          exportData[table] = [];
-        } else {
-          exportData[table] = data || [];
+          parts.push(`-- ERROR: ${table}: ${error.message}`);
+          tableCounts[table] = 0;
+          continue;
+        }
+
+        const rows = data || [];
+        tableCounts[table] = rows.length;
+
+        parts.push(`-- -----------------------------------------------`);
+        parts.push(`-- Table: ${table} (${rows.length} rows)`);
+        parts.push(`-- -----------------------------------------------`);
+
+        if (rows.length === 0) {
+          parts.push(`-- (no data)`);
+          parts.push("");
+          continue;
+        }
+
+        const columns = Object.keys(rows[0]);
+        const colList = columns.join(", ");
+
+        // Generate INSERT statements in batches of 50
+        for (let i = 0; i < rows.length; i += 50) {
+          const batch = rows.slice(i, i + 50);
+          parts.push(`INSERT INTO public.${table} (${colList}) VALUES`);
+
+          const valueLines = batch.map((row) => {
+            const vals = columns.map((col) => escapeSQL((row as Record<string, unknown>)[col]));
+            return `  (${vals.join(", ")})`;
+          });
+
+          parts.push(valueLines.join(",\n") + "");
+          parts.push(`ON CONFLICT (id) DO UPDATE SET`);
+          
+          const updateCols = columns
+            .filter((c) => c !== "id")
+            .map((c) => `  ${c} = EXCLUDED.${c}`);
+          parts.push(updateCols.join(",\n") + ";");
+          parts.push("");
         }
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : String(err);
         errors.push(`Error fetching ${table}: ${errorMessage}`);
-        exportData[table] = [];
+        parts.push(`-- ERROR: ${table}: ${errorMessage}`);
+        tableCounts[table] = 0;
       }
     }
 
-    const result = {
-      exported_at: new Date().toISOString(),
-      tables: exportData,
-      table_counts: Object.fromEntries(
-        Object.entries(exportData).map(([table, data]) => [table, data.length])
-      ),
-      errors: errors.length > 0 ? errors : undefined,
-    };
+    // Summary at the end
+    const totalRows = Object.values(tableCounts).reduce((a, b) => a + b, 0);
+    parts.push("");
+    parts.push("-- =============================================");
+    parts.push(`-- SUMMARY: ${totalRows} total rows from ${selectedTables.length} tables`);
+    if (errors.length > 0) {
+      parts.push(`-- ERRORS: ${errors.length}`);
+      for (const e of errors) parts.push(`--   ${e}`);
+    }
+    parts.push("-- =============================================");
 
-    return new Response(JSON.stringify(result, null, 2), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const sqlContent = parts.join("\n");
+    console.log(`Data export complete: ${sqlContent.length} chars, ${totalRows} rows`);
+
+    return new Response(sqlContent, {
+      headers: {
+        ...corsHeaders,
+        "Content-Type": "application/sql",
+        "Content-Disposition": `attachment; filename="data-export-${new Date().toISOString().split("T")[0]}.sql"`,
+      },
     });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : String(error);
