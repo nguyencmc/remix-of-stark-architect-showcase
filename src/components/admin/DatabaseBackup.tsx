@@ -168,22 +168,20 @@ export function DatabaseBackup() {
 
       if (response.error) throw new Error(response.error.message);
 
-      const jsonData = JSON.stringify(response.data, null, 2);
-      const blob = new Blob([jsonData], { type: 'application/json' });
+      const sqlContent = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+      const blob = new Blob([sqlContent], { type: 'application/sql' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `database-export-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `data-export-${new Date().toISOString().split('T')[0]}.sql`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      const counts = response.data?.table_counts || {};
-      const totalRows = Object.values(counts).reduce((a: number, b: unknown) => a + (b as number), 0);
       toast({
         title: 'Xuất thành công',
-        description: `Đã xuất ${selectedTables.size} bảng với ${totalRows} bản ghi`,
+        description: `Đã xuất ${selectedTables.size} bảng ra file SQL`,
       });
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Unknown error';
@@ -274,7 +272,7 @@ export function DatabaseBackup() {
               <Download className="w-4 h-4" />
               Xuất dữ liệu
             </CardTitle>
-            <CardDescription>Chọn các bảng bạn muốn xuất ra file JSON</CardDescription>
+            <CardDescription>Chọn các bảng bạn muốn xuất ra file SQL (INSERT ... ON CONFLICT)</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Quick actions */}
