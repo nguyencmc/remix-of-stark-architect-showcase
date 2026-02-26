@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { HtmlContent } from '@/components/ui/HtmlContent';
 import { 
   FileText, 
   Clock, 
@@ -166,7 +167,7 @@ export const PracticeReviewStep = ({
                     <span className="text-sm font-medium text-primary">{index + 1}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm line-clamp-2">{question.question_text}</p>
+                    <p className="text-sm line-clamp-2"><HtmlContent html={question.question_text} className="line-clamp-2" /></p>
                     <div className="flex items-center gap-2 mt-1">
                       <CheckCircle2 className="w-3 h-3 text-green-500" />
                       <span className="text-xs text-muted-foreground">

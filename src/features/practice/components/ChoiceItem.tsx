@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { Check, X, Square, CheckSquare } from 'lucide-react';
+import { HtmlContent } from '@/components/ui/HtmlContent';
 
 interface ChoiceItemProps {
   id: string;
@@ -96,7 +97,7 @@ export function ChoiceItem({
       >
         {label}
       </span>
-      <span className="flex-1 text-foreground">{text}</span>
+      <HtmlContent html={text} className="flex-1 text-foreground" />
       {showResult && isCorrectAnswer && (
         <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
       )}

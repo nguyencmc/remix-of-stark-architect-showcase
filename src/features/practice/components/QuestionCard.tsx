@@ -9,6 +9,7 @@ import { createFlashcardFromQuestion } from '@/features/flashcards/api';
 import { toast } from 'sonner';
 import type { PracticeQuestion } from '../types';
 import { isMultiSelectQuestion } from '../types';
+import { HtmlContent } from '@/components/ui/HtmlContent';
 
 interface QuestionCardProps {
   question: PracticeQuestion;
@@ -141,7 +142,7 @@ export function QuestionCard({
         )}
 
         {/* Question text */}
-        <div className="text-lg font-medium leading-relaxed">{question.question_text}</div>
+        <HtmlContent html={question.question_text} className="text-lg font-medium leading-relaxed" />
 
         {/* Choices */}
         <div className="space-y-3">
@@ -187,7 +188,7 @@ export function QuestionCard({
               )}
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {question.explanation}
+              <HtmlContent html={question.explanation} />
             </p>
           </div>
         )}

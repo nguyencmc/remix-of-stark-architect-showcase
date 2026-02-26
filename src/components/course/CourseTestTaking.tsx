@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { HtmlContent } from '@/components/ui/HtmlContent';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -447,7 +448,7 @@ export const CourseTestTaking = ({ lessonId, onComplete }: CourseTestTakingProps
                   </Badge>
                 )}
                 <CardTitle className="text-lg font-medium leading-relaxed">
-                  {currentQuestion.question_text}
+                  <HtmlContent html={currentQuestion.question_text} />
                 </CardTitle>
               </div>
             </div>
@@ -667,7 +668,7 @@ export const CourseTestTaking = ({ lessonId, onComplete }: CourseTestTakingProps
                             Câu {index + 1}
                             {isMultiple && <Badge variant="outline" className="ml-2 text-xs">Nhiều đáp án</Badge>}
                           </p>
-                          <p className="font-medium">{question.question_text}</p>
+                          <HtmlContent html={question.question_text} className="font-medium" />
                         </div>
                       </div>
 
@@ -693,7 +694,7 @@ export const CourseTestTaking = ({ lessonId, onComplete }: CourseTestTakingProps
                               className={`flex items-center gap-2 p-2 rounded border ${bgClass}`}
                             >
                               <span className="font-medium w-6">{opt}.</span>
-                              <span className="flex-1">{optionText}</span>
+                              <HtmlContent html={optionText} className="flex-1" />
                               {isCorrectAnswer && (
                                 <CheckCircle className="w-4 h-4 text-green-600" />
                               )}
@@ -707,7 +708,7 @@ export const CourseTestTaking = ({ lessonId, onComplete }: CourseTestTakingProps
                         {question.explanation && (
                           <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                             <p className="text-sm font-medium text-blue-800 mb-1">Giải thích:</p>
-                            <p className="text-sm text-blue-700">{question.explanation}</p>
+                            <HtmlContent html={question.explanation} className="text-sm text-blue-700" />
                           </div>
                         )}
                       </div>

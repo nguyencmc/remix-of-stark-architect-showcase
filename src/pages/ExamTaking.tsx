@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { AIExplanation } from '@/components/exam/AIExplanation';
 import { CameraPreview } from '@/components/exam/CameraPreview';
 import { useExamProctoring } from '@/hooks/useExamProctoring';
+import { HtmlContent } from '@/components/ui/HtmlContent';
 import { 
   Clock, 
   ChevronLeft, 
@@ -524,7 +525,7 @@ const ExamTaking = () => {
                     <span className="font-medium">Câu {index + 1}</span>
                   </div>
                   <div className="p-4">
-                    <p className="font-medium mb-4">{question.question_text}</p>
+                    <div className="font-medium mb-4 prose prose-sm max-w-none dark:prose-invert [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md" dangerouslySetInnerHTML={{ __html: question.question_text }} />
                     <div className="grid gap-2">
                       {['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].map((option) => {
                         const optionKey = `option_${option.toLowerCase()}` as keyof Question;
@@ -537,7 +538,7 @@ const ExamTaking = () => {
                         return (
                           <div
                             key={option}
-                            className={`p-3 rounded-lg border-2 ${
+                            className={`p-3 rounded-lg border-2 flex items-start gap-2 ${
                               isCorrectOption
                                 ? 'border-green-500 bg-green-500/10'
                                 : isUserSelected
@@ -545,7 +546,7 @@ const ExamTaking = () => {
                                 : 'border-border'
                             }`}
                           >
-                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm mr-2 ${
+                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-sm flex-shrink-0 ${
                               isCorrectOption
                                 ? 'bg-green-500 text-white'
                                 : isUserSelected
@@ -554,14 +555,15 @@ const ExamTaking = () => {
                             }`}>
                               {option}
                             </span>
-                            {optionText as string}
+                            <span className="prose prose-sm max-w-none dark:prose-invert [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md" dangerouslySetInnerHTML={{ __html: optionText as string }} />
                           </div>
                         );
                       })}
                     </div>
                     {question.explanation && (
                       <div className="mt-4 p-4 bg-muted rounded-lg">
-                        <p className="text-sm"><strong>Giải thích:</strong> {question.explanation}</p>
+                        <p className="text-sm font-semibold mb-1">Giải thích:</p>
+                        <div className="text-sm prose prose-sm max-w-none dark:prose-invert [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md" dangerouslySetInnerHTML={{ __html: question.explanation }} />
                       </div>
                     )}
                     <AIExplanation question={question} userAnswer={userAnswers.join(', ')} />
@@ -709,7 +711,7 @@ const ExamTaking = () => {
 
                 {/* Question Text */}
                 <div className="bg-muted/50 rounded-xl p-6 mb-6">
-                  <p className="text-lg">{currentQuestion?.question_text}</p>
+                  <div className="text-lg prose prose-sm max-w-none dark:prose-invert [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md" dangerouslySetInnerHTML={{ __html: currentQuestion?.question_text ?? '' }} />
                 </div>
 
                 {/* Answer Options */}
@@ -740,7 +742,7 @@ const ExamTaking = () => {
                           }`}>
                             {option}
                           </span>
-                          <span className="flex-1">{optionText as string}</span>
+                          <span className="flex-1 prose prose-sm max-w-none dark:prose-invert [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md" dangerouslySetInnerHTML={{ __html: optionText as string }} />
                           {isSelected && (
                             <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
                           )}

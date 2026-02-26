@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { HtmlContent } from "@/components/ui/HtmlContent";
 import {
   ArrowLeft,
   Clock,
@@ -293,7 +294,7 @@ const AttemptDetail = () => {
                           >
                             {index + 1}
                           </div>
-                          <p className="font-medium text-lg">{question.question_text}</p>
+                          <HtmlContent html={question.question_text} className="font-medium text-lg" />
                         </div>
                         <div className="flex-shrink-0">
                           {isCorrect ? (
@@ -342,7 +343,7 @@ const AttemptDetail = () => {
                               >
                                 {getOptionLabel(option.key)}
                               </div>
-                              <span className="flex-1">{option.value}</span>
+                              <HtmlContent html={option.value} className="flex-1" />
                               {isCorrectOption && (
                                 <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
                               )}
@@ -361,7 +362,7 @@ const AttemptDetail = () => {
                             <FileText className="w-4 h-4" />
                             Giải thích
                           </div>
-                          <p className="text-muted-foreground">{question.explanation}</p>
+                          <HtmlContent html={question.explanation} className="text-muted-foreground" />
                         </div>
                       )}
                     </CardContent>
