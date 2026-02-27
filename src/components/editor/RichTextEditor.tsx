@@ -371,6 +371,84 @@ export const RichTextEditor = ({
     [handleContentChange]
   );
 
+  // ── Handle keyboard shortcuts inside editor ────────────────────────────
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0) return;
+
+      // ── Tab inside <pre>: insert 2 spaces instead of moving focus ──────
+      const anchorNode = sel.anchorNode;
+      const preEl = (anchorNode instanceof Element ? anchorNode : anchorNode?.parentElement)?.closest("pre");
+
+      if (preEl && e.key === "Tab") {
+        e.preventDefault();
+        document.execCommand("insertText", false, "  ");
+        handleContentChange();
+        return;
+      }
+
+      // ── Enter inside <pre>: exit block on double-Enter (blank last line) ──
+      // Strategy: Shift+Enter always exits; plain Enter on a trailing blank line exits.
+      if (preEl) {
+        if (e.key === "Enter" && e.shiftKey) {
+          // Shift+Enter → insert <p> after <pre> and move cursor there
+          e.preventDefault();
+          const editor = editorRef.current!;
+
+          // Create a new paragraph after the <pre>
+          const p = document.createElement("p");
+          p.innerHTML = "<br>";
+          preEl.insertAdjacentElement("afterend", p);
+
+          // Move cursor into the new paragraph
+          const newRange = document.createRange();
+          newRange.setStart(p, 0);
+          newRange.collapse(true);
+          sel.removeAllRanges();
+          sel.addRange(newRange);
+          editor.focus();
+          handleContentChange();
+          return;
+        }
+
+        if (e.key === "Enter" && !e.shiftKey) {
+          // Check if cursor is at the very end of <pre> content on a blank last line
+          const range = sel.getRangeAt(0);
+          if (!range.collapsed) return; // has selection — let browser handle
+
+          // Get text of <pre> (without copy button text)
+          const clonePre = preEl.cloneNode(true) as HTMLElement;
+          clonePre.querySelectorAll(".rte-copy-btn").forEach(b => b.remove());
+          const preText = clonePre.innerText;
+
+          // If the last two chars are newlines (blank trailing line) → exit
+          if (preText.endsWith("\n\n") || preText.endsWith("\n\n ")) {
+            e.preventDefault();
+            const editor = editorRef.current!;
+
+            // Remove the trailing blank line inside <pre> then insert <p> after
+            document.execCommand("delete"); // removes the blank line char
+
+            const p = document.createElement("p");
+            p.innerHTML = "<br>";
+            preEl.insertAdjacentElement("afterend", p);
+
+            const newRange = document.createRange();
+            newRange.setStart(p, 0);
+            newRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+            editor.focus();
+            handleContentChange();
+          }
+        }
+      }
+    },
+    [handleContentChange]
+  );
+  // ──────────────────────────────────────────────────────────────────────────
+
   return (
     <TooltipProvider>
       <div className={cn("border rounded-lg overflow-hidden bg-background", className)}>
@@ -688,6 +766,7 @@ export const RichTextEditor = ({
           )}
           style={{ minHeight }}
           onInput={handleContentChange}
+          onKeyDown={handleKeyDown}
           onPaste={handlePaste}
           data-placeholder={placeholder}
           suppressContentEditableWarning
