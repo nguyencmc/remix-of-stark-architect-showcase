@@ -23,6 +23,7 @@ import {
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Article } from '../types';
+import { HtmlContent } from '@/components/ui/HtmlContent';
 
 const statusConfig = {
     draft: { label: 'Bản nháp', icon: AlertCircle, color: 'bg-gray-500' },
@@ -232,9 +233,9 @@ const ArticlePreviewPage = () => {
                         <Separator className="my-8" />
 
                         {/* Content */}
-                        <div
-                            className="prose prose-lg dark:prose-invert max-w-none"
-                            dangerouslySetInnerHTML={{ __html: article.content }}
+                        <HtmlContent
+                            html={article.content}
+                            className="prose-lg"
                         />
                     </div>
                 </article>

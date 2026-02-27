@@ -48,6 +48,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
+import { HtmlContent } from '@/components/ui/HtmlContent';
 
 const ArticleDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -285,9 +286,9 @@ const ArticleDetailPage = () => {
               )}
 
               {/* Content */}
-              <div
-                className="prose prose-lg dark:prose-invert max-w-none mb-8"
-                dangerouslySetInnerHTML={{ __html: article.content }}
+              <HtmlContent
+                html={article.content}
+                className="prose-lg mb-8"
               />
 
               {/* Tags at bottom */}

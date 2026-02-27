@@ -199,11 +199,15 @@ export const RichTextEditor = ({
       btn.className = "rte-copy-btn";
       btn.type = "button";
       btn.title = "Copy code";
+      btn.setAttribute("contenteditable", "false");
       btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
       btn.addEventListener("mousedown", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const code = pre.querySelector("code")?.innerText ?? pre.innerText;
+        // Get text excluding the button itself
+        const clone = pre.cloneNode(true) as HTMLElement;
+        clone.querySelectorAll(".rte-copy-btn").forEach(b => b.remove());
+        const code = clone.querySelector("code")?.innerText ?? clone.innerText;
         navigator.clipboard.writeText(code).then(() => {
           btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
           btn.classList.add("rte-copy-btn--copied");
@@ -215,6 +219,20 @@ export const RichTextEditor = ({
       });
       pre.appendChild(btn);
     });
+  }, []);
+
+  // ── Get clean HTML without injected copy buttons (for saving) ────────────
+  const getCleanHtml = useCallback((): string => {
+    const editor = editorRef.current;
+    if (!editor) return "";
+    // Clone DOM, strip all copy buttons, return clean HTML
+    const clone = editor.cloneNode(true) as HTMLElement;
+    clone.querySelectorAll(".rte-copy-btn").forEach(btn => btn.remove());
+    // Also remove inline position:relative style added to <pre>
+    clone.querySelectorAll("pre").forEach(pre => {
+      (pre as HTMLElement).style.removeProperty("position");
+    });
+    return clone.innerHTML;
   }, []);
   // ──────────────────────────────────────────────────────────────────────────
 
@@ -238,18 +256,18 @@ export const RichTextEditor = ({
     editorRef.current?.focus();
     if (editorRef.current && onChange) {
       isInternalChange.current = true;
-      onChange(editorRef.current.innerHTML);
+      onChange(getCleanHtml());
     }
     injectCopyButtons();
-  }, [onChange, injectCopyButtons]);
+  }, [onChange, injectCopyButtons, getCleanHtml]);
 
   const handleContentChange = useCallback(() => {
     if (editorRef.current && onChange) {
       isInternalChange.current = true;
-      onChange(editorRef.current.innerHTML);
+      onChange(getCleanHtml());
     }
     injectCopyButtons();
-  }, [onChange, injectCopyButtons]);
+  }, [onChange, injectCopyButtons, getCleanHtml]);
 
   const formatBlock = useCallback((tag: string) => {
     execCommand("formatBlock", tag === "p" ? "p" : tag);
