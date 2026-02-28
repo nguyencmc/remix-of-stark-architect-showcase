@@ -9,6 +9,35 @@ interface HtmlContentProps {
 const COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
 const CHECK_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
 
+// Placeholder SVG khi ảnh lỗi
+const ERROR_PLACEHOLDER = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200' viewBox='0 0 400 200'%3E%3Crect width='400' height='200' fill='%23f1f5f9'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-size='14' font-family='sans-serif'%3EKhông tải được ảnh%3C/text%3E%3C/svg%3E`;
+
+/**
+ * Append Supabase image transform params nếu URL là Supabase Storage.
+ * Docs: https://supabase.com/docs/guides/storage/serving/image-transformations
+ */
+function getOptimizedImageUrl(src: string, width = 1200): string {
+  if (!src || src.startsWith("data:")) return src;
+  try {
+    const url = new URL(src);
+    // Supabase Storage URL pattern: .../storage/v1/object/public/...
+    if (url.pathname.includes("/storage/v1/object/public/")) {
+      // Dùng render endpoint thay vì object endpoint
+      const renderUrl = src.replace(
+        "/storage/v1/object/public/",
+        "/storage/v1/render/image/public/"
+      );
+      const u = new URL(renderUrl);
+      if (!u.searchParams.has("width")) u.searchParams.set("width", String(width));
+      if (!u.searchParams.has("quality")) u.searchParams.set("quality", "80");
+      return u.toString();
+    }
+  } catch {
+    // không phải URL hợp lệ — trả nguyên
+  }
+  return src;
+}
+
 function injectCopyButtons(container: HTMLElement) {
   container.querySelectorAll("pre").forEach((pre) => {
     if (pre.querySelector(".hc-copy-btn")) return;
@@ -34,15 +63,40 @@ function injectCopyButtons(container: HTMLElement) {
   });
 }
 
+/** Inject lazy loading, decoding, onerror và Supabase transform vào tất cả <img> */
+function optimizeImages(container: HTMLElement) {
+  container.querySelectorAll<HTMLImageElement>("img").forEach((img) => {
+    // Lazy load
+    if (!img.hasAttribute("loading")) img.loading = "lazy";
+    // Async decoding — không block main thread
+    if (!img.hasAttribute("decoding")) img.decoding = "async";
+    // Supabase image transform (chỉ áp dụng nếu chưa có render URL)
+    const optimized = getOptimizedImageUrl(img.src);
+    if (optimized !== img.src) img.src = optimized;
+    // Fallback khi ảnh lỗi
+    if (!img.dataset.errorHandled) {
+      img.dataset.errorHandled = "1";
+      img.addEventListener("error", () => {
+        img.src = ERROR_PLACEHOLDER;
+        img.alt = "Không tải được ảnh";
+        img.style.opacity = "0.6";
+      });
+    }
+  });
+}
+
 /**
  * Renders HTML content safely with proper image, prose, and code block styling.
- * Code blocks get a dark theme with a copy button.
+ * - Code blocks: dark theme + copy button
+ * - Images: lazy load, decoding async, error fallback, Supabase transform
  */
 export const HtmlContent = ({ html, className }: HtmlContentProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (ref.current) injectCopyButtons(ref.current);
+    if (!ref.current) return;
+    injectCopyButtons(ref.current);
+    optimizeImages(ref.current);
   }, [html]);
 
   if (!html) return null;

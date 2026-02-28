@@ -126,13 +126,28 @@ const ToolbarButton = React.forwardRef<
 ToolbarButton.displayName = "ToolbarButton";
 
 // ─── Image resize helper ────────────────────────────────────────────────────
+// GIF và WEBP động không resize qua Canvas (sẽ mất animation)
+const PASSTHROUGH_TYPES = ["image/gif", "image/webp", "image/svg+xml"];
+
 const resizeImageFile = (
   file: File,
   maxWidth = 1200,
   maxHeight = 1200,
   quality = 0.85
-): Promise<{ blob: Blob; dataUrl: string }> =>
+): Promise<{ blob: Blob; dataUrl: string; originalSize: number }> =>
   new Promise((resolve, reject) => {
+    const originalSize = file.size;
+
+    // GIF/WEBP/SVG: trả thẳng blob gốc, không resize
+    if (PASSTHROUGH_TYPES.includes(file.type)) {
+      const reader = new FileReader();
+      reader.onload = (e) =>
+        resolve({ blob: file, dataUrl: e.target!.result as string, originalSize });
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+      return;
+    }
+
     const img = new window.Image();
     const objectUrl = URL.createObjectURL(file);
     img.onload = () => {
@@ -152,7 +167,8 @@ const resizeImageFile = (
         (blob) => {
           if (!blob) return reject(new Error("Canvas toBlob failed"));
           const reader = new FileReader();
-          reader.onload = (e) => resolve({ blob, dataUrl: e.target!.result as string });
+          reader.onload = (e) =>
+            resolve({ blob, dataUrl: e.target!.result as string, originalSize });
           reader.readAsDataURL(blob);
         },
         file.type === "image/png" ? "image/png" : "image/jpeg",
@@ -183,6 +199,7 @@ export const RichTextEditor = ({
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadDragOver, setUploadDragOver] = useState(false);
   const [uploadDimensions, setUploadDimensions] = useState<{ w: number; h: number } | null>(null);
+  const [uploadOriginalSize, setUploadOriginalSize] = useState<number | null>(null);
   // Track whether the last change came from user typing (not external prop update)
   const isInternalChange = useRef(false);
 
@@ -293,11 +310,12 @@ export const RichTextEditor = ({
     if (!file.type.startsWith("image/")) return;
     if (file.size > 10 * 1024 * 1024) return;
     try {
-      const { blob, dataUrl } = await resizeImageFile(file);
+      const { blob, dataUrl, originalSize } = await resizeImageFile(file);
       // Wrap resized blob as a File so we can still pass it to onImageUpload
       const resized = new File([blob], file.name, { type: blob.type });
       setUploadFile(resized);
       setUploadPreview(dataUrl);
+      setUploadOriginalSize(originalSize);
       // Get dimensions from canvas result
       const img = new window.Image();
       img.onload = () => setUploadDimensions({ w: img.naturalWidth, h: img.naturalHeight });
@@ -305,6 +323,7 @@ export const RichTextEditor = ({
     } catch {
       // Fallback: use original file without resize
       setUploadFile(file);
+      setUploadOriginalSize(file.size);
       setUploadDimensions(null);
       const reader = new FileReader();
       reader.onload = (e) => setUploadPreview(e.target?.result as string);
@@ -358,6 +377,7 @@ export const RichTextEditor = ({
     setUploadFile(null);
     setUploadPreview(null);
     setUploadDimensions(null);
+    setUploadOriginalSize(null);
     if (uploadFileInputRef.current) uploadFileInputRef.current.value = "";
   }, []);
 
@@ -649,8 +669,13 @@ export const RichTextEditor = ({
                         <p className="text-xs text-muted-foreground truncate">
                           {uploadFile?.name}{" "}
                           <span className="opacity-60">
-                            ({uploadFile ? (uploadFile.size / 1024).toFixed(1) : 0} KB
-                            {uploadDimensions ? ` · ${uploadDimensions.w}×${uploadDimensions.h}px` : ""})
+                            ({uploadDimensions ? `${uploadDimensions.w}×${uploadDimensions.h}px · ` : ""}
+                            {uploadFile ? (uploadFile.size / 1024).toFixed(0) : 0} KB
+                            {uploadOriginalSize && uploadFile && uploadOriginalSize > uploadFile.size ? (
+                              <span className="text-green-500 ml-1">
+                                ↓ từ {(uploadOriginalSize / 1024).toFixed(0)} KB
+                              </span>
+                            ) : null})
                           </span>
                         </p>
                         <Button
