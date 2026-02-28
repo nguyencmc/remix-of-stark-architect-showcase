@@ -15,6 +15,8 @@ const ERROR_PLACEHOLDER = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/20
 /**
  * Append Supabase image transform params nếu URL là Supabase Storage.
  * Docs: https://supabase.com/docs/guides/storage/serving/image-transformations
+ * NOTE: Image Transform chỉ có trên Pro plan. Với free plan sẽ trả 400/404.
+ * → Dùng onerror fallback về URL gốc trong optimizeImages().
  */
 function getOptimizedImageUrl(src: string, width = 1200): string {
   if (!src || src.startsWith("data:")) return src;
@@ -70,16 +72,25 @@ function optimizeImages(container: HTMLElement) {
     if (!img.hasAttribute("loading")) img.loading = "lazy";
     // Async decoding — không block main thread
     if (!img.hasAttribute("decoding")) img.decoding = "async";
-    // Supabase image transform (chỉ áp dụng nếu chưa có render URL)
-    const optimized = getOptimizedImageUrl(img.src);
-    if (optimized !== img.src) img.src = optimized;
-    // Fallback khi ảnh lỗi
+
     if (!img.dataset.errorHandled) {
       img.dataset.errorHandled = "1";
+      const originalSrc = img.src;
+
+      // Supabase image transform (chỉ áp dụng nếu chưa có render URL)
+      const optimized = getOptimizedImageUrl(img.src);
+      if (optimized !== img.src) img.src = optimized;
+
       img.addEventListener("error", () => {
-        img.src = ERROR_PLACEHOLDER;
-        img.alt = "Không tải được ảnh";
-        img.style.opacity = "0.6";
+        if (img.src !== originalSrc && originalSrc) {
+          // Lần 1: transform thất bại → fallback về URL gốc
+          img.src = originalSrc;
+        } else {
+          // Lần 2: URL gốc cũng lỗi → hiện placeholder
+          img.src = ERROR_PLACEHOLDER;
+          img.alt = "Không tải được ảnh";
+          img.style.opacity = "0.6";
+        }
       });
     }
   });

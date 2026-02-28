@@ -37,10 +37,18 @@ interface ImageLibraryPickerProps {
 }
 
 // ── Supabase image transform helper ──────────────────────────────────────────
-const thumbUrl = (url: string, w = 160) =>
-  url
-    .replace("/storage/v1/object/public/", "/storage/v1/render/image/public/")
-    .replace(/\?.*$/, "") + `?width=${w}&quality=70`;
+// NOTE: Image Transform chỉ hoạt động với Supabase Pro plan.
+// Với free plan, dùng thẳng public URL gốc. onError sẽ fallback về gốc nếu transform thất bại.
+const thumbUrl = (url: string, w = 160) => {
+  try {
+    const transformed = url
+      .replace("/storage/v1/object/public/", "/storage/v1/render/image/public/")
+      .replace(/\?.*$/, "") + `?width=${w}&quality=70`;
+    return transformed;
+  } catch {
+    return url;
+  }
+};
 
 // ── Format bytes ──────────────────────────────────────────────────────────────
 const fmtSize = (b: number) => {
@@ -94,6 +102,7 @@ export const ImageLibraryPicker: React.FC<ImageLibraryPickerProps> = ({
   const [selected, setSelected] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [imgErrors, setImgErrors] = useState<Set<string>>(new Set());
+  const [imgFallback, setImgFallback] = useState<Set<string>>(new Set());
   const fetchedRef = useRef(false);
 
   const load = useCallback(async () => {
@@ -214,14 +223,20 @@ export const ImageLibraryPicker: React.FC<ImageLibraryPickerProps> = ({
                     </div>
                   ) : (
                     <img
-                      src={thumbUrl(file.publicUrl)}
+                      src={imgFallback.has(file.path) ? file.publicUrl : thumbUrl(file.publicUrl)}
                       alt={file.name}
                       loading="lazy"
                       decoding="async"
                       className="w-full h-full object-cover"
-                      onError={() =>
-                        setImgErrors((prev) => new Set([...prev, file.path]))
-                      }
+                      onError={() => {
+                        if (!imgFallback.has(file.path)) {
+                          // Lần 1: transform thất bại → thử URL gốc
+                          setImgFallback((prev) => new Set([...prev, file.path]));
+                        } else {
+                          // Lần 2: URL gốc cũng lỗi → hiện placeholder
+                          setImgErrors((prev) => new Set([...prev, file.path]));
+                        }
+                      }}
                     />
                   )}
 
