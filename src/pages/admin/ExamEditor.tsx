@@ -102,7 +102,7 @@ const ExamEditor = () => {
     setCategoryId(exam.category_id || '');
     setDifficulty(exam.difficulty || 'medium');
     setDurationMinutes(exam.duration_minutes || 60);
-    setThumbnailUrl(exam.thumbnail_url || '');
+    setThumbnailUrl((exam as any).thumbnail_url || '');
 
     // Fetch questions
     const { data: questionsData } = await supabase
