@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Layers, Loader2 } from 'lucide-react';
 import { ChoiceItem } from './ChoiceItem';
+import { AIExplainButton } from './AIExplainButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { createFlashcardFromQuestion } from '@/features/flashcards/api';
 import { toast } from 'sonner';
@@ -191,6 +192,15 @@ export function QuestionCard({
               <HtmlContent html={question.explanation} />
             </p>
           </div>
+        )}
+
+        {/* AI Explanation — always shown after answer is checked */}
+        {showResult && (
+          <AIExplainButton
+            question={question}
+            userAnswer={selectedAnswer}
+            className="mt-3"
+          />
         )}
 
         {/* Show flashcard button even without explanation for wrong answers */}
