@@ -276,6 +276,8 @@ export const PracticeQuestionEditor = ({
                   required={letter === 'A' || letter === 'B'}
                   onChange={(value) => onUpdate(index, getOptionField(letter), value)}
                   onToggleCorrect={() => toggleCorrectAnswer(letter)}
+                  onImageUpload={onImageUpload ? async (file: File) => onImageUpload(file, index, `option_${letter.toLowerCase()}_image`) : undefined}
+                  imageBucket={imageBucket}
                 />
               ))}
               
@@ -290,6 +292,8 @@ export const PracticeQuestionEditor = ({
                     required={false}
                     onChange={(value) => onUpdate(index, getOptionField(letter), value)}
                     onToggleCorrect={() => toggleCorrectAnswer(letter)}
+                    onImageUpload={onImageUpload ? async (file: File) => onImageUpload(file, index, `option_${letter.toLowerCase()}_image`) : undefined}
+                    imageBucket={imageBucket}
                   />
                 ))
               )}
@@ -356,6 +360,8 @@ export const PracticeQuestionEditor = ({
    required: boolean;
    onChange: (value: string) => void;
    onToggleCorrect: () => void;
+   onImageUpload?: (file: File) => Promise<string>;
+   imageBucket?: string;
  }
  
  const OptionInput = ({
@@ -365,6 +371,8 @@ export const PracticeQuestionEditor = ({
    required,
    onChange,
    onToggleCorrect,
+   onImageUpload,
+   imageBucket,
  }: OptionInputProps) => {
    return (
      <div className="flex items-start gap-2">
@@ -387,6 +395,9 @@ export const PracticeQuestionEditor = ({
             placeholder={`Đáp án ${letter}${required ? ' *' : ''}`}
             className={isCorrect ? "border-green-600" : ""}
             miniMinHeight="40px"
+            showImageUpload={!!onImageUpload}
+            onImageUpload={onImageUpload}
+            imageBucket={imageBucket}
           />
        </div>
      </div>
