@@ -5,9 +5,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 import {
   ArrowLeft, ArrowRight, Check, RotateCcw, Trophy, Target,
   BrainCircuit, CheckCircle2, XCircle, Sparkles, Loader2, RefreshCw, Flag,
+  Shield, HelpCircle, Info, CheckCircle, Circle, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePracticeQuestions } from '../hooks/usePracticeQuestions';
@@ -33,7 +35,7 @@ function getChoices(q: PracticeQuestion) {
     .filter(Boolean) as { id: string; text: string }[];
 }
 
-// ── Right panel ──────────────────────────────────────────────────────────────
+// ── Right panel (Answer & Explanation) ──────────────────────────────────────
 function RightPanel({
   question,
   answer,
@@ -90,7 +92,7 @@ function RightPanel({
 
   if (!answer?.isChecked || !question) {
     return (
-      <div className="h-full flex flex-col items-center justify-center gap-3 text-center px-6 py-10">
+      <div className="flex flex-col items-center justify-center gap-3 text-center px-6 py-10">
         <div className="w-12 h-12 rounded-full bg-muted/60 flex items-center justify-center">
           <CheckCircle2 className="h-6 w-6 text-muted-foreground/30" />
         </div>
@@ -117,101 +119,98 @@ function RightPanel({
   };
 
   return (
-    <ScrollArea className="h-full">
-      <div className="p-4 space-y-4">
-        {/* Result banner */}
-        <div
-          className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium ${
-            answer.isCorrect
-              ? 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400'
-              : 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400'
+    <div className="space-y-4">
+      {/* Result banner */}
+      <div
+        className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium ${answer.isCorrect
+            ? 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400'
+            : 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400'
           }`}
-        >
-          {answer.isCorrect ? (
-            <>
-              <CheckCircle2 className="h-4 w-4 shrink-0" /> Chính xác!
-            </>
-          ) : (
-            <>
-              <XCircle className="h-4 w-4 shrink-0" /> Chưa đúng
-            </>
-          )}
-        </div>
+      >
+        {answer.isCorrect ? (
+          <>
+            <CheckCircle2 className="h-4 w-4 shrink-0" /> Chính xác!
+          </>
+        ) : (
+          <>
+            <XCircle className="h-4 w-4 shrink-0" /> Chưa đúng
+          </>
+        )}
+      </div>
 
-        {/* Đáp án đúng */}
-        <div>
-          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-            Đáp án đúng
-          </p>
-          <div className="space-y-1.5">
-            {correctLetters.map((letter) => (
-              <div
-                key={letter}
-                className="flex items-start gap-2.5 rounded-lg bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 px-3 py-2.5"
-              >
-                <span className="shrink-0 w-6 h-6 rounded-full bg-green-500 text-white text-xs font-bold flex items-center justify-center mt-0.5">
-                  {letter}
-                </span>
-                <HtmlContent
-                  html={optMap[letter] ?? ''}
-                  className="text-sm leading-relaxed text-green-900 dark:text-green-100 flex-1"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Giải thích tĩnh */}
-        {question.explanation && (
-          <div>
-            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-              💡 Giải thích
-            </p>
-            <div className="rounded-lg bg-muted/40 border px-3 py-3">
+      {/* Đáp án đúng */}
+      <div>
+        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+          Đáp án đúng
+        </p>
+        <div className="space-y-1.5">
+          {correctLetters.map((letter) => (
+            <div
+              key={letter}
+              className="flex items-start gap-2.5 rounded-lg bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 px-3 py-2.5"
+            >
+              <span className="shrink-0 w-6 h-6 rounded-full bg-green-500 text-white text-xs font-bold flex items-center justify-center mt-0.5">
+                {letter}
+              </span>
               <HtmlContent
-                html={question.explanation}
-                className="text-sm leading-relaxed text-foreground/80"
+                html={optMap[letter] ?? ''}
+                className="text-sm leading-relaxed text-green-900 dark:text-green-100 flex-1"
               />
             </div>
-          </div>
-        )}
-
-        {/* AI */}
-        <div>
-          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-            ✨ AI giải thích
-          </p>
-          {!aiText && !aiLoading && !aiError && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-full gap-2 border-violet-300 text-violet-600 hover:bg-violet-50 dark:border-violet-500/30 dark:hover:bg-violet-500/5"
-              onClick={fetchAI}
-            >
-              <Sparkles className="h-3.5 w-3.5" /> Giải thích bằng AI
-            </Button>
-          )}
-          {aiLoading && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
-              <Loader2 className="h-4 w-4 animate-spin" /> Đang phân tích...
-            </div>
-          )}
-          {aiError && (
-            <div className="rounded-lg bg-red-50 dark:bg-destructive/10 px-3 py-2 text-sm text-red-600 dark:text-destructive flex items-center justify-between gap-2">
-              <span className="text-xs">{aiError}</span>
-              <Button size="sm" variant="ghost" className="h-6 w-6 p-0 shrink-0" onClick={fetchAI}>
-                <RefreshCw className="h-3 w-3" />
-              </Button>
-            </div>
-          )}
-          {aiText && (
-            <div className="rounded-lg bg-violet-50 dark:bg-violet-500/5 border border-violet-100 dark:border-violet-500/15 px-3 py-3 text-sm leading-relaxed text-foreground/85 whitespace-pre-wrap">
-              {aiText}
-            </div>
-          )}
+          ))}
         </div>
       </div>
-    </ScrollArea>
+
+      {/* Giải thích tĩnh */}
+      {question.explanation && (
+        <div>
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+            💡 Giải thích
+          </p>
+          <div className="rounded-lg bg-muted/40 border px-3 py-3">
+            <HtmlContent
+              html={question.explanation}
+              className="text-sm leading-relaxed text-foreground/80"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* AI */}
+      <div>
+        <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+          ✨ AI giải thích
+        </p>
+        {!aiText && !aiLoading && !aiError && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="w-full gap-2 border-violet-300 text-violet-600 hover:bg-violet-50 dark:border-violet-500/30 dark:hover:bg-violet-500/5"
+            onClick={fetchAI}
+          >
+            <Sparkles className="h-3.5 w-3.5" /> Giải thích bằng AI
+          </Button>
+        )}
+        {aiLoading && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
+            <Loader2 className="h-4 w-4 animate-spin" /> Đang phân tích...
+          </div>
+        )}
+        {aiError && (
+          <div className="rounded-lg bg-red-50 dark:bg-destructive/10 px-3 py-2 text-sm text-red-600 dark:text-destructive flex items-center justify-between gap-2">
+            <span className="text-xs">{aiError}</span>
+            <Button size="sm" variant="ghost" className="h-6 w-6 p-0 shrink-0" onClick={fetchAI}>
+              <RefreshCw className="h-3 w-3" />
+            </Button>
+          </div>
+        )}
+        {aiText && (
+          <div className="rounded-lg bg-violet-50 dark:bg-violet-500/5 border border-violet-100 dark:border-violet-500/15 px-3 py-3 text-sm leading-relaxed text-foreground/85 whitespace-pre-wrap">
+            {aiText}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -248,6 +247,7 @@ export default function PracticeRunner() {
   const currentAnswer = currentQuestion ? answers[currentQuestion.id] : null;
   const isLastQuestion = questions ? currentIndex === questions.length - 1 : false;
   const answeredCount = Object.values(answers).filter((a) => a?.isChecked).length;
+  const progress = questions ? (answeredCount / questions.length) * 100 : 0;
 
   const handleSelectAnswer = useCallback(
     (choiceId: string) => {
@@ -327,29 +327,21 @@ export default function PracticeRunner() {
   // ── Loading ──────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div className="h-screen flex flex-col">
-        <div className="h-14 border-b flex items-center px-6 gap-4">
+      <div className="min-h-screen bg-muted/30 flex flex-col">
+        <div className="h-16 border-b bg-card flex items-center px-4 gap-4">
           <Skeleton className="h-5 w-64" />
           <div className="flex-1" />
           <Skeleton className="h-5 w-24" />
         </div>
-        <div className="flex flex-1 overflow-hidden">
-          <div className="w-[200px] border-r p-3 space-y-2">
-            <Skeleton className="h-4 w-24 mb-3" />
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-5 w-full" />
-            ))}
-            <div className="grid grid-cols-5 gap-1.5 mt-3">
-              {Array.from({ length: 20 }).map((_, i) => (
-                <Skeleton key={i} className="aspect-square rounded" />
-              ))}
+        <div className="container mx-auto px-4 py-6">
+          <div className="grid lg:grid-cols-[200px_1fr_280px] gap-6">
+            <div className="hidden lg:block">
+              <Skeleton className="h-[400px] w-full rounded-xl" />
             </div>
-          </div>
-          <div className="flex-1 p-8">
-            <Skeleton className="h-full w-full max-w-2xl mx-auto rounded-xl" />
-          </div>
-          <div className="w-[260px] border-l p-4">
-            <Skeleton className="h-full rounded-xl" />
+            <Skeleton className="h-[600px] w-full rounded-xl" />
+            <div className="hidden lg:block">
+              <Skeleton className="h-[400px] w-full rounded-xl" />
+            </div>
           </div>
         </div>
       </div>
@@ -358,7 +350,7 @@ export default function PracticeRunner() {
 
   if (error || !questions || questions.length === 0) {
     return (
-      <div className="h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center">
         <div className="text-center px-4 space-y-3">
           <p className="text-muted-foreground">
             {questions?.length === 0
@@ -378,13 +370,12 @@ export default function PracticeRunner() {
     const total = questions.length;
     const pct = total > 0 ? Math.round((stats.correct / total) * 100) : 0;
     return (
-      <div className="h-screen flex items-center justify-center bg-background px-4">
+      <div className="min-h-screen bg-muted/30 flex items-center justify-center px-4">
         <Card className="w-full max-w-md">
           <CardContent className="pt-10 pb-8 px-8 text-center space-y-6">
             <div
-              className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto ${
-                pct >= 70 ? 'bg-green-500/15' : 'bg-orange-500/15'
-              }`}
+              className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto ${pct >= 70 ? 'bg-green-500/15' : 'bg-orange-500/15'
+                }`}
             >
               {pct >= 70 ? (
                 <Trophy className="h-10 w-10 text-green-500" />
@@ -402,9 +393,8 @@ export default function PracticeRunner() {
             </div>
             <div>
               <div
-                className={`text-5xl font-bold mb-2 ${
-                  pct >= 80 ? 'text-green-500' : pct >= 50 ? 'text-yellow-500' : 'text-red-500'
-                }`}
+                className={`text-5xl font-bold mb-2 ${pct >= 80 ? 'text-green-500' : pct >= 50 ? 'text-yellow-500' : 'text-red-500'
+                  }`}
               >
                 {pct}%
               </div>
@@ -473,141 +463,144 @@ export default function PracticeRunner() {
   };
   const diff = getDifficultyLabel(currentQuestion?.difficulty ?? null);
 
+  const correctCount = Object.values(answers).filter((a) => a.isChecked && a.isCorrect).length;
+  const wrongCount = Object.values(answers).filter((a) => a.isChecked && !a.isCorrect).length;
+  const unansweredCount = questions.length - answeredCount;
+
   // ── Main render ───────────────────────────────────────────────────────────
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-background">
+    <div className="min-h-screen bg-muted/30 flex flex-col">
 
-      {/* ══ TOP BAR ══════════════════════════════════════════════════════════ */}
-      <div className="shrink-0 h-14 border-b bg-background flex items-center px-4 gap-3 z-10">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="gap-1.5 text-muted-foreground hover:text-foreground shrink-0 -ml-1"
-          onClick={() => navigate(`/practice/setup/${setId}`)}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <span className="font-semibold text-sm truncate max-w-[180px] sm:max-w-sm">
-          Luyện tập
-        </span>
+      {/* ══ TOP HEADER (sticky, matching ExamTaking) ══════════════════════════ */}
+      <header className="bg-card border-b sticky top-0 z-50">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            {/* Left: Logo & Title */}
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-1.5 text-muted-foreground hover:text-foreground -ml-1"
+                onClick={() => navigate(`/practice/setup/${setId}`)}
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                <Shield className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <h1 className="font-semibold text-foreground hidden sm:block truncate max-w-[200px] lg:max-w-none">
+                Luyện tập
+              </h1>
+            </div>
 
-        <div className="flex-1 flex justify-center">
-          <span className="text-sm font-medium text-muted-foreground">
-            Câu <strong className="text-foreground">{currentIndex + 1}</strong> /{' '}
-            {questions.length}
-          </span>
+            {/* Center: Question Counter */}
+            <div className="text-sm text-muted-foreground">
+              Câu <span className="font-semibold text-foreground">{currentIndex + 1}</span> / {questions.length}
+            </div>
+
+            {/* Right: Stats */}
+            <div className="flex items-center gap-4 text-sm">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-green-500" />
+                <span className="text-muted-foreground hidden sm:inline">Đúng:</span>
+                <strong className="text-green-600">{stats.correct}</strong>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-red-500" />
+                <span className="text-muted-foreground hidden sm:inline">Sai:</span>
+                <strong className="text-red-600">{stats.wrong}</strong>
+              </span>
+            </div>
+          </div>
         </div>
-
-        <div className="flex items-center gap-4 text-sm shrink-0">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-green-500" />
-            <span className="text-muted-foreground hidden sm:inline">Đúng:</span>
-            <strong className="text-green-600">{stats.correct}</strong>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-red-500" />
-            <span className="text-muted-foreground hidden sm:inline">Sai:</span>
-            <strong className="text-red-600">{stats.wrong}</strong>
-          </span>
-        </div>
-      </div>
+      </header>
 
       {/* ══ 3-COLUMN BODY ════════════════════════════════════════════════════ */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex-1 container mx-auto px-4 py-6">
+        <div className="grid lg:grid-cols-[200px_1fr_280px] gap-6">
 
-        {/* ── LEFT: Question navigator ─────────────────────────────────────── */}
-        <div className="w-[200px] shrink-0 border-r flex flex-col bg-background">
-          <div className="px-4 pt-4 pb-2.5">
-            <h3 className="font-semibold text-sm text-foreground">Điều hướng câu hỏi</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Nhấn vào câu để chuyển</p>
-          </div>
+          {/* ── LEFT SIDEBAR: Question Navigation ────────────────────────────── */}
+          <aside className="hidden lg:block">
+            <div className="bg-card border rounded-xl p-4 sticky top-24">
+              <h3 className="font-semibold text-foreground mb-2">Điều hướng câu hỏi</h3>
+              <p className="text-xs text-muted-foreground mb-4">Nhấn vào câu để chuyển</p>
 
-          <div className="px-4 pb-3 space-y-2 border-b">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="w-4 h-4 rounded-full border-2 border-green-500 bg-green-50 dark:bg-green-500/10 flex items-center justify-center shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-              </span>
-              Đã trả lời (
-              {Object.values(answers).filter((a) => a.isChecked && a.isCorrect).length})
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="w-4 h-4 rounded-full border-2 border-red-400 bg-red-50 dark:bg-red-500/10 flex items-center justify-center shrink-0">
-                <Flag className="w-2 h-2 text-red-500" />
-              </span>
-              Trả lời sai (
-              {Object.values(answers).filter((a) => a.isChecked && !a.isCorrect).length})
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="w-4 h-4 rounded-full border-2 border-muted-foreground/30 shrink-0" />
-              Chưa làm ({questions.length - answeredCount})
-            </div>
-          </div>
-
-          <ScrollArea className="flex-1">
-            <div className="p-3 grid grid-cols-5 gap-1.5">
-              {questions.map((q, idx) => {
-                const a = answers[q.id];
-                const isCurrent = idx === currentIndex;
-                const isRight = a?.isChecked && a.isCorrect;
-                const isWrong = a?.isChecked && !a.isCorrect;
-                return (
-                  <button
-                    key={q.id}
-                    onClick={() => setCurrentIndex(idx)}
-                    className={[
-                      'aspect-square rounded text-xs font-medium flex items-center justify-center transition-all',
-                      isCurrent
-                        ? 'bg-primary text-primary-foreground shadow-sm ring-2 ring-primary/30'
-                        : isRight
-                        ? 'bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400 ring-1 ring-green-400/40'
-                        : isWrong
-                        ? 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-400 ring-1 ring-red-400/40'
-                        : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground',
-                    ].join(' ')}
-                  >
-                    {idx + 1}
-                  </button>
-                );
-              })}
-            </div>
-          </ScrollArea>
-        </div>
-
-        {/* ── CENTER: Question content ──────────────────────────────────────── */}
-        <ScrollArea className="flex-1">
-          <div className="max-w-2xl mx-auto px-8 py-7">
-            {currentQuestion && (
-              <>
-                {/* Badges */}
-                <div className="flex items-center gap-2 mb-5">
-                  <span
-                    className={`text-xs font-semibold px-2.5 py-1 rounded-full ${diff.cls}`}
-                  >
-                    {diff.label}
-                  </span>
-                  {isMultiSelect ? (
-                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400">
-                      Nhiều đáp án
-                    </span>
-                  ) : (
-                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-muted text-muted-foreground">
-                      Một đáp án
-                    </span>
-                  )}
+              {/* Legend */}
+              <div className="flex flex-col gap-1 mb-4 text-xs">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-3 h-3 text-green-500" />
+                  <span className="text-muted-foreground">Đã trả lời ({correctCount})</span>
                 </div>
+                <div className="flex items-center gap-2">
+                  <XCircle className="w-3 h-3 text-red-500" />
+                  <span className="text-muted-foreground">Trả lời sai ({wrongCount})</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Circle className="w-3 h-3 text-muted-foreground" />
+                  <span className="text-muted-foreground">Chưa làm ({unansweredCount})</span>
+                </div>
+              </div>
 
-                {/* Heading */}
-                <h2 className="text-xl font-bold text-foreground mb-1">
-                  Câu {currentIndex + 1}
-                </h2>
-                <p className="text-sm text-muted-foreground mb-5">
+              {/* Question Grid */}
+              <div className="grid grid-cols-5 gap-2">
+                {questions.map((q, idx) => {
+                  const a = answers[q.id];
+                  const isCurrent = idx === currentIndex;
+                  const isRight = a?.isChecked && a.isCorrect;
+                  const isWrong = a?.isChecked && !a.isCorrect;
+                  return (
+                    <button
+                      key={q.id}
+                      onClick={() => setCurrentIndex(idx)}
+                      className={`relative aspect-square rounded-lg text-sm font-medium transition-all flex items-center justify-center
+                        ${isCurrent
+                          ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2'
+                          : isRight
+                            ? 'bg-green-500/20 text-green-600 border border-green-500/30'
+                            : isWrong
+                              ? 'bg-red-500/20 text-red-600 border border-red-500/30'
+                              : 'bg-muted text-muted-foreground hover:bg-muted/80 border border-border'
+                        }`}
+                    >
+                      {idx + 1}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </aside>
+
+          {/* ── CENTER: Question Content ──────────────────────────────────────── */}
+          <main className="min-w-0">
+            {/* Question Card */}
+            <div className="bg-card border rounded-xl overflow-hidden">
+              {/* Question Header */}
+              <div className="px-6 py-4 border-b flex items-center gap-3">
+                <Badge variant="outline" className={`uppercase text-xs font-semibold ${diff.cls} border-0`}>
+                  {diff.label}
+                </Badge>
+                {isMultiSelect ? (
+                  <Badge variant="secondary" className="text-xs">
+                    Nhiều đáp án
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="text-xs">
+                    Một đáp án
+                  </Badge>
+                )}
+              </div>
+
+              {/* Question Content */}
+              <div className="p-6">
+                <h2 className="text-2xl font-bold mb-2">Câu {currentIndex + 1}</h2>
+                <p className="text-muted-foreground mb-6">
                   {isMultiSelect
                     ? 'Chọn tất cả đáp án đúng từ các lựa chọn bên dưới.'
                     : 'Chọn đáp án đúng nhất từ các lựa chọn bên dưới.'}
                 </p>
 
                 {/* Question image */}
-                {currentQuestion.question_image && (
+                {currentQuestion?.question_image && (
                   <div className="mb-5 flex justify-center">
                     <img
                       src={currentQuestion.question_image}
@@ -617,101 +610,175 @@ export default function PracticeRunner() {
                   </div>
                 )}
 
-                {/* Question text */}
-                <HtmlContent
-                  html={currentQuestion.question_text}
-                  className="text-base text-foreground leading-relaxed mb-6"
-                />
-
-                {/* Choices */}
-                <div className="space-y-2.5">
-                  {choices.map((choice, index) => (
-                    <ChoiceItem
-                      key={choice.id}
-                      id={choice.id}
-                      text={choice.text}
-                      label={CHOICE_LABELS[index]}
-                      isSelected={selectedAnswers.includes(choice.id.toUpperCase())}
-                      isCorrect={currentAnswer?.isCorrect ?? null}
-                      showResult={currentAnswer?.isChecked || false}
-                      correctAnswer={currentQuestion.correct_answer}
-                      disabled={currentAnswer?.isChecked || false}
-                      isMultiSelect={isMultiSelect}
-                      onSelect={handleSelectAnswer}
+                {/* Question Text */}
+                {currentQuestion && (
+                  <div className="bg-muted/50 rounded-xl p-6 mb-6">
+                    <HtmlContent
+                      html={currentQuestion.question_text}
+                      className="text-lg prose prose-sm max-w-none dark:prose-invert [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md"
                     />
-                  ))}
-                </div>
-
-                {/* Actions */}
-                <div className="flex items-center justify-between mt-8 pt-6 border-t gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={handlePrev}
-                    disabled={currentIndex === 0}
-                    className="gap-2"
-                  >
-                    <ArrowLeft className="h-4 w-4" /> Câu trước
-                  </Button>
-
-                  <div className="flex gap-2">
-                    {!currentAnswer?.isChecked ? (
-                      <Button
-                        onClick={handleCheck}
-                        disabled={!currentAnswer?.selected || isChecking}
-                        className="px-8 gap-2"
-                      >
-                        <Check className="h-4 w-4" /> Kiểm tra
-                      </Button>
-                    ) : isLastQuestion ? (
-                      <div className="flex gap-2">
-                        <Button variant="outline" onClick={handleRestart} className="gap-2">
-                          <RotateCcw className="h-4 w-4" /> Làm lại
-                        </Button>
-                        <Button onClick={() => setIsFinished(true)}>Xem kết quả</Button>
-                      </div>
-                    ) : (
-                      <Button onClick={handleNext} className="px-8 gap-2">
-                        Câu tiếp <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    )}
                   </div>
+                )}
 
-                  <Button
-                    variant="outline"
-                    onClick={handleNext}
-                    disabled={isLastQuestion}
-                    className="gap-2"
-                  >
-                    Câu sau <ArrowRight className="h-4 w-4" />
-                  </Button>
+                {/* Answer Options */}
+                {currentQuestion && (
+                  <div className="space-y-3">
+                    {choices.map((choice, index) => (
+                      <ChoiceItem
+                        key={choice.id}
+                        id={choice.id}
+                        text={choice.text}
+                        label={CHOICE_LABELS[index]}
+                        isSelected={selectedAnswers.includes(choice.id.toUpperCase())}
+                        isCorrect={currentAnswer?.isCorrect ?? null}
+                        showResult={currentAnswer?.isChecked || false}
+                        correctAnswer={currentQuestion.correct_answer}
+                        disabled={currentAnswer?.isChecked || false}
+                        isMultiSelect={isMultiSelect}
+                        onSelect={handleSelectAnswer}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Navigation Footer */}
+              <div className="px-6 py-4 border-t bg-muted/30 flex items-center justify-between">
+                <Button
+                  variant="outline"
+                  onClick={handlePrev}
+                  disabled={currentIndex === 0}
+                >
+                  <ChevronLeft className="w-4 h-4 mr-2" />
+                  Câu trước
+                </Button>
+
+                <div className="flex gap-2">
+                  {!currentAnswer?.isChecked ? (
+                    <Button
+                      onClick={handleCheck}
+                      disabled={!currentAnswer?.selected || isChecking}
+                      className="px-8 gap-2"
+                    >
+                      <Check className="h-4 w-4" /> Kiểm tra
+                    </Button>
+                  ) : isLastQuestion ? (
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={handleRestart} className="gap-2">
+                        <RotateCcw className="h-4 w-4" /> Làm lại
+                      </Button>
+                      <Button onClick={() => setIsFinished(true)}>Xem kết quả</Button>
+                    </div>
+                  ) : (
+                    <Button onClick={handleNext} className="px-8 gap-2">
+                      Câu tiếp <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
-              </>
-            )}
-          </div>
-        </ScrollArea>
 
-        {/* ── RIGHT: Answer & Explanation ───────────────────────────────────── */}
-        <div className="w-[260px] shrink-0 border-l flex flex-col bg-muted/5">
-          <div className="h-14 flex items-center px-4 border-b">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Đáp án &amp; Giải thích
-            </p>
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <RightPanel question={currentQuestion} answer={currentAnswer} />
-          </div>
+                <Button
+                  variant="outline"
+                  onClick={handleNext}
+                  disabled={isLastQuestion}
+                >
+                  Câu sau
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </main>
+
+          {/* ── RIGHT SIDEBAR: Progress & Answer/Explanation ─────────────────── */}
+          <aside className="hidden lg:block">
+            <div className="space-y-4 sticky top-24">
+              {/* Progress Card */}
+              <div className="bg-card border rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Tiến độ</p>
+                  <span className="text-lg font-bold">{Math.round(progress)}%</span>
+                </div>
+                <Progress value={progress} className="h-2 mb-3" />
+                <p className="text-sm text-muted-foreground">
+                  {answeredCount} / {questions.length} câu đã trả lời
+                </p>
+              </div>
+
+              {/* Stats Card */}
+              <div className="bg-card border rounded-xl p-4">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Kết quả</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="text-center p-3 rounded-lg bg-green-500/10">
+                    <div className="text-2xl font-bold text-green-600">{stats.correct}</div>
+                    <div className="text-xs text-muted-foreground">Câu đúng</div>
+                  </div>
+                  <div className="text-center p-3 rounded-lg bg-red-500/10">
+                    <div className="text-2xl font-bold text-red-600">{stats.wrong}</div>
+                    <div className="text-xs text-muted-foreground">Câu sai</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Giám sát thi label (matching screenshot) */}
+              <div className="bg-card border rounded-xl p-4">
+                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">
+                  Đáp án & Giải thích
+                </p>
+                <RightPanel question={currentQuestion} answer={currentAnswer} />
+              </div>
+
+              {/* Info Card */}
+              <div className="bg-muted/50 border rounded-xl p-4">
+                <div className="flex items-start gap-2">
+                  <Info className="w-4 h-4 text-muted-foreground mt-0.5" />
+                  <p className="text-xs text-muted-foreground">
+                    Bạn có thể quay lại bất kỳ câu hỏi nào bằng cách sử dụng bảng điều hướng bên trái. Đáp án được tự động lưu.
+                  </p>
+                </div>
+              </div>
+
+              {/* Finish Button */}
+              <Button
+                onClick={() => setIsFinished(true)}
+                className="w-full h-12 text-base"
+                size="lg"
+                disabled={answeredCount === 0}
+              >
+                <Trophy className="w-5 h-5 mr-2" />
+                Xem kết quả
+              </Button>
+            </div>
+          </aside>
+
         </div>
-
       </div>
 
-      {/* ══ BOTTOM PROGRESS ══════════════════════════════════════════════════ */}
-      <div className="shrink-0 h-1 bg-muted">
-        <div
-          className="h-full bg-primary transition-all duration-300"
-          style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
-        />
+      {/* ══ MOBILE BOTTOM BAR ════════════════════════════════════════════════ */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t p-4 z-40">
+        <div className="flex items-center gap-3">
+          {/* Stats */}
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted">
+            <span className="text-sm font-semibold text-green-600">{stats.correct}✓</span>
+            <span className="text-sm font-semibold text-red-600">{stats.wrong}✗</span>
+          </div>
+
+          {/* Progress */}
+          <div className="flex-1">
+            <div className="flex items-center justify-between text-xs mb-1">
+              <span className="text-muted-foreground">{answeredCount}/{questions.length}</span>
+              <span className="font-medium">{Math.round(progress)}%</span>
+            </div>
+            <Progress value={progress} className="h-1.5" />
+          </div>
+
+          {/* Finish */}
+          <Button onClick={() => setIsFinished(true)} disabled={answeredCount === 0} size="sm">
+            Kết quả
+          </Button>
+        </div>
       </div>
 
+      {/* Bottom padding for mobile */}
+      <div className="lg:hidden h-20" />
     </div>
   );
 }

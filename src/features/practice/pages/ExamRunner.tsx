@@ -93,7 +93,7 @@ export default function ExamRunner() {
   if (authLoading || questionsLoading) {
     return (
       <div className="min-h-screen bg-background">
-<main className="container mx-auto px-4 py-8 max-w-3xl">
+        <main className="container mx-auto px-4 py-8 max-w-3xl">
           <div className="flex items-center justify-center gap-2 mb-8">
             <Loader2 className="h-6 w-6 animate-spin" />
             <span>Đang tải đề thi...</span>
@@ -108,7 +108,7 @@ export default function ExamRunner() {
   if (error || !questions || questions.length === 0) {
     return (
       <div className="min-h-screen bg-background">
-<main className="container mx-auto px-4 py-8 text-center">
+        <main className="container mx-auto px-4 py-8 text-center">
           <p className="text-destructive mb-4">
             {questions?.length === 0
               ? 'Không có câu hỏi trong bộ đề này'

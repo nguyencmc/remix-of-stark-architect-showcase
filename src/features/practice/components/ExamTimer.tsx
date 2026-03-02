@@ -9,7 +9,7 @@ interface ExamTimerProps {
 export function ExamTimer({ timeLeft, className }: ExamTimerProps) {
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
-  
+
   const isLowTime = timeLeft <= 60; // Last minute
   const isCritical = timeLeft <= 30; // Last 30 seconds
 
