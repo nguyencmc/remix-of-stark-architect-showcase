@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 interface HtmlContentProps {
   html: string | null | undefined;
   className?: string;
+  onClickImage?: (src: string) => void;
 }
 
 const COPY_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
@@ -66,16 +67,30 @@ function injectCopyButtons(container: HTMLElement) {
 }
 
 /** Inject lazy loading, decoding, onerror và Supabase transform vào tất cả <img> */
-function optimizeImages(container: HTMLElement) {
+function optimizeImages(container: HTMLElement, onClickImage?: (src: string) => void) {
   container.querySelectorAll<HTMLImageElement>("img").forEach((img) => {
     // Lazy load
     if (!img.hasAttribute("loading")) img.loading = "lazy";
     // Async decoding — không block main thread
     if (!img.hasAttribute("decoding")) img.decoding = "async";
 
+    // Click to zoom
+    if (onClickImage && !img.dataset.zoomAttached) {
+      img.dataset.zoomAttached = "1";
+      img.style.cursor = "zoom-in";
+      img.addEventListener("click", (e) => {
+        e.stopPropagation();
+        // Lấy src gốc (trước khi transform) nếu có, ưu tiên naturalSrc
+        const src = img.dataset.originalSrc || img.src;
+        if (src && !src.startsWith("data:")) onClickImage(src);
+      });
+    }
+
     if (!img.dataset.errorHandled) {
       img.dataset.errorHandled = "1";
       const originalSrc = img.src;
+      // Lưu lại src gốc để click zoom dùng
+      img.dataset.originalSrc = originalSrc;
 
       // Supabase image transform (chỉ áp dụng nếu chưa có render URL)
       const optimized = getOptimizedImageUrl(img.src);
@@ -101,14 +116,14 @@ function optimizeImages(container: HTMLElement) {
  * - Code blocks: dark theme + copy button
  * - Images: lazy load, decoding async, error fallback, Supabase transform
  */
-export const HtmlContent = ({ html, className }: HtmlContentProps) => {
+export const HtmlContent = ({ html, className, onClickImage }: HtmlContentProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!ref.current) return;
     injectCopyButtons(ref.current);
-    optimizeImages(ref.current);
-  }, [html]);
+    optimizeImages(ref.current, onClickImage);
+  }, [html, onClickImage]);
 
   if (!html) return null;
 

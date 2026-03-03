@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { HtmlContent } from "@/components/ui/HtmlContent";
-import { ImageLightbox, useClickableImages } from "@/components/ui/ImageLightbox";
+import { ImageLightbox } from "@/components/ui/ImageLightbox";
 import {
   ArrowLeft,
   Clock,
@@ -54,8 +54,6 @@ const AttemptDetail = () => {
   const { attemptId } = useParams<{ attemptId: string }>();
   const navigate = useNavigate();
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-  const questionsRef = useRef<HTMLDivElement>(null);
-  useClickableImages(questionsRef, setLightboxSrc);
 
   const { data: attempt, isLoading: attemptLoading } = useQuery({
     queryKey: ["attempt", attemptId],
@@ -263,7 +261,7 @@ const AttemptDetail = () => {
               ))}
             </div>
           ) : questions && questions.length > 0 ? (
-            <div ref={questionsRef} className="space-y-6">
+            <div className="space-y-6">
               {questions.map((question, index) => {
                 const userAnswer = answers[question.id];
                 const isCorrect = userAnswer === question.correct_answer;
@@ -300,7 +298,7 @@ const AttemptDetail = () => {
                           >
                             {index + 1}
                           </div>
-                          <HtmlContent html={question.question_text} className="font-medium text-lg [&_img]:cursor-zoom-in [&_img]:rounded-md [&_img]:hover:opacity-80 [&_img]:transition-opacity" />
+                          <HtmlContent html={question.question_text} className="font-medium text-lg [&_img]:cursor-zoom-in [&_img]:rounded-md [&_img]:hover:opacity-80 [&_img]:transition-opacity" onClickImage={setLightboxSrc} />
                         </div>
                         <div className="flex-shrink-0">
                           {isCorrect ? (
@@ -368,7 +366,7 @@ const AttemptDetail = () => {
                             <FileText className="w-4 h-4" />
                             Giải thích
                           </div>
-                          <HtmlContent html={question.explanation} className="text-muted-foreground [&_img]:cursor-zoom-in [&_img]:rounded-md [&_img]:hover:opacity-80 [&_img]:transition-opacity" />
+                          <HtmlContent html={question.explanation} className="text-muted-foreground [&_img]:cursor-zoom-in [&_img]:rounded-md [&_img]:hover:opacity-80 [&_img]:transition-opacity" onClickImage={setLightboxSrc} />
                         </div>
                       )}
                     </CardContent>

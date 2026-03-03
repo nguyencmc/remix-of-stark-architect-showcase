@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { HtmlContent } from '@/components/ui/HtmlContent';
-import { ImageLightbox, useClickableImages } from '@/components/ui/ImageLightbox';
+import { ImageLightbox } from '@/components/ui/ImageLightbox';
 import { AIExplainButton } from '../components/AIExplainButton';
 import {
   Trophy,
@@ -30,10 +30,12 @@ function ReviewRow({
   question,
   attempt,
   index,
+  onClickImage,
 }: {
   question: PracticeQuestion;
   attempt: PracticeAttempt | undefined;
   index: number;
+  onClickImage: (src: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const isCorrect = attempt?.is_correct ?? false;
@@ -103,7 +105,7 @@ function ReviewRow({
                   <span className={`shrink-0 font-semibold w-4 ${isCorrectOpt ? 'text-green-600 dark:text-green-400' : isSelectedOpt ? 'text-red-600 dark:text-red-400' : ''}`}>
                     {letter}.
                   </span>
-                  <HtmlContent html={text ?? ''} className="flex-1" />
+                  <HtmlContent html={text ?? ''} className="flex-1" onClickImage={onClickImage} />
                   {isCorrectOpt && <CheckCircle2 className="h-4 w-4 shrink-0 text-green-500" />}
                   {isSelectedOpt && !isCorrectOpt && <XCircle className="h-4 w-4 shrink-0 text-red-500" />}
                 </div>
@@ -115,7 +117,7 @@ function ReviewRow({
           {question.explanation && (
             <div className="rounded-lg bg-muted/50 border px-4 py-3">
               <p className="text-xs font-semibold text-muted-foreground mb-1">💡 Giải thích</p>
-              <HtmlContent html={question.explanation} className="text-sm text-muted-foreground" />
+              <HtmlContent html={question.explanation} className="text-sm text-muted-foreground" onClickImage={onClickImage} />
             </div>
           )}
 
@@ -133,8 +135,6 @@ export default function ExamResult() {
   const navigate = useNavigate();
   const [showReview, setShowReview] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-  const reviewRef = useRef<HTMLDivElement>(null);
-  useClickableImages(reviewRef, setLightboxSrc);
 
   const { data: session, isLoading: sessionLoading } = useQuery({
     queryKey: ['exam-session', sessionId],
@@ -338,13 +338,14 @@ export default function ExamResult() {
             </Button>
 
             {showReview && (
-              <div ref={reviewRef} className="space-y-3">
+              <div className="space-y-3">
                 {questions.map((q, i) => (
                   <ReviewRow
                     key={q.id}
                     question={q}
                     attempt={attemptMap.get(q.id)}
                     index={i}
+                    onClickImage={setLightboxSrc}
                   />
                 ))}
               </div>

@@ -18,7 +18,7 @@ import { createAttempt } from '../api';
 import type { AnswerState, PracticeQuestion } from '../types';
 import { isMultiSelectQuestion, toggleMultiSelect, checkAnswerCorrect } from '../types';
 import { HtmlContent } from '@/components/ui/HtmlContent';
-import { ImageLightbox, useClickableImages } from '@/components/ui/ImageLightbox';
+import { ImageLightbox } from '@/components/ui/ImageLightbox';
 
 const EXPLAIN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/explain-answer`;
 const CHOICE_LABELS = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -49,9 +49,6 @@ function RightPanel({
   const [aiError, setAiError] = useState<string | null>(null);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const prevId = useRef<string | null>(null);
-  const explanationRef = useRef<HTMLDivElement>(null);
-
-  useClickableImages(explanationRef, setLightboxSrc);
 
   useEffect(() => {
     if (question?.id !== prevId.current) {
@@ -124,7 +121,7 @@ function RightPanel({
   };
 
   return (
-    <div ref={explanationRef} className="space-y-4">
+    <div className="space-y-4">
       {/* Lightbox */}
       {lightboxSrc && (
         <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
@@ -165,6 +162,7 @@ function RightPanel({
               <HtmlContent
                 html={optMap[letter] ?? ''}
                 className="text-sm leading-relaxed text-green-900 dark:text-green-100 flex-1"
+                onClickImage={setLightboxSrc}
               />
             </div>
           ))}
@@ -181,6 +179,7 @@ function RightPanel({
             <HtmlContent
               html={question.explanation}
               className="text-sm leading-relaxed text-foreground/80 [&_img]:cursor-zoom-in [&_img]:rounded-md [&_img]:transition-opacity [&_img]:hover:opacity-80"
+              onClickImage={setLightboxSrc}
             />
           </div>
         </div>
@@ -253,9 +252,6 @@ export default function PracticeRunner() {
   const [isFinished, setIsFinished] = useState(false);
   const [stats, setStats] = useState({ correct: 0, wrong: 0 });
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-  const questionContentRef = useRef<HTMLDivElement>(null);
-
-  useClickableImages(questionContentRef, setLightboxSrc);
 
   const currentQuestion = questions?.[currentIndex];
   const currentAnswer = currentQuestion ? answers[currentQuestion.id] : null;
@@ -632,10 +628,11 @@ export default function PracticeRunner() {
 
                 {/* Question Text */}
                 {currentQuestion && (
-                  <div ref={questionContentRef} className="bg-muted/50 rounded-xl p-6 mb-6">
+                  <div className="bg-muted/50 rounded-xl p-6 mb-6">
                     <HtmlContent
                       html={currentQuestion.question_text}
                       className="text-lg prose prose-sm max-w-none dark:prose-invert [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-md [&_img]:cursor-zoom-in [&_img]:hover:opacity-80 [&_img]:transition-opacity"
+                      onClickImage={setLightboxSrc}
                     />
                   </div>
                 )}
