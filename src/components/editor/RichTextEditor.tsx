@@ -210,6 +210,7 @@ export const RichTextEditor = ({
   const [uploadDragOver, setUploadDragOver] = useState(false);
   const [uploadDimensions, setUploadDimensions] = useState<{ w: number; h: number } | null>(null);
   const [uploadOriginalSize, setUploadOriginalSize] = useState<number | null>(null);
+  const [libraryRefreshKey, setLibraryRefreshKey] = useState(0);
   // Track whether the last change came from user typing (not external prop update)
   const isInternalChange = useRef(false);
   // ── Lưu selection trước khi Popover mở (focus sẽ bị mất khi click toolbar) ──
@@ -546,6 +547,8 @@ export const RichTextEditor = ({
         url = uploadPreview!;
       }
       execCommandWithRestore("insertImage", url);
+      // Notify library tab to refresh so the newly uploaded image appears
+      if (onImageUpload) setLibraryRefreshKey((k) => k + 1);
       setUploadFile(null);
       setUploadPreview(null);
       setImagePopoverOpen(false);
@@ -971,6 +974,7 @@ export const RichTextEditor = ({
                         bucket={imageBucket}
                         prefix={imageBucketPrefix}
                         onSelect={insertLibraryImage}
+                        refreshKey={libraryRefreshKey}
                       />
                     </TabsContent>
                   )}

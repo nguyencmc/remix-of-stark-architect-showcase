@@ -34,6 +34,8 @@ interface ImageLibraryPickerProps {
   prefix?: string;
   onSelect: (url: string) => void;
   className?: string;
+  /** Bump this value to force-reload the library (e.g. after a new upload) */
+  refreshKey?: number;
 }
 
 // ── Supabase image transform helper ──────────────────────────────────────────
@@ -95,6 +97,7 @@ export const ImageLibraryPicker: React.FC<ImageLibraryPickerProps> = ({
   prefix = "",
   onSelect,
   className,
+  refreshKey = 0,
 }) => {
   const [files, setFiles] = useState<StorageFile[]>([]);
   const [loading, setLoading] = useState(false);
@@ -115,12 +118,14 @@ export const ImageLibraryPicker: React.FC<ImageLibraryPickerProps> = ({
     }
   }, [bucket, prefix]);
 
-  // Auto-load on mount (only once)
+  // Load on mount (fetchedRef prevents double-call in StrictMode).
+  // Also re-load whenever refreshKey is bumped (e.g. after a new upload).
   useEffect(() => {
-    if (fetchedRef.current) return;
+    if (refreshKey === 0 && fetchedRef.current) return;
     fetchedRef.current = true;
     load();
-  }, [load]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshKey]);
 
   const handleDelete = useCallback(
     async (file: StorageFile, e: React.MouseEvent) => {
