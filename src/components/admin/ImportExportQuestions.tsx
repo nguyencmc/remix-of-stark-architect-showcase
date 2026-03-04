@@ -106,93 +106,161 @@ export const ImportExportQuestions = ({ questions, onImport }: ImportExportQuest
     return result;
   };
 
-  // Parse TXT content (one question per block, separated by empty lines)
+  // ── Helper: does a line start a new option marker? (A. B. C. … H. or *A. [x]A. etc.)
+  const OPTION_START_RE = /^(?:\*|\[x\]|✓|✔)?\s*([A-Ha-h])[.:)]\s*/i;
+
+  // ── Regex that matches "Question N" / "Question N:" / "Câu N" / "Q N." etc.
+  // Deliberately allows an OPTIONAL trailing separator [.:)] so that lines like
+  // "Question 47" (no colon) are still recognised as question headers.
+  const QUESTION_HEADER_RE = /^((?:Question|Câu\s*hỏi|Câu|Q)\s*\d+\s*[.:)]?)\s*/im;
+  const QUESTION_HEADER_SPLIT_RE = /^((?:Question|Câu\s*hỏi|Câu|Q)\s*\d+\s*[.:)]?)/gim;
+
+  // Parse TXT content
+  // Supports two layouts:
+  //   1. Blank-line-separated blocks  (one question per block)
+  //   2. "Question N:" / "Câu N:" markers with no blank lines between questions
+  //
+  // Option content rule:
+  //   • Content of an option begins right after "A." / "B." … "H."
+  //   • It continues on the NEXT lines until another option marker (A.–H.) is found,
+  //     OR until a known meta-line (Correct:, Explanation:, Đáp án:, Question N:, Câu N:) is found,
+  //     OR until end of the block.
   const parseTXT = (content: string): Question[] => {
-    const blocks = content.split(/\n\s*\n/);
+    // ── Step 1: split into per-question blocks ───────────────────────────────
+    // If the file uses "Question N" / "Question N:" markers, split on those.
+    // Otherwise fall back to blank-line separation.
+    let rawBlocks: string[];
+    const hasQuestionMarkers = QUESTION_HEADER_RE.test(content);
+
+    if (hasQuestionMarkers) {
+      // Insert a delimiter before each question marker then split on it
+      const delimited = content.replace(QUESTION_HEADER_SPLIT_RE, '\x00$1');
+      rawBlocks = delimited.split('\x00').filter(b => b.trim());
+    } else {
+      rawBlocks = content.split(/\n\s*\n/).filter(b => b.trim());
+    }
+
     const result: Question[] = [];
-    
-    for (const block of blocks) {
-      const lines = block.trim().split('\n').map(l => l.trim()).filter(l => l);
+
+    console.log(`[parseTXT] Total raw blocks: ${rawBlocks.length}`);
+      const lines = block.split('\n').map(l => l.trim()).filter(l => l);
       if (lines.length < 3) continue;
-      
-      // Find where the question ends and options begin
-      // Question starts with "Question", "Câu", "Câu hỏi", "Q", or number pattern
-      // Options start with A. B. C. etc.
+
+      // ── Step 2: separate question-text lines from option lines ──────────────
       const questionLines: string[] = [];
       let optionStartIndex = -1;
-      
+
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        // Check if this line starts an option (A. A) A: etc.)
-        if (/^[A-Ha-h][.):]\s*\S/.test(line) || /^\*\s*[A-Ha-h][.):]/i.test(line) || /^\[x\]\s*[A-Ha-h][.):]/i.test(line)) {
+        if (
+          OPTION_START_RE.test(line) ||
+          /^\*\s*[A-Ha-h][.:)]/i.test(line) ||
+          /^\[x\]\s*[A-Ha-h][.:)]/i.test(line)
+        ) {
           optionStartIndex = i;
           break;
         }
         questionLines.push(line);
       }
-      
+
       if (optionStartIndex === -1 || questionLines.length === 0) continue;
-      
-      // Join all question lines and clean up the question prefix
-      let questionText = questionLines.join(' ');
-      // Remove common prefixes like "Question 1:", "Câu 1:", "Câu hỏi 1:", "Q1:", etc.
-      questionText = questionText.replace(/^(?:Question|Câu\s*hỏi|Câu|Q)\s*\d*[.:)]\s*/i, '').trim();
-      
-      let optionA = '', optionB = '', optionC = '', optionD = '';
-      let optionE = '', optionF = '', optionG = '', optionH = '';
-      let correctAnswer = 'A';
+
+      // Clean question prefix ("Question 1:", "Câu 1:", "Question 47" etc.) and join wrapped lines
+      let questionText = questionLines.join(' ')
+        .replace(/^(?:Question|Câu\s*hỏi|Câu|Q)\s*\d*\s*[.:)]?\s*/i, '')
+        .trim();
+
+      // ── Step 3: collect options, accumulating continuation lines ────────────
+      // Build a list of {letter, textParts[], isCorrect}
+      type OptionEntry = { letter: string; parts: string[]; isCorrect: boolean };
+      const optionEntries: OptionEntry[] = [];
+      let currentEntry: OptionEntry | null = null;
+      let correctAnswer = '';
       let explanation = '';
-      
+
       for (let i = optionStartIndex; i < lines.length; i++) {
         const line = lines[i];
-        
-        // Check for correct answer marker (*, [x], ✓, (correct))
-        const isCorrect = /^\*|^\[x\]|✓|✔|\(correct\)|\(đúng\)/i.test(line);
-        const cleanLine = line.replace(/^\*|\[x\]|✓|✔|\(correct\)|\(đúng\)/gi, '').trim();
-        
-        // Match options A-H with various formats: A. A) A:
-        const optionMatch = cleanLine.match(/^([A-Ha-h])[.:)]\s*(.+)/);
-        
-        if (optionMatch) {
-          const letter = optionMatch[1].toUpperCase();
-          const text = optionMatch[2].trim();
-          
-          if (letter === 'A') optionA = text;
-          if (letter === 'B') optionB = text;
-          if (letter === 'C') optionC = text;
-          if (letter === 'D') optionD = text;
-          if (letter === 'E') optionE = text;
-          if (letter === 'F') optionF = text;
-          if (letter === 'G') optionG = text;
-          if (letter === 'H') optionH = text;
-          
-          if (isCorrect) correctAnswer = letter;
-        } else if (/^(Giải thích|Explanation|Answer)[.:]/i.test(cleanLine)) {
-          explanation = cleanLine.replace(/^(Giải thích|Explanation|Answer)[.:]\s*/i, '');
-        } else if (/^(Đáp án|Correct|Đáp án đúng)[.:]\s*([A-Ha-h])/i.test(cleanLine)) {
-          const match = cleanLine.match(/([A-Ha-h])/i);
-          if (match) correctAnswer = match[1].toUpperCase();
+
+        // ── Meta lines: Correct / Đáp án / Explanation / Giải thích ───────────
+        if (/^(?:Correct|Đáp\s*án\s*(?:đúng)?)\s*[.:]\s*[A-Ha-h]/i.test(line)) {
+          const m = line.match(/[A-Ha-h]/i);
+          if (m) correctAnswer = m[0].toUpperCase();
+          currentEntry = null; // stop accumulating
+          continue;
+        }
+        if (/^(?:Explanation|Giải\s*thích|Answer)\s*[.:]/i.test(line)) {
+          explanation = line.replace(/^(?:Explanation|Giải\s*thích|Answer)\s*[.:]\s*/i, '').trim();
+          currentEntry = null;
+          continue;
+        }
+
+        // ── Check for correct-answer prefix markers (* [x] ✓ ✔) ──────────────
+        const isCorrectMarker = /^\*|^\[x\]|^✓|^✔|\(correct\)|\(đúng\)/i.test(line);
+        const stripped = line.replace(/^\*|\[x\]|✓|✔|\(correct\)|\(đúng\)/gi, '').trim();
+
+        // ── New option marker? ────────────────────────────────────────────────
+        const optMatch = stripped.match(/^([A-Ha-h])[.:)]\s*(.*)/);
+        if (optMatch) {
+          // Save previous entry
+          if (currentEntry) optionEntries.push(currentEntry);
+
+          const letter = optMatch[1].toUpperCase();
+          const firstPart = optMatch[2].trim();
+          currentEntry = { letter, parts: firstPart ? [firstPart] : [], isCorrect: isCorrectMarker };
+          if (isCorrectMarker && !correctAnswer) correctAnswer = letter;
+          continue;
+        }
+
+        // ── Continuation line for the current option ─────────────────────────
+        if (currentEntry) {
+          // A line that looks like a new question block header → stop
+          if (/^(?:Question|Câu\s*hỏi|Câu|Q)\s*\d+/i.test(line)) {
+            optionEntries.push(currentEntry);
+            currentEntry = null;
+            break;
+          }
+          currentEntry.parts.push(line);
         }
       }
-      
-      if (questionText && optionA && optionB) {
+      // Push last open entry
+      if (currentEntry) optionEntries.push(currentEntry);
+
+      // ── Step 4: assemble option map ─────────────────────────────────────────
+      const opts: Record<string, string> = {};
+      for (const entry of optionEntries) {
+        opts[entry.letter] = entry.parts.join(' ').trim();
+        if (entry.isCorrect && !correctAnswer) correctAnswer = entry.letter;
+      }
+
+      if (!correctAnswer) correctAnswer = 'A';
+
+      // Debug: log every block that gets dropped so we can diagnose missing questions
+      if (!(questionText && 'A' in opts && 'B' in opts)) {
+        console.warn('[parseTXT] DROPPED block —',
+          'first line:', lines[0]?.slice(0, 60),
+          '| questionText:', questionText ? `"${questionText.slice(0, 40)}..."` : '(empty)',
+          '| opts keys:', Object.keys(opts),
+        );
+      }
+
+      if (questionText && 'A' in opts && 'B' in opts) {
         result.push({
           question_text: questionText,
-          option_a: optionA,
-          option_b: optionB,
-          option_c: optionC,
-          option_d: optionD,
-          option_e: optionE,
-          option_f: optionF,
-          option_g: optionG,
-          option_h: optionH,
+          option_a: opts['A'] || '',
+          option_b: opts['B'] || '',
+          option_c: opts['C'] || '',
+          option_d: opts['D'] || '',
+          option_e: opts['E'] || '',
+          option_f: opts['F'] || '',
+          option_g: opts['G'] || '',
+          option_h: opts['H'] || '',
           correct_answer: correctAnswer,
           explanation,
           question_order: result.length + 1,
         });
       }
     }
-    
+
     return result;
   };
 
