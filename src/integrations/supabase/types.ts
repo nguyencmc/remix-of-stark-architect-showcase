@@ -1592,6 +1592,7 @@ export type Database = {
           duration_minutes: number | null
           id: string
           is_featured: boolean | null
+          is_proctored: boolean
           pass_rate: number | null
           question_count: number | null
           slug: string
@@ -1608,6 +1609,7 @@ export type Database = {
           duration_minutes?: number | null
           id?: string
           is_featured?: boolean | null
+          is_proctored?: boolean
           pass_rate?: number | null
           question_count?: number | null
           slug: string
@@ -1624,6 +1626,7 @@ export type Database = {
           duration_minutes?: number | null
           id?: string
           is_featured?: boolean | null
+          is_proctored?: boolean
           pass_rate?: number | null
           question_count?: number | null
           slug?: string
