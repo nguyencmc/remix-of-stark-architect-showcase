@@ -55,29 +55,29 @@ export const ImportExportQuestions = ({ questions, onImport }: ImportExportQuest
   const [showManualDialog, setShowManualDialog] = useState(false);
   const [manualInput, setManualInput] = useState('');
 
-  // ── Parse toàn bộ CSV text thành mảng rows (mỗi row là mảng field strings).
-  // Xử lý đúng: quoted fields có newline bên trong, escaped double-quotes ("").
+  // RFC 4180 char-by-char CSV parser — handles multi-line quoted fields correctly
   const parseCSVRaw = (content: string): string[][] => {
     const rows: string[][] = [];
-    let row: string[] = [];
-    let field = '';
+    const fields: string[] = [];
+    let cur = '';
     let inQuotes = false;
     let i = 0;
 
     while (i < content.length) {
       const ch = content[i];
-      const next = content[i + 1];
 
       if (inQuotes) {
-        if (ch === '"' && next === '"') {
-          // escaped quote
-          field += '"';
-          i += 2;
-        } else if (ch === '"') {
-          inQuotes = false;
-          i++;
+        if (ch === '"') {
+          // Check for escaped double-quote ""
+          if (content[i + 1] === '"') {
+            cur += '"';
+            i += 2;
+          } else {
+            inQuotes = false;
+            i++;
+          }
         } else {
-          field += ch;
+          cur += ch;
           i++;
         }
       } else {
@@ -85,112 +85,106 @@ export const ImportExportQuestions = ({ questions, onImport }: ImportExportQuest
           inQuotes = true;
           i++;
         } else if (ch === ',') {
-          row.push(field.trim());
-          field = '';
+          fields.push(cur.trim());
+          cur = '';
           i++;
-        } else if (ch === '\r' && next === '\n') {
-          row.push(field.trim());
-          field = '';
-          rows.push(row);
-          row = [];
+        } else if (ch === '\r' && content[i + 1] === '\n') {
+          fields.push(cur.trim());
+          cur = '';
+          rows.push([...fields]);
+          fields.length = 0;
           i += 2;
-        } else if (ch === '\n' || ch === '\r') {
-          row.push(field.trim());
-          field = '';
-          rows.push(row);
-          row = [];
+        } else if (ch === '\n') {
+          fields.push(cur.trim());
+          cur = '';
+          rows.push([...fields]);
+          fields.length = 0;
           i++;
         } else {
-          field += ch;
+          cur += ch;
           i++;
         }
       }
     }
-    // flush last field / row
-    if (field || row.length > 0) {
-      row.push(field.trim());
-      if (row.some(f => f)) rows.push(row);
+
+    // Last field / row
+    if (cur || fields.length > 0) {
+      fields.push(cur.trim());
+      rows.push([...fields]);
     }
+
     return rows;
   };
 
-  // Strip leading "A. " / "B. " / "1. " prefix that some tools add to option cells
+  // Strip option prefix like "B. ", "C) ", "2. " from option cell values
   const stripOptionPrefix = (text: string): string =>
     text.replace(/^[A-Ha-h\d][.)]\s+/, '').trim();
 
-  // Normalise correct_answer: "C;D" / "C,D" / "C D" → take first letter, uppercase
+  // Normalise correct-answer cell: "C;D" or "C,D" → take first letter only
   const normaliseAnswer = (raw: string): string => {
-    const first = raw.trim().split(/[;,\s|/]+/)[0].trim().toUpperCase();
-    return /^[A-H]$/.test(first) ? first : 'A';
+    const first = raw.trim().split(/[;,\s]/)[0].trim();
+    return /^[A-Ha-h]$/i.test(first) ? first.toUpperCase() : 'A';
   };
 
   // Parse CSV content
-  // Supports two column layouts automatically:
-  //   Template layout (9 cols):  Title, Topic, Question, OptionA, OptionB, OptionC, OptionD, CorrectAnswer, Explanation
-  //   Legacy layout  (≥6 cols):  Question, OptionA, OptionB, OptionC, OptionD, [OptionE..H,] CorrectAnswer, Explanation
   const parseCSV = (content: string): Question[] => {
     const rows = parseCSVRaw(content);
-    if (rows.length < 2) return [];
+    if (rows.length === 0) return [];
 
     const result: Question[] = [];
 
-    // Detect header row and column layout
-    const headerRow = rows[0].map(h => h.toLowerCase().replace(/\s/g, ''));
+    // Detect layout by inspecting the header row
+    const headerRow = rows[0].map(h => h.toLowerCase().replace(/[^a-z]/g, ''));
+
+    // Template layout: Title,Topic,Question,OptionA,OptionB,OptionC,OptionD,CorrectAnswer,Explanation (9 cols)
     const isTemplateLayout =
       headerRow[0] === 'title' ||
-      headerRow[1] === 'topic' ||
-      (headerRow[2] === 'question' && headerRow[0] !== 'question');
+      (headerRow[2] === 'question' && (headerRow[3] === 'optiona' || headerRow[3] === 'option_a'));
 
-    for (let i = 1; i < rows.length; i++) {
+    const startIndex = (headerRow.includes('question') || headerRow[0] === 'title') ? 1 : 0;
+
+    for (let i = startIndex; i < rows.length; i++) {
       const f = rows[i];
-      if (f.every(cell => !cell)) continue; // blank row
+      // Skip empty rows
+      if (f.every(cell => cell === '')) continue;
 
       let questionText: string;
       let optA: string, optB: string, optC: string, optD: string;
-      let optE = '', optF = '', optG = '', optH = '';
-      let correct: string;
+      let correctRaw: string;
       let explanation: string;
 
       if (isTemplateLayout) {
-        // Title(0), Topic(1), Question(2), OptionA(3), OptionB(4), OptionC(5), OptionD(6), CorrectAnswer(7), Explanation(8)
+        // f[0]=Title, f[1]=Topic, f[2]=Question, f[3]=OptionA, f[4]=OptionB, f[5]=OptionC, f[6]=OptionD, f[7]=CorrectAnswer, f[8]=Explanation
         if (f.length < 8) continue;
         questionText = f[2] || '';
         optA = stripOptionPrefix(f[3] || '');
         optB = stripOptionPrefix(f[4] || '');
         optC = stripOptionPrefix(f[5] || '');
         optD = stripOptionPrefix(f[6] || '');
-        correct = normaliseAnswer(f[7] || 'A');
+        correctRaw = f[7] || 'A';
         explanation = f[8] || '';
       } else {
-        // Legacy: Question(0), OptA(1), OptB(2), OptC(3), OptD(4), [OptE(5)..OptH(8),] Correct, Explanation
+        // Legacy layout: Question,OptionA,OptionB,OptionC,OptionD,[E,F,G,H,]CorrectAnswer,Explanation
         if (f.length < 6) continue;
         questionText = f[0] || '';
-        optA = stripOptionPrefix(f[1] || '');
-        optB = stripOptionPrefix(f[2] || '');
-        optC = stripOptionPrefix(f[3] || '');
-        optD = stripOptionPrefix(f[4] || '');
-        if (f.length >= 12) {
-          // 12-col: Q, A-H (8), Correct, Explanation
-          optE = stripOptionPrefix(f[5] || '');
-          optF = stripOptionPrefix(f[6] || '');
-          optG = stripOptionPrefix(f[7] || '');
-          optH = stripOptionPrefix(f[8] || '');
-          correct = normaliseAnswer(f[9] || 'A');
+        optA = f[1] || '';
+        optB = f[2] || '';
+        optC = f[3] || '';
+        optD = f[4] || '';
+        // Legacy had optional E-H before correct answer
+        // If 11+ cols: f[1..8]=opts, f[9]=correct, f[10]=explanation
+        // If 6 cols: f[1..4]=opts, f[5]=correct, (no expl)
+        const hasExtendedOpts = f.length >= 11;
+        if (hasExtendedOpts) {
+          correctRaw = f[9] || 'A';
           explanation = f[10] || '';
-        } else if (f.length >= 7) {
-          // 7-col: Q, A-D, Correct, Explanation  OR  Q, A-E, Correct
-          const possibleCorrect = f[f.length - 2] || '';
-          correct = /^[A-Ha-h]/.test(possibleCorrect.trim())
-            ? normaliseAnswer(possibleCorrect)
-            : normaliseAnswer(f[5] || 'A');
-          explanation = f[f.length - 1] || '';
         } else {
-          correct = normaliseAnswer(f[5] || 'A');
+          correctRaw = f[5] || 'A';
           explanation = f[6] || '';
         }
       }
 
-      if (!questionText || !optA || !optB) continue;
+      if (!questionText && !optA) continue;
 
       result.push({
         question_text: questionText,
@@ -198,11 +192,11 @@ export const ImportExportQuestions = ({ questions, onImport }: ImportExportQuest
         option_b: optB,
         option_c: optC,
         option_d: optD,
-        option_e: optE,
-        option_f: optF,
-        option_g: optG,
-        option_h: optH,
-        correct_answer: correct,
+        option_e: '',
+        option_f: '',
+        option_g: '',
+        option_h: '',
+        correct_answer: normaliseAnswer(correctRaw),
         explanation,
         question_order: result.length + 1,
       });
@@ -211,152 +205,93 @@ export const ImportExportQuestions = ({ questions, onImport }: ImportExportQuest
     return result;
   };
 
-  // ── Helper: does a line start a new option marker? (A. B. C. … H. or *A. [x]A. etc.)
-  const OPTION_START_RE = /^(?:\*|\[x\]|✓|✔)?\s*([A-Ha-h])[.:)]\s*/i;
-
-  // ── Regex that matches "Question N" / "Question N:" / "Câu N" / "Q N." etc.
-  // Deliberately allows an OPTIONAL trailing separator [.:)] so that lines like
-  // "Question 47" (no colon) are still recognised as question headers.
-  const QUESTION_HEADER_RE = /^((?:Question|Câu\s*hỏi|Câu|Q)\s*\d+\s*[.:)]?)\s*/im;
-  const QUESTION_HEADER_SPLIT_RE = /^((?:Question|Câu\s*hỏi|Câu|Q)\s*\d+\s*[.:)]?)/gim;
-
-  // Parse TXT content
-  // Supports two layouts:
-  //   1. Blank-line-separated blocks  (one question per block)
-  //   2. "Question N:" / "Câu N:" markers with no blank lines between questions
-  //
-  // Option content rule:
-  //   • Content of an option begins right after "A." / "B." … "H."
-  //   • It continues on the NEXT lines until another option marker (A.–H.) is found,
-  //     OR until a known meta-line (Correct:, Explanation:, Đáp án:, Question N:, Câu N:) is found,
-  //     OR until end of the block.
+  // Parse TXT content (one question per block, separated by empty lines)
   const parseTXT = (content: string): Question[] => {
-    // ── Step 1: split into per-question blocks ───────────────────────────────
-    // If the file uses "Question N" / "Question N:" markers, split on those.
-    // Otherwise fall back to blank-line separation.
-    let rawBlocks: string[];
-    const hasQuestionMarkers = QUESTION_HEADER_RE.test(content);
-
-    if (hasQuestionMarkers) {
-      // Insert a delimiter before each question marker then split on it
-      const delimited = content.replace(QUESTION_HEADER_SPLIT_RE, '\x00$1');
-      rawBlocks = delimited.split('\x00').filter(b => b.trim());
-    } else {
-      rawBlocks = content.split(/\n\s*\n/).filter(b => b.trim());
-    }
-
+    const blocks = content.split(/\n\s*\n/);
     const result: Question[] = [];
-
-    for (const block of rawBlocks) {
-      const lines = block.split('\n').map(l => l.trim()).filter(l => l);
+    
+    for (const block of blocks) {
+      const lines = block.trim().split('\n').map(l => l.trim()).filter(l => l);
       if (lines.length < 3) continue;
-
-      // ── Step 2: separate question-text lines from option lines ──────────────
+      
+      // Find where the question ends and options begin
+      // Question starts with "Question", "Câu", "Câu hỏi", "Q", or number pattern
+      // Options start with A. B. C. etc.
       const questionLines: string[] = [];
       let optionStartIndex = -1;
-
+      
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        if (
-          OPTION_START_RE.test(line) ||
-          /^\*\s*[A-Ha-h][.:)]/i.test(line) ||
-          /^\[x\]\s*[A-Ha-h][.:)]/i.test(line)
-        ) {
+        // Check if this line starts an option (A. A) A: etc.)
+        if (/^[A-Ha-h][.):]\s*\S/.test(line) || /^\*\s*[A-Ha-h][.):]/i.test(line) || /^\[x\]\s*[A-Ha-h][.):]/i.test(line)) {
           optionStartIndex = i;
           break;
         }
         questionLines.push(line);
       }
-
+      
       if (optionStartIndex === -1 || questionLines.length === 0) continue;
-
-      // Clean question prefix ("Question 1:", "Câu 1:", "Question 47" etc.) and join wrapped lines
-      let questionText = questionLines.join(' ')
-        .replace(/^(?:Question|Câu\s*hỏi|Câu|Q)\s*\d*\s*[.:)]?\s*/i, '')
-        .trim();
-
-      // ── Step 3: collect options, accumulating continuation lines ────────────
-      // Build a list of {letter, textParts[], isCorrect}
-      type OptionEntry = { letter: string; parts: string[]; isCorrect: boolean };
-      const optionEntries: OptionEntry[] = [];
-      let currentEntry: OptionEntry | null = null;
-      let correctAnswer = '';
+      
+      // Join all question lines and clean up the question prefix
+      let questionText = questionLines.join(' ');
+      // Remove common prefixes like "Question 1:", "Câu 1:", "Câu hỏi 1:", "Q1:", etc.
+      questionText = questionText.replace(/^(?:Question|Câu\s*hỏi|Câu|Q)\s*\d*[.:)]\s*/i, '').trim();
+      
+      let optionA = '', optionB = '', optionC = '', optionD = '';
+      let optionE = '', optionF = '', optionG = '', optionH = '';
+      let correctAnswer = 'A';
       let explanation = '';
-
+      
       for (let i = optionStartIndex; i < lines.length; i++) {
         const line = lines[i];
-
-        // ── Meta lines: Correct / Đáp án / Explanation / Giải thích ───────────
-        if (/^(?:Correct|Đáp\s*án\s*(?:đúng)?)\s*[.:]\s*[A-Ha-h]/i.test(line)) {
-          const m = line.match(/[A-Ha-h]/i);
-          if (m) correctAnswer = m[0].toUpperCase();
-          currentEntry = null; // stop accumulating
-          continue;
-        }
-        if (/^(?:Explanation|Giải\s*thích|Answer)\s*[.:]/i.test(line)) {
-          explanation = line.replace(/^(?:Explanation|Giải\s*thích|Answer)\s*[.:]\s*/i, '').trim();
-          currentEntry = null;
-          continue;
-        }
-
-        // ── Check for correct-answer prefix markers (* [x] ✓ ✔) ──────────────
-        const isCorrectMarker = /^\*|^\[x\]|^✓|^✔|\(correct\)|\(đúng\)/i.test(line);
-        const stripped = line.replace(/^\*|\[x\]|✓|✔|\(correct\)|\(đúng\)/gi, '').trim();
-
-        // ── New option marker? ────────────────────────────────────────────────
-        const optMatch = stripped.match(/^([A-Ha-h])[.:)]\s*(.*)/);
-        if (optMatch) {
-          // Save previous entry
-          if (currentEntry) optionEntries.push(currentEntry);
-
-          const letter = optMatch[1].toUpperCase();
-          const firstPart = optMatch[2].trim();
-          currentEntry = { letter, parts: firstPart ? [firstPart] : [], isCorrect: isCorrectMarker };
-          if (isCorrectMarker && !correctAnswer) correctAnswer = letter;
-          continue;
-        }
-
-        // ── Continuation line for the current option ─────────────────────────
-        if (currentEntry) {
-          // A line that looks like a new question block header → stop
-          if (/^(?:Question|Câu\s*hỏi|Câu|Q)\s*\d+/i.test(line)) {
-            optionEntries.push(currentEntry);
-            currentEntry = null;
-            break;
-          }
-          currentEntry.parts.push(line);
+        
+        // Check for correct answer marker (*, [x], ✓, (correct))
+        const isCorrect = /^\*|^\[x\]|✓|✔|\(correct\)|\(đúng\)/i.test(line);
+        const cleanLine = line.replace(/^\*|\[x\]|✓|✔|\(correct\)|\(đúng\)/gi, '').trim();
+        
+        // Match options A-H with various formats: A. A) A:
+        const optionMatch = cleanLine.match(/^([A-Ha-h])[.:)]\s*(.+)/);
+        
+        if (optionMatch) {
+          const letter = optionMatch[1].toUpperCase();
+          const text = optionMatch[2].trim();
+          
+          if (letter === 'A') optionA = text;
+          if (letter === 'B') optionB = text;
+          if (letter === 'C') optionC = text;
+          if (letter === 'D') optionD = text;
+          if (letter === 'E') optionE = text;
+          if (letter === 'F') optionF = text;
+          if (letter === 'G') optionG = text;
+          if (letter === 'H') optionH = text;
+          
+          if (isCorrect) correctAnswer = letter;
+        } else if (/^(Giải thích|Explanation|Answer)[.:]/i.test(cleanLine)) {
+          explanation = cleanLine.replace(/^(Giải thích|Explanation|Answer)[.:]\s*/i, '');
+        } else if (/^(Đáp án|Correct|Đáp án đúng)[.:]\s*([A-Ha-h])/i.test(cleanLine)) {
+          const match = cleanLine.match(/([A-Ha-h])/i);
+          if (match) correctAnswer = match[1].toUpperCase();
         }
       }
-      // Push last open entry
-      if (currentEntry) optionEntries.push(currentEntry);
-
-      // ── Step 4: assemble option map ─────────────────────────────────────────
-      const opts: Record<string, string> = {};
-      for (const entry of optionEntries) {
-        opts[entry.letter] = entry.parts.join(' ').trim();
-        if (entry.isCorrect && !correctAnswer) correctAnswer = entry.letter;
-      }
-
-      if (!correctAnswer) correctAnswer = 'A';
-
-      if (questionText && 'A' in opts && 'B' in opts) {
+      
+      if (questionText && optionA && optionB) {
         result.push({
           question_text: questionText,
-          option_a: opts['A'] || '',
-          option_b: opts['B'] || '',
-          option_c: opts['C'] || '',
-          option_d: opts['D'] || '',
-          option_e: opts['E'] || '',
-          option_f: opts['F'] || '',
-          option_g: opts['G'] || '',
-          option_h: opts['H'] || '',
+          option_a: optionA,
+          option_b: optionB,
+          option_c: optionC,
+          option_d: optionD,
+          option_e: optionE,
+          option_f: optionF,
+          option_g: optionG,
+          option_h: optionH,
           correct_answer: correctAnswer,
           explanation,
           question_order: result.length + 1,
         });
       }
     }
-
+    
     return result;
   };
 
@@ -483,43 +418,23 @@ export const ImportExportQuestions = ({ questions, onImport }: ImportExportQuest
     }
   };
 
-  // Export functions
-  const exportToCSV = () => {
-    // Use same 9-column template layout for easy re-import
-    const header = 'Title,Topic,Question,OptionA,OptionB,OptionC,OptionD,CorrectAnswer,Explanation';
-    const rows = questions.map(q => {
-      const esc = (s: string) => `"${(s || '').replace(/"/g, '""')}"`;
-      return [
-        esc(''),
-        esc(''),
-        esc(q.question_text),
-        esc(q.option_a),
-        esc(q.option_b),
-        esc(q.option_c || ''),
-        esc(q.option_d || ''),
-        esc(q.correct_answer),
-        esc(q.explanation || ''),
-      ].join(',');
-    });
-    const csv = [header, ...rows].join('\n');
-    downloadFile(csv, 'questions.csv', 'text/csv');
-  };
-
+  // Download blank CSV template
   const downloadTemplate = () => {
     const header = 'Title,Topic,Question,OptionA,OptionB,OptionC,OptionD,CorrectAnswer,Explanation';
-    const example = [
-      '"Tên bộ đề"',
-      '"Chủ đề"',
-      '"Thủ đô của Việt Nam là gì?"',
-      '"Hà Nội"',
-      '"Hồ Chí Minh"',
-      '"Đà Nẵng"',
-      '"Huế"',
-      '"A"',
-      '"Hà Nội là thủ đô của Việt Nam từ năm 1010"',
-    ].join(',');
-    const csv = [header, example].join('\n');
-    downloadFile(csv, 'quiz-template.csv', 'text/csv');
+    const example = '"My Quiz","General","What is the capital of Vietnam?","Hanoi","Ho Chi Minh City","Da Nang","Hue","A","Hanoi is the capital of Vietnam"';
+    downloadFile([header, example].join('\n'), 'quiz-template.csv', 'text/csv');
+  };
+
+  // Export functions — 9-col template layout
+  const exportToCSV = () => {
+    const esc = (s: string) => (s || '').replace(/"/g, '""');
+    const header = 'Title,Topic,Question,OptionA,OptionB,OptionC,OptionD,CorrectAnswer,Explanation';
+    const rows = questions.map(q =>
+      `"","","${esc(q.question_text)}","${esc(q.option_a)}","${esc(q.option_b)}","${esc(q.option_c)}","${esc(q.option_d)}","${q.correct_answer}","${esc(q.explanation)}"`
+    );
+
+    const csv = [header, ...rows].join('\n');
+    downloadFile(csv, 'questions.csv', 'text/csv');
   };
 
   const exportToTXT = () => {
@@ -625,7 +540,7 @@ export const ImportExportQuestions = ({ questions, onImport }: ImportExportQuest
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={downloadTemplate}>
-              <Download className="w-4 h-4 mr-2" />
+              <FileSpreadsheet className="w-4 h-4 mr-2" />
               Tải file mẫu CSV
             </DropdownMenuItem>
           </DropdownMenuContent>
