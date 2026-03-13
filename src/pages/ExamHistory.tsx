@@ -12,13 +12,10 @@ import {
   Trophy,
   Calendar,
   CheckCircle2,
-  XCircle,
   ChevronRight,
   FileText,
   History,
   LogIn,
-  Target,
-  TrendingUp,
   BarChart3,
 } from "lucide-react";
 import { format } from "date-fns";

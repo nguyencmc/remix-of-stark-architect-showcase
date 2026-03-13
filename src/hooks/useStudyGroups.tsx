@@ -196,7 +196,7 @@ export const useStudyGroups = () => {
       toast.success('Đã rời nhóm');
       await fetchMyGroups();
       return true;
-    } catch (error) {
+    } catch {
       toast.error('Không thể rời nhóm');
       return false;
     }

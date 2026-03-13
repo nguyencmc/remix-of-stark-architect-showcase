@@ -18,7 +18,6 @@ import {
   Play, 
   CheckCircle, 
   Circle, 
-  Clock, 
   ArrowLeft,
   ChevronRight,
   ChevronLeft,
@@ -28,8 +27,6 @@ import {
   Download,
   File,
   ClipboardList,
-  Video,
-  AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
@@ -72,7 +69,7 @@ interface Lesson {
   attachments?: LessonAttachment[];
 }
 
-interface CourseTest {
+interface _CourseTest {
   id: string;
   title: string;
   description: string | null;
@@ -82,7 +79,7 @@ interface CourseTest {
   is_required: boolean;
 }
 
-interface TestQuestion {
+interface _TestQuestion {
   id: string;
   question_text: string;
   option_a: string;
@@ -112,8 +109,8 @@ const CourseViewer = () => {
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [videoProgress, setVideoProgress] = useState(0);
-  const [videoDuration, setVideoDuration] = useState(0);
+  const [_videoProgress, setVideoProgress] = useState(0);
+  const [_videoDuration, setVideoDuration] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
@@ -305,25 +302,25 @@ const CourseViewer = () => {
     }
   };
 
-  const formatTime = (seconds: number) => {
+  const _formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleVideoTimeUpdate = () => {
+  const _handleVideoTimeUpdate = () => {
     if (videoRef.current) {
       setVideoProgress(videoRef.current.currentTime);
     }
   };
 
-  const handleVideoLoadedMetadata = () => {
+  const _handleVideoLoadedMetadata = () => {
     if (videoRef.current) {
       setVideoDuration(videoRef.current.duration);
     }
   };
 
-  const togglePlay = () => {
+  const _togglePlay = () => {
     if (videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause();
@@ -334,14 +331,14 @@ const CourseViewer = () => {
     }
   };
 
-  const toggleMute = () => {
+  const _toggleMute = () => {
     if (videoRef.current) {
       videoRef.current.muted = !isMuted;
       setIsMuted(!isMuted);
     }
   };
 
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const _handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const time = parseFloat(e.target.value);
     if (videoRef.current) {
       videoRef.current.currentTime = time;
@@ -349,7 +346,7 @@ const CourseViewer = () => {
     }
   };
 
-  const toggleFullscreen = () => {
+  const _toggleFullscreen = () => {
     if (videoRef.current) {
       if (document.fullscreenElement) {
         document.exitFullscreen();

@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import {
-  Clock, FileText, Target, Users, ArrowLeft, Play,
+  Clock, FileText, Users, ArrowLeft, Play,
   BookOpen, BarChart3, Shield, Camera, CheckCircle2,
   AlertTriangle, TrendingUp, Trophy, ChevronRight, Timer,
   Hash, Zap,
@@ -152,7 +152,7 @@ const ExamDetail = () => {
     ? Math.max(...userAttempts.map(a => a.score))
     : null;
   const totalAttempts = userAttempts?.length ?? 0;
-  const lastAttempt = userAttempts?.[0] ?? null;
+  const _lastAttempt = userAttempts?.[0] ?? null;
 
   const getDifficultyConfig = (difficulty: string) => {
     switch (difficulty) {
@@ -431,7 +431,7 @@ const ExamDetail = () => {
                     Lịch sử của bạn
                   </h3>
                   <div className="space-y-2">
-                    {userAttempts.map((attempt, i) => (
+                    {userAttempts.map((attempt, _i) => (
                       <button
                         key={attempt.id}
                         onClick={() => navigate(`/attempt/${attempt.id}`)}

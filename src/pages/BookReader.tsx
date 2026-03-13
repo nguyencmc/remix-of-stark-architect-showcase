@@ -18,7 +18,6 @@ import {
   Headphones,
   LayoutPanelLeft,
   MoreHorizontal,
-  X,
 } from "lucide-react";
 import {
   Sheet,
@@ -66,7 +65,7 @@ const BookReader = () => {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Reading settings
-  const [fontSize, setFontSize] = useState(16);
+  const [fontSize, _setFontSize] = useState(16);
   const [currentPage, setCurrentPage] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
   const [showContents, setShowContents] = useState(false);
