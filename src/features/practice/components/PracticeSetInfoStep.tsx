@@ -51,7 +51,7 @@ export const PracticeSetInfoStep = ({
   tags,
   isPublished,
   categories,
-  isEditing,
+  isEditing: _isEditing,
   onTitleChange,
   onSlugChange,
   onDescriptionChange,

@@ -21,7 +21,7 @@ export function ChoiceItem({
   text,
   label,
   isSelected,
-  isCorrect,
+  isCorrect: _isCorrect,
   showResult,
   correctAnswer,
   disabled,

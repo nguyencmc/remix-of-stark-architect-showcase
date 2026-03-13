@@ -553,7 +553,7 @@ function MySetsTab() {
 
 // ── Public Sets tab ────────────────────────────────────────────────────────
 function PublicSetsTab() {
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [levelFilter, setLevelFilter] = useState('all');
 

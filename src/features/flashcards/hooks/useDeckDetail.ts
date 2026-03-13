@@ -6,7 +6,7 @@ import { FlashcardDeck, UserFlashcard } from '../types';
 import { toast } from 'sonner';
 
 export function useDeckDetail(deckId: string) {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const queryClient = useQueryClient();
 
   // Fetch deck info

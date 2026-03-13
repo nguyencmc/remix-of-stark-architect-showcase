@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   AlertDialog,
@@ -51,7 +50,7 @@ export default function ExamRunner() {
   });
 
   const {
-    session,
+    session: _session,
     answers,
     currentIndex,
     currentQuestion,
