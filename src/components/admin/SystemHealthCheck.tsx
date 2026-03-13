@@ -3,7 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import {
   Database,
   Shield,
@@ -166,15 +165,15 @@ export function SystemHealthCheck() {
       const start = performance.now();
       try {
         const [rolesRes, permsRes, rolePermsRes] = await Promise.all([
-          supabase.from('roles' as any).select('*', { count: 'exact', head: true }),
-          supabase.from('permissions' as any).select('*', { count: 'exact', head: true }),
-          supabase.from('role_permissions' as any).select('*', { count: 'exact', head: true }),
+          supabase.from('roles' as never).select('*', { count: 'exact', head: true }),
+          supabase.from('permissions' as never).select('*', { count: 'exact', head: true }),
+          supabase.from('role_permissions' as never).select('*', { count: 'exact', head: true }),
         ]);
         const latency = Math.round(performance.now() - start);
 
-        const rolesCount = (rolesRes as any).count || 0;
-        const permsCount = (permsRes as any).count || 0;
-        const rolePermsCount = (rolePermsRes as any).count || 0;
+        const rolesCount = (rolesRes as unknown as { count: number | null }).count || 0;
+        const permsCount = (permsRes as unknown as { count: number | null }).count || 0;
+        const rolePermsCount = (rolePermsRes as unknown as { count: number | null }).count || 0;
 
         const hasError = rolesRes.error || permsRes.error || rolePermsRes.error;
         if (hasError) {
@@ -209,7 +208,7 @@ export function SystemHealthCheck() {
     const edgeFnCheck = async () => {
       const start = performance.now();
       try {
-        const { data, error } = await supabase.functions.invoke('export-schema', {
+        const { data: _data, error: _error } = await supabase.functions.invoke('export-schema', {
           method: 'POST',
           body: { healthCheck: true },
         });

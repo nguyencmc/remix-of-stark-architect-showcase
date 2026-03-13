@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import type { User as AuthUser } from '@supabase/supabase-js';
 import { 
   Layers, 
   Headphones, 
@@ -40,7 +41,7 @@ interface UserProfile {
 interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
-  user: any;
+  user: AuthUser | null;
   profile: UserProfile | null;
   displayName: string;
   isAdmin: boolean;

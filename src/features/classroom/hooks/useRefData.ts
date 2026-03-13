@@ -9,7 +9,7 @@ export const useRefData = (type: AssignmentType) => {
     queryFn: async () => {
       switch (type) {
         case 'exam':
-        case 'practice':
+        case 'practice': {
           const { data: sets, error: setsError } = await supabase
             .from('question_sets')
             .select('id, title, question_count, level')
@@ -17,22 +17,25 @@ export const useRefData = (type: AssignmentType) => {
             .order('title');
           if (setsError) throw setsError;
           return sets;
+        }
         
-        case 'book':
+        case 'book': {
           const { data: books, error: booksError } = await supabase
             .from('books')
             .select('id, title, author_name, page_count')
             .order('title');
           if (booksError) throw booksError;
           return books;
+        }
         
-        case 'podcast':
+        case 'podcast': {
           const { data: podcasts, error: podcastsError } = await supabase
             .from('podcasts')
             .select('id, title, host_name, duration_seconds')
             .order('title');
           if (podcastsError) throw podcastsError;
           return podcasts;
+        }
         
         default:
           return [];

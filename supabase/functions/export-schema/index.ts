@@ -104,7 +104,7 @@ serve(async (req) => {
         ORDER BY kcu.ordinal_position
       `;
       if (pks.length > 0) {
-        const pkCols = pks.map((p: any) => p.column_name).join(", ");
+        const pkCols = pks.map((p: Record<string, unknown>) => p.column_name).join(", ");
         colDefs.push(`  PRIMARY KEY (${pkCols})`);
       }
 

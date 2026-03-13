@@ -81,7 +81,7 @@ export const TranscriptFlashcardGenerator = ({
         return;
       }
 
-      const cards = data.flashcards.map((card: any) => ({
+      const cards = data.flashcards.map((card: { front: string; back: string; hint?: string }) => ({
         ...card,
         selected: true,
       }));

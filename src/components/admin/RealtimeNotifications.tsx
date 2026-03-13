@@ -47,11 +47,11 @@ export function RealtimeNotifications() {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'profiles' },
         (payload) => {
-          const profile = payload.new as any;
+          const profile = payload.new as Record<string, unknown>;
           addNotification({
             type: 'new_user',
             title: 'Người dùng mới',
-            description: profile.full_name || profile.email || 'Người dùng ẩn danh',
+            description: String(profile.full_name || profile.email || 'Người dùng ẩn danh'),
             icon: UserPlus,
             color: 'text-blue-500',
           });
@@ -61,13 +61,13 @@ export function RealtimeNotifications() {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'audit_logs' },
         (payload) => {
-          const log = payload.new as any;
+          const log = payload.new as Record<string, unknown>;
           addNotification({
             type: 'audit_event',
-            title: getAuditTitle(log.action),
-            description: `${log.entity_type} ${log.entity_id ? '(' + log.entity_id.substring(0, 8) + '...)' : ''}`,
-            icon: getAuditIcon(log.action),
-            color: getAuditColor(log.action),
+            title: getAuditTitle(String(log.action)),
+            description: `${log.entity_type} ${log.entity_id ? '(' + String(log.entity_id).substring(0, 8) + '...)' : ''}`,
+            icon: getAuditIcon(String(log.action)),
+            color: getAuditColor(String(log.action)),
           });
         }
       )
@@ -75,12 +75,12 @@ export function RealtimeNotifications() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'user_roles' },
         (payload) => {
-          const data = (payload.new || payload.old) as any;
+          const data = (payload.new || payload.old) as Record<string, unknown>;
           const eventType = payload.eventType;
           addNotification({
             type: 'role_change',
             title: eventType === 'INSERT' ? 'Gán quyền mới' : eventType === 'DELETE' ? 'Xóa quyền' : 'Cập nhật quyền',
-            description: `${data?.role || 'unknown'} → ${data?.user_id?.substring(0, 8)}...`,
+            description: `${data?.role || 'unknown'} → ${String(data?.user_id || '').substring(0, 8)}...`,
             icon: Shield,
             color: 'text-orange-500',
           });

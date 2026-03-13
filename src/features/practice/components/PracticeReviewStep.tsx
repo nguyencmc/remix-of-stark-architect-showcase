@@ -27,7 +27,7 @@ interface PracticeReviewStepProps {
   questions: PracticeQuestion[];
   onEditInfo: () => void;
   onEditQuestions: () => void;
-  onUpdateQuestion: (index: number, field: string, value: any) => void;
+  onUpdateQuestion: (index: number, field: string, value: PracticeQuestion[keyof PracticeQuestion]) => void;
 }
 
 export const PracticeReviewStep = ({

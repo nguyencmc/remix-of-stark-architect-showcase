@@ -218,8 +218,8 @@ export async function fetchDueCards(userId: string): Promise<UserFlashcard[]> {
 
   if (error) throw error;
   
-  return (data || []).map((r: any) => ({
-    ...r.flashcard,
+  return (data || []).map((r) => ({
+    ...(r as Record<string, unknown>).flashcard as Record<string, unknown>,
     review: {
       id: r.id,
       user_id: r.user_id,
@@ -257,8 +257,8 @@ export async function fetchDeckStudyCards(
     .order('due_at', { ascending: true })
     .limit(limit);
 
-  const dueCards = (dueReviews || []).map((r: any) => ({
-    ...r.flashcard,
+  const dueCards = (dueReviews || []).map((r) => ({
+    ...(r as Record<string, unknown>).flashcard as Record<string, unknown>,
     review: {
       id: r.id,
       user_id: r.user_id,
@@ -291,9 +291,9 @@ export async function fetchDeckStudyCards(
 
   // Filter out cards that are already in due list
   const newCards = (allCards || [])
-    .filter((c: any) => !dueCardIds.includes(c.id))
+    .filter((c) => !dueCardIds.includes(c.id))
     .slice(0, remaining)
-    .map((c: any) => ({
+    .map((c) => ({
       ...c,
       review: undefined, // No review record yet
     })) as UserFlashcard[];

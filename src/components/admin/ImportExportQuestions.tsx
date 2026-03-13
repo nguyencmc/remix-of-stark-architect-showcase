@@ -185,7 +185,7 @@ export const ImportExportQuestions = ({ questions, onImport }: ImportExportQuest
     const result: Question[] = [];
 
     // Normalise a header cell to a plain lowercase key: "OptionA" → "optiona", "Option A" → "optiona"
-    const normHeader = (h: string) => h.toLowerCase().replace(/[\s_\-]/g, '');
+    const normHeader = (h: string) => h.toLowerCase().replace(/[\s_-]/g, '');
 
     const rawHeader = rows[0];
     const header = rawHeader.map(normHeader);

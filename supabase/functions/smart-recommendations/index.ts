@@ -59,9 +59,9 @@ serve(async (req) => {
         ? Math.round(attempts.reduce((acc, a) => acc + (a.score || 0), 0) / attempts.length)
         : 0,
       recentExams: attempts?.slice(0, 5).map(a => ({
-        title: (a.exam as any)?.title,
+        title: (a.exam as Record<string, unknown> | null)?.title as string | undefined,
         score: a.score,
-        difficulty: (a.exam as any)?.difficulty,
+        difficulty: (a.exam as Record<string, unknown> | null)?.difficulty as string | undefined,
       })) || [],
       flashcardStats: {
         total: flashcardProgress?.length || 0,

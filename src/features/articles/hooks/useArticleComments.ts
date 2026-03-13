@@ -36,7 +36,7 @@ export function useArticleComments(articleId: string | undefined) {
       const commentsMap = new Map<string, ArticleComment>();
       const rootComments: ArticleComment[] = [];
 
-      (data || []).forEach((comment: any) => {
+      (data || []).forEach((comment: ArticleComment) => {
         commentsMap.set(comment.id, { ...comment, replies: [] });
       });
 
@@ -90,7 +90,7 @@ export function useArticleComments(articleId: string | undefined) {
 
       fetchComments();
       return true;
-    } catch (err) {
+    } catch (_err) {
       toast({
         title: 'Lỗi',
         description: 'Không thể thêm bình luận',
@@ -117,7 +117,7 @@ export function useArticleComments(articleId: string | undefined) {
 
       fetchComments();
       return true;
-    } catch (err) {
+    } catch (_err) {
       toast({
         title: 'Lỗi',
         description: 'Không thể cập nhật bình luận',
@@ -143,7 +143,7 @@ export function useArticleComments(articleId: string | undefined) {
 
       fetchComments();
       return true;
-    } catch (err) {
+    } catch (_err) {
       toast({
         title: 'Lỗi',
         description: 'Không thể xóa bình luận',

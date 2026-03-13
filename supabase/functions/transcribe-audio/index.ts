@@ -118,7 +118,7 @@ Hãy transcribe audio và tạo timestamps chính xác:`;
     }
 
     // Clean up the transcript - remove markdown code blocks if present
-    let cleanTranscript = transcriptContent
+    const cleanTranscript = transcriptContent
       .replace(/```[\s\S]*?```/g, '') // Remove code blocks
       .replace(/^\s*#+\s*.*/gm, '') // Remove markdown headers
       .trim();
