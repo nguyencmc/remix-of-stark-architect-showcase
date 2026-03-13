@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import { getErrorMessage } from '@/lib/utils';
+import { logger } from '@/lib/logger';
+
+const log = logger('AIQuestionGenerator');
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -61,17 +65,17 @@ export const AIQuestionGenerator: React.FC<AIQuestionGeneratorProps> = ({
 
       if (data.questions) {
         setGeneratedQuestions(data.questions);
-        setSelectedQuestions(new Set(data.questions.map((_: any, i: number) => i)));
+        setSelectedQuestions(new Set(data.questions.map((_: unknown, i: number) => i)));
         toast({
           title: 'Thành công',
           description: `Đã tạo ${data.questions.length} câu hỏi!`,
         });
       }
     } catch (error) {
-      console.error('Generate questions error:', error);
+      log.error('Generate questions error', error);
       toast({
         title: 'Lỗi',
-        description: error instanceof Error ? error.message : 'Không thể tạo câu hỏi',
+        description: getErrorMessage(error),
         variant: 'destructive',
       });
     } finally {

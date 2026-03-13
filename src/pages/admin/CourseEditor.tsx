@@ -35,6 +35,9 @@ import { useToast } from '@/hooks/useToast';
 import { LessonEditor, CourseLesson, LessonAttachment } from '@/components/admin/course/LessonEditor';
 import { CourseTestEditor } from '@/components/admin/course/CourseTestEditor';
 import { createAuditLog } from '@/hooks/useAuditLogs';
+import { logger } from '@/lib/logger';
+
+const log = logger('CourseEditor');
 
 interface CourseCategory {
   id: string;
@@ -493,7 +496,7 @@ const CourseEditor = () => {
 
       navigate('/admin/courses');
     } catch (error) {
-      console.error('Error saving course:', error);
+      log.error('Error saving course', error);
       toast({
         title: "Lỗi",
         description: "Không thể lưu khóa học",

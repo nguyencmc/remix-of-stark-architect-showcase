@@ -18,6 +18,7 @@ import { CreateQuestionsStep } from '@/components/admin/exam/CreateQuestionsStep
 import { ReviewStep } from '@/components/admin/exam/ReviewStep';
 import { type Question } from '@/components/admin/exam/QuestionEditor';
 import { createAuditLog } from '@/hooks/useAuditLogs';
+import { getErrorMessage } from '@/lib/utils';
 
 interface ExamCategory {
   id: string;
@@ -102,7 +103,7 @@ const ExamEditor = () => {
     setCategoryId(exam.category_id || '');
     setDifficulty(exam.difficulty || 'medium');
     setDurationMinutes(exam.duration_minutes || 60);
-    setThumbnailUrl((exam as any).thumbnail_url || '');
+    setThumbnailUrl((exam as Record<string, unknown>).thumbnail_url as string || '');
 
     // Fetch questions
     const { data: questionsData } = await supabase
@@ -240,10 +241,10 @@ const ExamEditor = () => {
       });
 
       navigate('/admin/exams');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Lỗi",
-        description: error.message || "Không thể lưu đề thi",
+        description: getErrorMessage(error) || "Không thể lưu đề thi",
         variant: "destructive",
       });
     } finally {

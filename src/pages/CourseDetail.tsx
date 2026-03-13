@@ -18,7 +18,7 @@ import {
   Star,
   Award,
   Globe,
-  Infinity,
+  Infinity as InfinityIcon,
   FileText,
   Download,
   CheckCircle,
@@ -46,6 +46,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { logger } from '@/lib/logger';
+
+const log = logger('CourseDetail');
 
 interface Course {
   id: string;
@@ -156,7 +159,7 @@ const CourseDetail = () => {
 
       setSections(sectionsWithLessons);
     } catch (error) {
-      console.error("Error fetching course:", error);
+      log.error("Error fetching course", error);
     }
     setLoading(false);
   };
@@ -189,7 +192,7 @@ const CourseDetail = () => {
       });
 
     if (error) {
-      console.error("Error enrolling:", error);
+      log.error("Error enrolling", error);
     } else {
       setIsEnrolled(true);
     }
@@ -674,7 +677,7 @@ const CourseDetail = () => {
                         Tài liệu tải xuống
                       </li>
                       <li className="flex items-center gap-2">
-                        <Infinity className="w-4 h-4 text-muted-foreground" />
+                        <InfinityIcon className="w-4 h-4 text-muted-foreground" />
                         Truy cập trọn đời
                       </li>
                       <li className="flex items-center gap-2">

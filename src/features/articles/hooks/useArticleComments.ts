@@ -3,6 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { ArticleComment } from '../types';
 import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logger';
+
+const log = logger('useArticleComments');
 
 export function useArticleComments(articleId: string | undefined) {
   const [comments, setComments] = useState<ArticleComment[]>([]);
@@ -33,7 +36,7 @@ export function useArticleComments(articleId: string | undefined) {
       const commentsMap = new Map<string, ArticleComment>();
       const rootComments: ArticleComment[] = [];
 
-      (data || []).forEach((comment: any) => {
+      (data || []).forEach((comment: ArticleComment) => {
         commentsMap.set(comment.id, { ...comment, replies: [] });
       });
 
@@ -48,7 +51,7 @@ export function useArticleComments(articleId: string | undefined) {
       setComments(rootComments);
     } catch (err) {
       setError(err as Error);
-      console.error('Error fetching comments:', err);
+      log.error('Error fetching comments', err);
     } finally {
       setLoading(false);
     }
@@ -87,7 +90,7 @@ export function useArticleComments(articleId: string | undefined) {
 
       fetchComments();
       return true;
-    } catch (err) {
+    } catch (_err) {
       toast({
         title: 'Lỗi',
         description: 'Không thể thêm bình luận',
@@ -114,7 +117,7 @@ export function useArticleComments(articleId: string | undefined) {
 
       fetchComments();
       return true;
-    } catch (err) {
+    } catch (_err) {
       toast({
         title: 'Lỗi',
         description: 'Không thể cập nhật bình luận',
@@ -140,7 +143,7 @@ export function useArticleComments(articleId: string | undefined) {
 
       fetchComments();
       return true;
-    } catch (err) {
+    } catch (_err) {
       toast({
         title: 'Lỗi',
         description: 'Không thể xóa bình luận',

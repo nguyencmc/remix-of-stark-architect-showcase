@@ -3,7 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import {
   Database,
   Shield,
@@ -17,7 +16,7 @@ import {
   Clock,
   Zap,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, getErrorMessage } from '@/lib/utils';
 
 type HealthStatus = 'checking' | 'healthy' | 'degraded' | 'down';
 
@@ -117,11 +116,11 @@ export function SystemHealthCheck() {
           lastChecked: new Date(),
         });
         return true;
-      } catch (e: any) {
+      } catch (e: unknown) {
         updateCheck('Database', {
           status: 'down',
           latency: Math.round(performance.now() - start),
-          details: `Không kết nối được: ${e.message}`,
+          details: `Không kết nối được: ${getErrorMessage(e)}`,
           lastChecked: new Date(),
         });
         return false;
@@ -150,11 +149,11 @@ export function SystemHealthCheck() {
           lastChecked: new Date(),
         });
         return true;
-      } catch (e: any) {
+      } catch (e: unknown) {
         updateCheck('Auth Service', {
           status: 'down',
           latency: Math.round(performance.now() - start),
-          details: `Lỗi: ${e.message}`,
+          details: `Lỗi: ${getErrorMessage(e)}`,
           lastChecked: new Date(),
         });
         return false;
@@ -166,15 +165,15 @@ export function SystemHealthCheck() {
       const start = performance.now();
       try {
         const [rolesRes, permsRes, rolePermsRes] = await Promise.all([
-          supabase.from('roles' as any).select('*', { count: 'exact', head: true }),
-          supabase.from('permissions' as any).select('*', { count: 'exact', head: true }),
-          supabase.from('role_permissions' as any).select('*', { count: 'exact', head: true }),
+          supabase.from('roles' as never).select('*', { count: 'exact', head: true }),
+          supabase.from('permissions' as never).select('*', { count: 'exact', head: true }),
+          supabase.from('role_permissions' as never).select('*', { count: 'exact', head: true }),
         ]);
         const latency = Math.round(performance.now() - start);
 
-        const rolesCount = (rolesRes as any).count || 0;
-        const permsCount = (permsRes as any).count || 0;
-        const rolePermsCount = (rolePermsRes as any).count || 0;
+        const rolesCount = (rolesRes as unknown as { count: number | null }).count || 0;
+        const permsCount = (permsRes as unknown as { count: number | null }).count || 0;
+        const rolePermsCount = (rolePermsRes as unknown as { count: number | null }).count || 0;
 
         const hasError = rolesRes.error || permsRes.error || rolePermsRes.error;
         if (hasError) {
@@ -194,11 +193,11 @@ export function SystemHealthCheck() {
           lastChecked: new Date(),
         });
         return true;
-      } catch (e: any) {
+      } catch (e: unknown) {
         updateCheck('RBAC System', {
           status: 'down',
           latency: Math.round(performance.now() - start),
-          details: `Lỗi: ${e.message}`,
+          details: `Lỗi: ${getErrorMessage(e)}`,
           lastChecked: new Date(),
         });
         return false;
@@ -209,7 +208,7 @@ export function SystemHealthCheck() {
     const edgeFnCheck = async () => {
       const start = performance.now();
       try {
-        const { data, error } = await supabase.functions.invoke('export-schema', {
+        await supabase.functions.invoke('export-schema', {
           method: 'POST',
           body: { healthCheck: true },
         });
@@ -222,10 +221,11 @@ export function SystemHealthCheck() {
           lastChecked: new Date(),
         });
         return true;
-      } catch (e: any) {
+      } catch (e: unknown) {
         const latency = Math.round(performance.now() - start);
         // Network error means truly down; other errors mean function is reachable
-        if (e.message?.includes('NetworkError') || e.message?.includes('fetch')) {
+        const errMsg = getErrorMessage(e);
+        if (errMsg.includes('NetworkError') || errMsg.includes('fetch')) {
           updateCheck('Edge Functions', {
             status: 'down',
             latency,
@@ -268,11 +268,11 @@ export function SystemHealthCheck() {
           lastChecked: new Date(),
         });
         return true;
-      } catch (e: any) {
+      } catch (e: unknown) {
         updateCheck('Storage', {
           status: 'down',
           latency: Math.round(performance.now() - start),
-          details: `Lỗi: ${e.message}`,
+          details: `Lỗi: ${getErrorMessage(e)}`,
           lastChecked: new Date(),
         });
         return false;

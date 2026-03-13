@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/useToast';
 import { createAuditLog } from '@/hooks/useAuditLogs';
+import { getErrorMessage } from '@/lib/utils';
 
 interface Flashcard {
   id?: string;
@@ -129,7 +130,7 @@ const FlashcardEditor = () => {
 
   const updateCard = (index: number, field: keyof Flashcard, value: string | number) => {
     const updated = [...cards];
-    (updated[index] as any)[field] = value;
+    (updated[index] as Record<string, string | number>)[field] = value;
     setCards(updated);
   };
 
@@ -218,10 +219,10 @@ const FlashcardEditor = () => {
       });
 
       navigate('/admin/flashcards');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Lỗi",
-        description: error.message || "Không thể lưu bộ thẻ",
+        description: getErrorMessage(error) || "Không thể lưu bộ thẻ",
         variant: "destructive",
       });
     } finally {

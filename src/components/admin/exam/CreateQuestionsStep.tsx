@@ -64,7 +64,7 @@ export const CreateQuestionsStep = ({
 
   const updateQuestion = (index: number, field: keyof Question, value: string | number) => {
     const updated = [...questions];
-    (updated[index] as any)[field] = value;
+    updated[index] = { ...updated[index], [field]: value };
     onQuestionsChange(updated);
   };
 
@@ -77,7 +77,7 @@ export const CreateQuestionsStep = ({
     }
   };
 
-  const handleAIQuestionsGenerated = (newQuestions: any[]) => {
+  const handleAIQuestionsGenerated = (newQuestions: Pick<Question, 'question_text' | 'option_a' | 'option_b' | 'option_c' | 'option_d' | 'correct_answer' | 'explanation'>[]) => {
     const mapped = newQuestions.map((q, i) => ({
       question_text: q.question_text,
       option_a: q.option_a,
@@ -94,8 +94,6 @@ export const CreateQuestionsStep = ({
     }));
     onQuestionsChange([...questions, ...mapped]);
     setActiveTab('manual');
-    // Navigate to first page of new questions
-    const newTotalPages = Math.ceil((questions.length + mapped.length) / QUESTIONS_PER_PAGE);
     setCurrentPage(Math.ceil((questions.length + 1) / QUESTIONS_PER_PAGE));
   };
 

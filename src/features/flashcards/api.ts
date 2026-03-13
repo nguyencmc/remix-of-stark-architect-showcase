@@ -7,6 +7,11 @@ type DbFlashcardDeck = Database['public']['Tables']['flashcard_decks']['Row'];
 type DbUserFlashcard = Database['public']['Tables']['user_flashcards']['Row'];
 type DbFlashcardReview = Database['public']['Tables']['flashcard_reviews']['Row'];
 
+/** Shape returned by Supabase when joining flashcard_reviews → user_flashcards → flashcard_decks */
+interface ReviewWithFlashcard extends DbFlashcardReview {
+  flashcard: Record<string, unknown>;
+}
+
 // Transform functions to ensure type safety
 function toFlashcardDeck(row: DbFlashcardDeck): FlashcardDeck {
   return {
@@ -218,8 +223,8 @@ export async function fetchDueCards(userId: string): Promise<UserFlashcard[]> {
 
   if (error) throw error;
   
-  return (data || []).map((r: any) => ({
-    ...r.flashcard,
+  return (data || []).map((r) => ({
+    ...(r as unknown as ReviewWithFlashcard).flashcard,
     review: {
       id: r.id,
       user_id: r.user_id,
@@ -257,8 +262,8 @@ export async function fetchDeckStudyCards(
     .order('due_at', { ascending: true })
     .limit(limit);
 
-  const dueCards = (dueReviews || []).map((r: any) => ({
-    ...r.flashcard,
+  const dueCards = (dueReviews || []).map((r) => ({
+    ...(r as unknown as ReviewWithFlashcard).flashcard,
     review: {
       id: r.id,
       user_id: r.user_id,
@@ -291,9 +296,9 @@ export async function fetchDeckStudyCards(
 
   // Filter out cards that are already in due list
   const newCards = (allCards || [])
-    .filter((c: any) => !dueCardIds.includes(c.id))
+    .filter((c) => !dueCardIds.includes(c.id))
     .slice(0, remaining)
-    .map((c: any) => ({
+    .map((c) => ({
       ...c,
       review: undefined, // No review record yet
     })) as UserFlashcard[];

@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Award, CheckCircle, XCircle, Loader2, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { logger } from '@/lib/logger';
+
+const log = logger('VerifyCertificate');
 
 interface CertificateData {
   id: string;
@@ -73,7 +76,7 @@ const VerifyCertificate = () => {
         profile: profileData,
       });
     } catch (err) {
-      console.error("Error verifying certificate:", err);
+      log.error("Error verifying certificate", err);
       setError(true);
     }
     

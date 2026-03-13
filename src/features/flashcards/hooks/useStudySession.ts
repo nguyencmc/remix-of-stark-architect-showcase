@@ -5,6 +5,7 @@ import { UserFlashcard, UIGrade, UI_GRADE_TO_SM2, ReviewState } from '../types';
 import { sm2Next, getGradePreviews } from '../srs_sm2';
 import { upsertReview } from '../api';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/utils';
 
 export function useStudySession(initialCards: UserFlashcard[]) {
   const { user } = useAuth();
@@ -74,8 +75,8 @@ export function useStudySession(initialCards: UserFlashcard[]) {
       // Invalidate queries
       queryClient.invalidateQueries({ queryKey: ['flashcard-due-cards'] });
       queryClient.invalidateQueries({ queryKey: ['flashcard-decks'] });
-    } catch (error: any) {
-      toast.error('Lỗi lưu kết quả: ' + error.message);
+    } catch (error: unknown) {
+      toast.error('Lỗi lưu kết quả: ' + getErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }

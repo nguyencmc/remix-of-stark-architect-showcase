@@ -16,6 +16,10 @@ import { PracticeSetInfoStep } from '@/features/practice/components/PracticeSetI
 import { CreatePracticeQuestionsStep } from '@/components/admin/practice/CreatePracticeQuestionsStep';
 import { PracticeReviewStep } from '@/features/practice/components/PracticeReviewStep';
 import type { PracticeQuestion } from '@/components/admin/practice/PracticeQuestionEditor';
+import { getErrorMessage } from '@/lib/utils';
+import { logger } from '@/lib/logger';
+
+const log = logger('PracticeEditorPage');
 
 interface ExamCategory {
   id: string;
@@ -297,9 +301,9 @@ export default function PracticeEditorPage() {
 
       toast.success(isEditMode ? 'Đã cập nhật bộ đề' : 'Đã tạo bộ đề mới');
       navigate('/practice/my-sets');
-    } catch (error: any) {
-      console.error('Save error:', error);
-      toast.error(`Không thể lưu bộ đề: ${error?.message || 'Lỗi không xác định'}`);
+    } catch (error: unknown) {
+      log.error('Save error', error);
+      toast.error(`Không thể lưu bộ đề: ${getErrorMessage(error) || 'Lỗi không xác định'}`);
     } finally {
       setSaving(false);
     }

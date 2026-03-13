@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { UIGrade } from '../types';
 import { cn } from '@/lib/utils';
-import { RotateCcw, ThumbsDown, ThumbsUp, Zap } from 'lucide-react';
+import { type LucideIcon, RotateCcw, ThumbsDown, ThumbsUp, Zap } from 'lucide-react';
 
 interface GradeButtonsProps {
   onGrade: (grade: UIGrade) => void;
@@ -9,7 +9,7 @@ interface GradeButtonsProps {
   disabled?: boolean;
 }
 
-const gradeConfig: { grade: UIGrade; label: string; icon: any; color: string }[] = [
+const gradeConfig: { grade: UIGrade; label: string; icon: LucideIcon; color: string }[] = [
   { grade: 'again', label: 'Lại', icon: RotateCcw, color: 'bg-red-500 hover:bg-red-600 text-white' },
   { grade: 'hard', label: 'Khó', icon: ThumbsDown, color: 'bg-orange-500 hover:bg-orange-600 text-white' },
   { grade: 'good', label: 'Tốt', icon: ThumbsUp, color: 'bg-green-500 hover:bg-green-600 text-white' },

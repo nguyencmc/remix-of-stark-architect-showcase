@@ -19,6 +19,10 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/utils';
+import { logger } from '@/lib/logger';
+
+const log = logger('AIFlashcardGenerator');
 
 interface GeneratedFlashcard {
   front: string;
@@ -97,15 +101,15 @@ export function AIFlashcardGenerator({ onCardsGenerated, onClose }: AIFlashcardG
       if (error) throw error;
 
       if (data.flashcards && Array.isArray(data.flashcards)) {
-        setGeneratedCards(data.flashcards.map((card: any) => ({ ...card, selected: true })));
+        setGeneratedCards(data.flashcards.map((card: Record<string, unknown>) => ({ ...card, selected: true })));
         setStep('review');
         toast.success(`Đã tạo ${data.flashcards.length} flashcard`);
       } else {
         throw new Error('Invalid response format');
       }
-    } catch (error: any) {
-      console.error('Error generating flashcards:', error);
-      toast.error(error.message || 'Không thể tạo flashcard');
+    } catch (error: unknown) {
+      log.error('Error generating flashcards', error);
+      toast.error(getErrorMessage(error) || 'Không thể tạo flashcard');
     } finally {
       setIsGenerating(false);
     }

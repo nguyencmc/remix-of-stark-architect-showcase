@@ -32,6 +32,9 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { logger } from '@/lib/logger';
+
+const log = logger('CourseViewer');
 
 interface Course {
   id: string;
@@ -200,7 +203,7 @@ const CourseViewer = () => {
         }
       }
     } catch (error) {
-      console.error('Error fetching course:', error);
+      log.error('Error fetching course', error);
       toast.error('Không thể tải khóa học');
     } finally {
       setLoading(false);
@@ -281,12 +284,12 @@ const CourseViewer = () => {
         .eq('course_id', id);
 
       if (enrollmentError) {
-        console.error('Error updating enrollment progress:', enrollmentError);
+        log.error('Error updating enrollment progress', enrollmentError);
       }
 
       toast.success('Đã hoàn thành bài học');
     } catch (error) {
-      console.error('Error marking lesson complete:', error);
+      log.error('Error marking lesson complete', error);
       toast.error('Không thể cập nhật tiến độ');
     }
   };

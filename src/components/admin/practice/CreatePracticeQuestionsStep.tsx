@@ -64,14 +64,14 @@ export const CreatePracticeQuestionsStep = ({
     setCurrentPage(newTotalPages);
   };
 
-  const updateQuestion = (visibleIndex: number, field: keyof PracticeQuestion, value: any) => {
+  const updateQuestion = (visibleIndex: number, field: keyof PracticeQuestion, value: PracticeQuestion[keyof PracticeQuestion]) => {
     // Find the actual index in the original array
     const question = currentQuestions[visibleIndex - startIndex];
     const actualIndex = questions.findIndex(q => q === question);
     if (actualIndex === -1) return;
 
     const updated = [...questions];
-    (updated[actualIndex] as any)[field] = value;
+    updated[actualIndex] = { ...updated[actualIndex], [field]: value };
     onQuestionsChange(updated);
   };
 
@@ -96,7 +96,7 @@ export const CreatePracticeQuestionsStep = ({
     }
   };
 
-  const handleAIQuestionsGenerated = (newQuestions: any[]) => {
+  const handleAIQuestionsGenerated = (newQuestions: Pick<PracticeQuestion, 'question_text' | 'option_a' | 'option_b' | 'option_c' | 'option_d' | 'correct_answer' | 'explanation'>[]) => {
     const mapped: PracticeQuestion[] = newQuestions.map((q, i) => ({
       question_text: q.question_text,
       option_a: q.option_a,
@@ -115,7 +115,7 @@ export const CreatePracticeQuestionsStep = ({
     setCurrentPage(Math.ceil((visibleQuestions.length + 1) / QUESTIONS_PER_PAGE));
   };
 
-  const handleImport = (importedQuestions: any[]) => {
+  const handleImport = (importedQuestions: Partial<PracticeQuestion>[]) => {
     const mapped: PracticeQuestion[] = importedQuestions.map((q, i) => ({
       question_text: q.question_text,
       option_a: q.option_a,

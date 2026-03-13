@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/lib/logger';
+
+const log = logger('EnhancedDashboardCharts');
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   LineChart,
@@ -67,7 +70,7 @@ export function UserGrowthChart() {
       .order('created_at', { ascending: true });
 
     if (error) {
-      console.error('Error fetching user growth:', error);
+      log.error('Error fetching user growth', error);
       setLoading(false);
       return;
     }
@@ -204,14 +207,14 @@ export function PopularExamsChart() {
       .not('exam_id', 'is', null);
 
     if (error) {
-      console.error('Error fetching popular exams:', error);
+      log.error('Error fetching popular exams', error);
       setLoading(false);
       return;
     }
 
     // Group by exam
     const examMap = new Map<string, { title: string; attempts: number; totalScore: number }>();
-    (attempts || []).forEach((a: any) => {
+    (attempts || []).forEach((a: { exam_id: string; score: number | null; exams: { title: string } | null }) => {
       const id = a.exam_id;
       const title = a.exams?.title || 'Unknown';
       if (!examMap.has(id)) {
@@ -313,7 +316,7 @@ export function RecentActivitiesCard() {
       .limit(10);
 
     if (error) {
-      console.error('Error fetching activities:', error);
+      log.error('Error fetching activities', error);
     }
     setActivities(data || []);
     setLoading(false);

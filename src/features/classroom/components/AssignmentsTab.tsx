@@ -135,7 +135,7 @@ const AssignmentsTab = ({ classId, isManager }: AssignmentsTabProps) => {
                     </SelectTrigger>
                     <SelectContent>
                       <ScrollArea className="max-h-[200px]">
-                        {refData?.map((item: any) => (
+                        {refData?.map((item: { id: string; title: string }) => (
                           <SelectItem key={item.id} value={item.id}>
                             {item.title}
                           </SelectItem>

@@ -2,6 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Article, ArticleStatus } from '../types';
 import { useToast } from '@/hooks/useToast';
+import { getErrorMessage } from '@/lib/utils';
+import { logger } from '@/lib/logger';
+
+const log = logger('useArticles');
 
 interface UseArticlesOptions {
   status?: ArticleStatus | 'all';
@@ -63,7 +67,7 @@ export function useArticles(options: UseArticlesOptions = {}) {
       setArticles((data as Article[]) || []);
     } catch (err) {
       setError(err as Error);
-      console.error('Error fetching articles:', err);
+      log.error('Error fetching articles', err);
     } finally {
       setLoading(false);
     }
@@ -86,7 +90,7 @@ export function useArticles(options: UseArticlesOptions = {}) {
         .eq('id', articleId);
 
       if (error) {
-        console.error('Approve article error:', error);
+        log.error('Approve article error', error);
         throw error;
       }
 
@@ -96,11 +100,11 @@ export function useArticles(options: UseArticlesOptions = {}) {
       });
 
       fetchArticles();
-    } catch (err: any) {
-      console.error('Approve article exception:', err);
+    } catch (err: unknown) {
+      log.error('Approve article exception', err);
       toast({
         title: 'Lỗi duyệt bài viết',
-        description: err?.message || 'Không thể duyệt bài viết. Vui lòng kiểm tra quyền admin.',
+        description: getErrorMessage(err) || 'Không thể duyệt bài viết. Vui lòng kiểm tra quyền admin.',
         variant: 'destructive',
       });
     }
@@ -117,7 +121,7 @@ export function useArticles(options: UseArticlesOptions = {}) {
         .eq('id', articleId);
 
       if (error) {
-        console.error('Reject article error:', error);
+        log.error('Reject article error', error);
         throw error;
       }
 
@@ -127,11 +131,11 @@ export function useArticles(options: UseArticlesOptions = {}) {
       });
 
       fetchArticles();
-    } catch (err: any) {
-      console.error('Reject article exception:', err);
+    } catch (err: unknown) {
+      log.error('Reject article exception', err);
       toast({
         title: 'Lỗi từ chối bài viết',
-        description: err?.message || 'Không thể từ chối bài viết. Vui lòng kiểm tra quyền admin.',
+        description: getErrorMessage(err) || 'Không thể từ chối bài viết. Vui lòng kiểm tra quyền admin.',
         variant: 'destructive',
       });
     }

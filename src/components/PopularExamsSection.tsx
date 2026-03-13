@@ -57,9 +57,9 @@ export const PopularExamsSection = () => {
         .limit(3);
 
       if (!examError && examData) {
-        const formattedExams = examData.map((exam: any) => ({
+        const formattedExams = examData.map((exam) => ({
           ...exam,
-          category_name: exam.category?.name || null,
+          category_name: (exam.category as { name: string } | null)?.name || null,
         }));
         setExams(formattedExams);
       }

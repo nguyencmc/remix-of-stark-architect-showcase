@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/useToast";
 import { Eye, EyeOff, Mail, Lock, User, Loader2 } from "lucide-react";
 import { z } from "zod";
 import logo from "@/assets/logo.png";
+import { getErrorMessage } from '@/lib/utils';
 
 const signInSchema = z.object({
   email: z.string().email("Email không hợp lệ"),
@@ -45,10 +46,10 @@ const Auth = () => {
         }
       });
       if (error) throw error;
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Đăng nhập thất bại",
-        description: error.message || "Không thể đăng nhập bằng Google",
+        description: getErrorMessage(error) || "Không thể đăng nhập bằng Google",
         variant: "destructive",
       });
     } finally {
@@ -76,10 +77,10 @@ const Auth = () => {
         description: "Vui lòng kiểm tra hộp thư để đặt lại mật khẩu.",
       });
       setMode('login');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Lỗi",
-        description: error.message || "Không thể gửi email đặt lại mật khẩu",
+        description: getErrorMessage(error) || "Không thể gửi email đặt lại mật khẩu",
         variant: "destructive",
       });
     } finally {

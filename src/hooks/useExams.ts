@@ -97,7 +97,7 @@ export function useExams(): UseExamsReturn {
             });
         }
 
-        let creatorProfiles: Record<string, CreatorProfile> = {};
+        const creatorProfiles: Record<string, CreatorProfile> = {};
         const uniqueCreatorIds = [...new Set(allCreatorIds)];
 
         if (uniqueCreatorIds.length > 0) {
@@ -126,7 +126,7 @@ export function useExams(): UseExamsReturn {
                     category_id: exam.category_id,
                     difficulty: exam.difficulty,
                     duration_minutes: exam.duration_minutes,
-                    thumbnail_url: (exam as any).thumbnail_url || null,
+                    thumbnail_url: (exam as Record<string, unknown>).thumbnail_url as string || null,
                     category: exam.exam_categories as ExamCategory | undefined,
                     source: 'exam',
                     creator_id: exam.creator_id,
