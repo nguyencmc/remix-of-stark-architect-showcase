@@ -105,7 +105,7 @@ Trả về JSON hợp lệ theo format sau (không có text khác ngoài JSON):
     try {
       const jsonMatch = rawText.match(/\{[\s\S]*\}/);
       parsed = JSON.parse(jsonMatch ? jsonMatch[0] : rawText);
-    } catch (_e) {
+    } catch {
       console.error('Failed to parse JSON:', rawText);
       throw new Error('Failed to parse questions from AI response');
     }

@@ -88,7 +88,7 @@ Trả về JSON array (không có text khác):
     try {
       const jsonMatch = rawText.match(/\[[\s\S]*\]/);
       flashcards = JSON.parse(jsonMatch ? jsonMatch[0] : rawText);
-    } catch (_parseError) {
+    } catch {
       console.error("Failed to parse AI response:", rawText);
       throw new Error("Failed to parse flashcards from AI response");
     }
