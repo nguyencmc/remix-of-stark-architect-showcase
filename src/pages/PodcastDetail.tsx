@@ -124,7 +124,7 @@ const PodcastDetail = () => {
   });
 
   // Hooks for progress and bookmarks
-  const { saveProgress } = usePodcastProgress({
+  const { saveProgress: _saveProgress } = usePodcastProgress({
     podcastId: podcast?.id || "",
     currentTime,
     duration,
