@@ -42,6 +42,10 @@ import {
 } from "@/components/ui/tooltip";
 import { useToast } from '@/hooks/useToast';
 import { createAuditLog } from '@/hooks/useAuditLogs';
+import { getErrorMessage } from '@/lib/utils';
+import { logger } from '@/lib/logger';
+
+const log = logger('PodcastEditor');
 
 interface PodcastCategory {
   id: string;
@@ -221,11 +225,11 @@ const PodcastEditor = () => {
         title: "Thành công",
         description: "Đã upload file audio",
       });
-    } catch (error: any) {
-      console.error('Upload error:', error);
+    } catch (error: unknown) {
+      log.error('Upload error', error);
       toast({
         title: "Lỗi upload",
-        description: error.message || "Không thể upload file audio",
+        description: getErrorMessage(error) || "Không thể upload file audio",
         variant: "destructive",
       });
     } finally {
@@ -290,11 +294,11 @@ const PodcastEditor = () => {
       } else {
         throw new Error('Không nhận được transcript từ AI');
       }
-    } catch (error: any) {
-      console.error('Transcript generation error:', error);
+    } catch (error: unknown) {
+      log.error('Transcript generation error', error);
       toast({
         title: "Lỗi tạo transcript",
-        description: error.message || "Không thể tạo transcript tự động",
+        description: getErrorMessage(error) || "Không thể tạo transcript tự động",
         variant: "destructive",
       });
     } finally {
@@ -352,11 +356,11 @@ const PodcastEditor = () => {
         title: "Thành công",
         description: "Đã upload thumbnail",
       });
-    } catch (error: any) {
-      console.error('Upload error:', error);
+    } catch (error: unknown) {
+      log.error('Upload error', error);
       toast({
         title: "Lỗi upload",
-        description: error.message || "Không thể upload thumbnail",
+        description: getErrorMessage(error) || "Không thể upload thumbnail",
         variant: "destructive",
       });
     } finally {
@@ -437,10 +441,10 @@ const PodcastEditor = () => {
       });
 
       navigate('/admin/podcasts');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Lỗi",
-        description: error.message || "Không thể lưu podcast",
+        description: getErrorMessage(error) || "Không thể lưu podcast",
         variant: "destructive",
       });
     } finally {

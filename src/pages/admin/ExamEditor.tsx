@@ -18,6 +18,7 @@ import { CreateQuestionsStep } from '@/components/admin/exam/CreateQuestionsStep
 import { ReviewStep } from '@/components/admin/exam/ReviewStep';
 import { type Question } from '@/components/admin/exam/QuestionEditor';
 import { createAuditLog } from '@/hooks/useAuditLogs';
+import { getErrorMessage } from '@/lib/utils';
 
 interface ExamCategory {
   id: string;
@@ -240,10 +241,10 @@ const ExamEditor = () => {
       });
 
       navigate('/admin/exams');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Lỗi",
-        description: error.message || "Không thể lưu đề thi",
+        description: getErrorMessage(error) || "Không thể lưu đề thi",
         variant: "destructive",
       });
     } finally {

@@ -18,6 +18,9 @@ import {
   BookOpen,
   Calendar
 } from "lucide-react";
+import { logger } from '@/lib/logger';
+
+const log = logger('UserProfile');
 
 interface Profile {
   user_id: string;
@@ -115,7 +118,7 @@ const UserProfile = () => {
         }
       }
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      log.error('Error fetching profile', error);
     } finally {
       setLoading(false);
     }
@@ -136,7 +139,7 @@ const UserProfile = () => {
         setUserRank(userEntry.rank);
       }
     } catch (error) {
-      console.error('Error fetching leaderboard:', error);
+      log.error('Error fetching leaderboard', error);
     }
   };
 

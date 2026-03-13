@@ -28,6 +28,10 @@ import {
 } from "@/components/ui/select";
 import { useToast } from '@/hooks/useToast';
 import { createAuditLog } from '@/hooks/useAuditLogs';
+import { getErrorMessage } from '@/lib/utils';
+import { logger } from '@/lib/logger';
+
+const log = logger('BookEditor');
 
 interface BookCategory {
     id: string;
@@ -208,11 +212,11 @@ const BookEditor = () => {
                 title: "Thành công",
                 description: "Đã upload ảnh bìa",
             });
-        } catch (error: any) {
-            console.error('Upload error:', error);
+        } catch (error: unknown) {
+            log.error('Upload error', error);
             toast({
                 title: "Lỗi upload",
-                description: error.message || "Không thể upload ảnh",
+                description: getErrorMessage(error) || "Không thể upload ảnh",
                 variant: "destructive",
             });
         } finally {
@@ -322,7 +326,7 @@ const BookEditor = () => {
                     .insert(chaptersToInsert);
 
                 if (chaptersError) {
-                    console.error('Error saving chapters:', chaptersError);
+                    log.error('Error saving chapters', chaptersError);
                 }
             }
 
@@ -341,10 +345,10 @@ const BookEditor = () => {
             });
 
             navigate('/admin/books');
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast({
                 title: "Lỗi",
-                description: error.message || "Không thể lưu sách",
+                description: getErrorMessage(error) || "Không thể lưu sách",
                 variant: "destructive",
             });
         } finally {

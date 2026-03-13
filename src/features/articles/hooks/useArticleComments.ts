@@ -3,6 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { ArticleComment } from '../types';
 import { useToast } from '@/hooks/useToast';
 import { useAuth } from '@/contexts/AuthContext';
+import { logger } from '@/lib/logger';
+
+const log = logger('useArticleComments');
 
 export function useArticleComments(articleId: string | undefined) {
   const [comments, setComments] = useState<ArticleComment[]>([]);
@@ -48,7 +51,7 @@ export function useArticleComments(articleId: string | undefined) {
       setComments(rootComments);
     } catch (err) {
       setError(err as Error);
-      console.error('Error fetching comments:', err);
+      log.error('Error fetching comments', err);
     } finally {
       setLoading(false);
     }

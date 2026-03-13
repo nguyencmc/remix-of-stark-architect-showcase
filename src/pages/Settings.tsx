@@ -22,6 +22,9 @@ import {
   Trash2
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import { logger } from '@/lib/logger';
+
+const log = logger('Settings');
 
 interface Profile {
   id: string;
@@ -100,7 +103,7 @@ const Settings = () => {
         setUsername(createdProfile.username || "");
       }
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      log.error('Error fetching profile', error);
       toast.error("Không thể tải thông tin tài khoản");
     } finally {
       setLoading(false);
@@ -154,7 +157,7 @@ const Settings = () => {
       setAvatarUrl(publicUrl);
       toast.success("Đã tải ảnh lên thành công!");
     } catch (error) {
-      console.error('Error uploading avatar:', error);
+      log.error('Error uploading avatar', error);
       toast.error("Không thể tải ảnh lên");
     } finally {
       setUploading(false);
@@ -176,7 +179,7 @@ const Settings = () => {
       setAvatarUrl("");
       toast.success("Đã xóa ảnh đại diện");
     } catch (error) {
-      console.error('Error removing avatar:', error);
+      log.error('Error removing avatar', error);
       toast.error("Không thể xóa ảnh");
     }
   };
@@ -232,7 +235,7 @@ const Settings = () => {
         avatar_url: avatarUrl.trim() || null,
       } : null);
     } catch (error) {
-      console.error('Error saving profile:', error);
+      log.error('Error saving profile', error);
       toast.error("Không thể lưu thông tin");
     } finally {
       setSaving(false);

@@ -58,6 +58,9 @@ import {
 } from "@/components/ui/select";
 import { useToast } from '@/hooks/useToast';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
+
+const log = logger('AdminDashboard');
 
 interface Stats {
   totalUsers: number;
@@ -260,7 +263,7 @@ const AdminDashboard = () => {
       .limit(50);
 
     if (profilesError) {
-      console.error('Error fetching profiles:', profilesError);
+      log.error('Error fetching profiles', profilesError);
       return;
     }
 
@@ -269,7 +272,7 @@ const AdminDashboard = () => {
       .select('user_id, role');
 
     if (rolesError) {
-      console.error('Error fetching roles:', rolesError);
+      log.error('Error fetching roles', rolesError);
     }
 
     const usersWithRoles: UserWithRole[] = (profiles || []).map(profile => ({
@@ -324,7 +327,7 @@ const AdminDashboard = () => {
         .eq('user_id', userId);
 
       if (deleteError) {
-        console.error('Error deleting old roles:', deleteError);
+        log.error('Error deleting old roles', deleteError);
       }
 
       const { error } = await supabase

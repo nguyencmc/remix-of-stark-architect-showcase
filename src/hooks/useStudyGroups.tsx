@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/utils';
+import { logger } from '@/lib/logger';
+
+const log = logger('useStudyGroups');
 
 export interface StudyGroup {
   id: string;
@@ -71,7 +75,7 @@ export const useStudyGroups = () => {
       if (error) throw error;
       setGroups(data || []);
     } catch (error) {
-      console.error('Error fetching groups:', error);
+      log.error('Error fetching groups', error);
     }
   };
 
@@ -100,7 +104,7 @@ export const useStudyGroups = () => {
         setMyGroups([]);
       }
     } catch (error) {
-      console.error('Error fetching my groups:', error);
+      log.error('Error fetching my groups', error);
     }
   };
 
@@ -140,9 +144,9 @@ export const useStudyGroups = () => {
       await fetchGroups();
       await fetchMyGroups();
       return groupData;
-    } catch (error: any) {
-      console.error('Error creating group:', error);
-      toast.error('Không thể tạo nhóm: ' + error.message);
+    } catch (error: unknown) {
+      log.error('Error creating group', error);
+      toast.error('Không thể tạo nhóm: ' + getErrorMessage(error));
       return null;
     }
   };
@@ -167,8 +171,8 @@ export const useStudyGroups = () => {
       toast.success('Đã tham gia nhóm!');
       await fetchMyGroups();
       return true;
-    } catch (error: any) {
-      if (error.code === '23505') {
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
         toast.error('Bạn đã là thành viên của nhóm này');
       } else {
         toast.error('Không thể tham gia nhóm');
@@ -239,7 +243,7 @@ export const useStudyGroupDetail = (groupId: string) => {
       if (error) throw error;
       setGroup(data);
     } catch (error) {
-      console.error('Error fetching group:', error);
+      log.error('Error fetching group', error);
     }
   };
 
@@ -275,7 +279,7 @@ export const useStudyGroupDetail = (groupId: string) => {
         }
       }
     } catch (error) {
-      console.error('Error fetching members:', error);
+      log.error('Error fetching members', error);
     }
   };
 
@@ -306,7 +310,7 @@ export const useStudyGroupDetail = (groupId: string) => {
         setMessages([]);
       }
     } catch (error) {
-      console.error('Error fetching messages:', error);
+      log.error('Error fetching messages', error);
     }
   };
 
@@ -324,7 +328,7 @@ export const useStudyGroupDetail = (groupId: string) => {
         resource_type: r.resource_type as 'link' | 'file' | 'note' | 'exam' | 'flashcard',
       })));
     } catch (error) {
-      console.error('Error fetching resources:', error);
+      log.error('Error fetching resources', error);
     }
   };
 
@@ -343,7 +347,7 @@ export const useStudyGroupDetail = (groupId: string) => {
       if (error) throw error;
       return true;
     } catch (error) {
-      console.error('Error sending message:', error);
+      log.error('Error sending message', error);
       return false;
     }
   };
@@ -368,7 +372,7 @@ export const useStudyGroupDetail = (groupId: string) => {
       toast.success('Đã thêm tài liệu!');
       return true;
     } catch (error) {
-      console.error('Error adding resource:', error);
+      log.error('Error adding resource', error);
       toast.error('Không thể thêm tài liệu');
       return false;
     }

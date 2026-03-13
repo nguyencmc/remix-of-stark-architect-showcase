@@ -2,6 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/utils';
+import { logger } from '@/lib/logger';
+
+const log = logger('useWishlist');
 
 export const useWishlist = () => {
   const { user } = useAuth();
@@ -25,7 +29,7 @@ export const useWishlist = () => {
       
       setWishlistIds(new Set(data?.map(w => w.course_id).filter(Boolean) as string[]));
     } catch (error) {
-      console.error('Error fetching wishlist:', error);
+      log.error('Error fetching wishlist', error);
     } finally {
       setLoading(false);
     }
@@ -55,11 +59,11 @@ export const useWishlist = () => {
       setWishlistIds(prev => new Set([...prev, courseId]));
       toast.success('Đã thêm vào danh sách yêu thích');
       return true;
-    } catch (error: any) {
-      if (error.code === '23505') {
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
         toast.info('Khóa học đã có trong danh sách yêu thích');
       } else {
-        console.error('Error adding to wishlist:', error);
+        log.error('Error adding to wishlist', error);
         toast.error('Không thể thêm vào danh sách yêu thích');
       }
       return false;
@@ -86,7 +90,7 @@ export const useWishlist = () => {
       toast.success('Đã xóa khỏi danh sách yêu thích');
       return true;
     } catch (error) {
-      console.error('Error removing from wishlist:', error);
+      log.error('Error removing from wishlist', error);
       toast.error('Không thể xóa khỏi danh sách yêu thích');
       return false;
     }
