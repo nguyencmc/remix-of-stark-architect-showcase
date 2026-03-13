@@ -9,10 +9,10 @@ import { UserGrowthChart, PopularExamsChart, RecentActivitiesCard } from '@/comp
 import { UserBulkActions, UserSelectCheckbox } from '@/components/admin/UserBulkActions';
 import { RealtimeNotifications } from '@/components/admin/RealtimeNotifications';
 import { SystemHealthCheck } from '@/components/admin/SystemHealthCheck';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Users, 
   FileText, 
@@ -23,22 +23,16 @@ import {
   TrendingUp,
   Activity,
   ChevronRight,
-  Download,
   HelpCircle,
   GraduationCap,
   Search,
-  BarChart3,
   Settings,
   FolderOpen,
   Eye,
-  Clock,
-  UserCheck,
   ArrowUpRight,
   Database,
-  Server,
   RefreshCw,
   PieChart,
-  LineChart as LineChartIcon,
   Newspaper
 } from 'lucide-react';
 import {
@@ -129,7 +123,7 @@ const AdminDashboard = () => {
     totalEnrollments: 0,
     completedCourses: 0,
   });
-  const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
+  const [_dailyStats, setDailyStats] = useState<DailyStats[]>([]);
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -138,9 +132,9 @@ const AdminDashboard = () => {
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
 
-  const canViewAnalytics = hasPermission('analytics.view');
-  const canManageUsers = hasPermission('users.view');
-  const canManageRoles = hasPermission('roles.assign');
+  const _canViewAnalytics = hasPermission('analytics.view');
+  const _canManageUsers = hasPermission('users.view');
+  const _canManageRoles = hasPermission('roles.assign');
 
   useEffect(() => {
     if (!roleLoading && !isAdmin) {
@@ -428,12 +422,12 @@ const AdminDashboard = () => {
   };
 
   // Calculate growth rates (mock for now)
-  const calculateGrowthRate = (current: number, previous: number) => {
+  const _calculateGrowthRate = (current: number, previous: number) => {
     if (previous === 0) return 100;
     return Math.round(((current - previous) / previous) * 100);
   };
 
-  const userGrowthRate = stats.newUsersThisWeek > 0 ? Math.round((stats.newUsersThisWeek / stats.totalUsers) * 100) : 0;
+  const _userGrowthRate = stats.newUsersThisWeek > 0 ? Math.round((stats.newUsersThisWeek / stats.totalUsers) * 100) : 0;
   const completionRate = stats.totalEnrollments > 0 ? Math.round((stats.completedCourses / stats.totalEnrollments) * 100) : 0;
 
   const renderOverviewTab = () => (

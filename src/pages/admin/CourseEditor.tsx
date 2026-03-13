@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/accordion";
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/useToast';
-import { LessonEditor, CourseLesson, LessonAttachment } from '@/components/admin/course/LessonEditor';
+import { LessonEditor, CourseLesson } from '@/components/admin/course/LessonEditor';
 import { CourseTestEditor } from '@/components/admin/course/CourseTestEditor';
 import { createAuditLog } from '@/hooks/useAuditLogs';
 import { logger } from '@/lib/logger';
@@ -73,7 +73,7 @@ interface CourseFormData {
 const CourseEditor = () => {
   const { id } = useParams();
   const { user } = useAuth();
-  const { isAdmin, hasPermission, canEditOwn, loading: roleLoading } = usePermissionsContext();
+  const { isAdmin, hasPermission, canEditOwn: _canEditOwn, loading: roleLoading } = usePermissionsContext();
   const navigate = useNavigate();
   const { toast } = useToast();
   

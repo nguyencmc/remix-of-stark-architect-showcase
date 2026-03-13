@@ -88,7 +88,7 @@ interface CourseCategory {
 
 const CourseManagement = () => {
   const { user } = useAuth();
-  const { isAdmin, hasPermission, canEditOwn, canDeleteOwn, loading: roleLoading } = usePermissionsContext();
+  const { isAdmin, hasPermission, canEditOwn: _canEditOwn, canDeleteOwn: _canDeleteOwn, loading: roleLoading } = usePermissionsContext();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -101,9 +101,9 @@ const CourseManagement = () => {
 
   const canView = hasPermission('courses.view');
   const canCreate = hasPermission('courses.create');
-  const canEdit = hasPermission('courses.edit');
-  const canDelete = hasPermission('courses.delete');
-  const canPublish = hasPermission('courses.publish');
+  const _canEdit = hasPermission('courses.edit');
+  const _canDelete = hasPermission('courses.delete');
+  const _canPublish = hasPermission('courses.publish');
 
   useEffect(() => {
     if (!roleLoading && !canView) {

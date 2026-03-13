@@ -34,7 +34,7 @@ const STEPS = [
 const ExamEditor = () => {
   const { id } = useParams();
   const isEditing = !!id;
-  const { isAdmin, hasPermission, canEditOwn, loading: roleLoading } = usePermissionsContext();
+  const { isAdmin: _isAdmin, hasPermission, canEditOwn: _canEditOwn, loading: roleLoading } = usePermissionsContext();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -122,7 +122,7 @@ const ExamEditor = () => {
     setLoading(false);
   };
 
-  const generateSlug = (text: string) => {
+  const _generateSlug = (text: string) => {
     return text
       .toLowerCase()
       .normalize('NFD')
@@ -307,7 +307,7 @@ const ExamEditor = () => {
   };
 
   // Image upload handler with date-based folder structure
-  const handleImageUpload = async (file: File, questionIndex: number, field: string): Promise<string> => {
+  const handleImageUpload = async (file: File, _questionIndex: number, _field: string): Promise<string> => {
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');

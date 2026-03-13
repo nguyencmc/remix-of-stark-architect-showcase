@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -33,8 +32,6 @@ import {
   Upload,
   Trash2,
   Key,
-  Shield,
-  Calendar,
   Search,
   Download,
   ArrowLeft
@@ -83,7 +80,7 @@ interface EnrichedUser {
 
 const UserManagement = () => {
   const { user: currentUser, session } = useAuth();
-  const { isAdmin, hasPermission, loading: roleLoading } = usePermissionsContext();
+  const { isAdmin: _isAdmin, hasPermission, loading: roleLoading } = usePermissionsContext();
   const navigate = useNavigate();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -117,10 +114,10 @@ const UserManagement = () => {
   const [importing, setImporting] = useState(false);
 
   const canView = hasPermission('users.view');
-  const canCreate = hasPermission('users.create');
-  const canEdit = hasPermission('users.edit');
-  const canDelete = hasPermission('users.delete');
-  const canAssignRoles = hasPermission('roles.assign');
+  const _canCreate = hasPermission('users.create');
+  const _canEdit = hasPermission('users.edit');
+  const _canDelete = hasPermission('users.delete');
+  const _canAssignRoles = hasPermission('roles.assign');
 
   useEffect(() => {
     if (!roleLoading && !canView) {

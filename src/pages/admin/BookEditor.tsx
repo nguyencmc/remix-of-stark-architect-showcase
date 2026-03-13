@@ -14,7 +14,6 @@ import {
     Save,
     ImageIcon,
     Loader2,
-    X,
     Plus,
     Trash2,
     GripVertical,
