@@ -50,7 +50,7 @@ const FlashcardEditor = () => {
   const { id } = useParams();
   const isEditing = !!id;
   const { user } = useAuth();
-  const { isAdmin, hasPermission, loading: roleLoading } = usePermissionsContext();
+  const { isAdmin: _isAdmin, hasPermission, loading: roleLoading } = usePermissionsContext();
   const navigate = useNavigate();
   const { toast } = useToast();
   

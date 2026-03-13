@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/useToast';
 import { supabase } from '@/integrations/supabase/client';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
 import { createAuditLog } from '@/hooks/useAuditLogs';
-import { ArrowLeft, Shield, Save, Loader2, Users, GraduationCap, UserCheck, User } from 'lucide-react';
+import { ArrowLeft, Shield, Save, Loader2, GraduationCap, UserCheck, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { logger } from '@/lib/logger';
 

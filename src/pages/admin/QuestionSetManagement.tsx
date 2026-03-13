@@ -64,8 +64,8 @@ const QuestionSetManagement = () => {
 
   const canView = hasPermission('questions.view');
   const canCreate = hasPermission('questions.create');
-  const canEdit = hasPermission('questions.edit');
-  const canDelete = hasPermission('questions.delete');
+  const _canEdit = hasPermission('questions.edit');
+  const _canDelete = hasPermission('questions.delete');
 
   useEffect(() => {
     if (!roleLoading && !canView) {

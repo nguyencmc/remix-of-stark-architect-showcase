@@ -6,11 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { 
   Search, 
   Star, 
-  Users, 
   Clock, 
   PlayCircle, 
   ChevronRight,
-  Filter,
   Grid3X3,
   List,
   TrendingUp,
@@ -299,7 +297,7 @@ const Courses = () => {
           </div>
         ) : viewMode === "grid" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredCourses.map((course, index) => {
+            {filteredCourses.map((course, _index) => {
               const rating = getRandomRating();
               const students = getRandomStudents();
               const price = getRandomPrice();

@@ -56,7 +56,7 @@ interface PodcastCategory {
 }
 
 const PodcastManagement = () => {
-  const { isAdmin, hasPermission, canEditOwn, canDeleteOwn, loading: roleLoading } = usePermissionsContext();
+  const { isAdmin, hasPermission, canEditOwn: _canEditOwn, canDeleteOwn: _canDeleteOwn, loading: roleLoading } = usePermissionsContext();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();

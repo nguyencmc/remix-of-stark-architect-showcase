@@ -14,7 +14,6 @@ import {
   Headphones, 
   ArrowLeft,
   Save,
-  Upload,
   FileText,
   Clock,
   Plus,
@@ -55,7 +54,7 @@ interface PodcastCategory {
 const PodcastEditor = () => {
   const { id } = useParams();
   const isEditing = !!id;
-  const { isAdmin, hasPermission, loading: roleLoading } = usePermissionsContext();
+  const { isAdmin: _isAdmin, hasPermission, loading: roleLoading } = usePermissionsContext();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();

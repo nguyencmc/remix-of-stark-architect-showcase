@@ -110,8 +110,8 @@ const CategoryManagement = () => {
 
   const canView = hasPermission('categories.view');
   const canCreate = hasPermission('categories.create');
-  const canEdit = hasPermission('categories.edit');
-  const canDelete = hasPermission('categories.delete');
+  const _canEdit = hasPermission('categories.edit');
+  const _canDelete = hasPermission('categories.delete');
 
   useEffect(() => {
     if (!roleLoading && !canView) {

@@ -38,7 +38,7 @@ import {
 
 export default function DeckDetailPage() {
   const { deckId } = useParams<{ deckId: string }>();
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   const { deck, cards, isLoading, createCard, deleteCard, isCreatingCard } = useDeckDetail(deckId!);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);

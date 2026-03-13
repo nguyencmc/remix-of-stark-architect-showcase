@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { fetchDeckStudyCards, fetchDueCards } from '../api';
+import { fetchDeckStudyCards } from '../api';
 import { useStudySession } from '../hooks/useStudySession';
 import { UserFlashcard } from '../types';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FlashcardFlip } from '../components/FlashcardFlip';
 import { GradeButtons } from '../components/GradeButtons';
@@ -24,7 +23,7 @@ export default function StudyDeckPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [deckTitle, setDeckTitle] = useState('');
 
-  const isFromToday = searchParams.get('from') === 'today';
+  const _isFromToday = searchParams.get('from') === 'today';
 
   useEffect(() => {
     if (!user || !deckId) return;

@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,7 +12,6 @@ import { VideoPreviewModal } from "@/components/course/VideoPreviewModal";
 import {
   Play,
   PlayCircle,
-  Clock,
   Users,
   Star,
   Award,
@@ -22,23 +20,14 @@ import {
   FileText,
   Download,
   CheckCircle,
-  ChevronDown,
-  ChevronUp,
   Heart,
   Share2,
   Monitor,
-  Smartphone,
   Trophy,
   Lock,
-  Volume2,
-  Maximize,
-  Pause,
   BookOpen,
-  MessageSquare,
-  ThumbsUp,
   AlertCircle,
   ClipboardList,
-  Video,
 } from "lucide-react";
 import {
   Accordion,
@@ -100,7 +89,7 @@ const CourseDetail = () => {
   const [course, setCourse] = useState<Course | null>(null);
   const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [_isPlaying, _setIsPlaying] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [enrolling, setEnrolling] = useState(false);

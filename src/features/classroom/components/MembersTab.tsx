@@ -55,7 +55,7 @@ const MembersTab = ({ classId, isManager }: MembersTabProps) => {
     await updateRole.mutateAsync({ classId, userId, role: 'assistant' });
   };
 
-  const handleSetStudent = async (userId: string) => {
+  const _handleSetStudent = async (userId: string) => {
     await updateRole.mutateAsync({ classId, userId, role: 'student' });
   };
 

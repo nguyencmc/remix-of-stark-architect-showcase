@@ -13,7 +13,6 @@ import {
   FileText, 
   Loader2, 
   Check, 
-  X,
   Plus,
   Wand2
 } from 'lucide-react';
@@ -73,7 +72,7 @@ export function AIFlashcardGenerator({ onCardsGenerated, onClose }: AIFlashcardG
       }
       setFileContent(content);
       toast.success(`Đã tải file: ${file.name}`);
-    } catch (error) {
+    } catch {
       toast.error('Không thể đọc file');
     }
   };

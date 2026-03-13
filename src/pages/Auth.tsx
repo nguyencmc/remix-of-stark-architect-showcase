@@ -173,7 +173,7 @@ const Auth = () => {
           navigate("/");
         }
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Lỗi",
         description: "Đã có lỗi xảy ra. Vui lòng thử lại.",
