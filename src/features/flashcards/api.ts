@@ -7,6 +7,11 @@ type DbFlashcardDeck = Database['public']['Tables']['flashcard_decks']['Row'];
 type DbUserFlashcard = Database['public']['Tables']['user_flashcards']['Row'];
 type DbFlashcardReview = Database['public']['Tables']['flashcard_reviews']['Row'];
 
+/** Shape returned by Supabase when joining flashcard_reviews → user_flashcards → flashcard_decks */
+interface ReviewWithFlashcard extends DbFlashcardReview {
+  flashcard: Record<string, unknown>;
+}
+
 // Transform functions to ensure type safety
 function toFlashcardDeck(row: DbFlashcardDeck): FlashcardDeck {
   return {
@@ -219,7 +224,7 @@ export async function fetchDueCards(userId: string): Promise<UserFlashcard[]> {
   if (error) throw error;
   
   return (data || []).map((r) => ({
-    ...(r as Record<string, unknown>).flashcard as Record<string, unknown>,
+    ...(r as unknown as ReviewWithFlashcard).flashcard,
     review: {
       id: r.id,
       user_id: r.user_id,
@@ -258,7 +263,7 @@ export async function fetchDeckStudyCards(
     .limit(limit);
 
   const dueCards = (dueReviews || []).map((r) => ({
-    ...(r as Record<string, unknown>).flashcard as Record<string, unknown>,
+    ...(r as unknown as ReviewWithFlashcard).flashcard,
     review: {
       id: r.id,
       user_id: r.user_id,

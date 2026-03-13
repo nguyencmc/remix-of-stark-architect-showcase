@@ -94,8 +94,6 @@ export const CreateQuestionsStep = ({
     }));
     onQuestionsChange([...questions, ...mapped]);
     setActiveTab('manual');
-    // Navigate to first page of new questions
-    const _newTotalPages = Math.ceil((questions.length + mapped.length) / QUESTIONS_PER_PAGE);
     setCurrentPage(Math.ceil((questions.length + 1) / QUESTIONS_PER_PAGE));
   };
 

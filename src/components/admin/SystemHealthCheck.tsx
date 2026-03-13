@@ -208,7 +208,7 @@ export function SystemHealthCheck() {
     const edgeFnCheck = async () => {
       const start = performance.now();
       try {
-        const { data: _data, error: _error } = await supabase.functions.invoke('export-schema', {
+        await supabase.functions.invoke('export-schema', {
           method: 'POST',
           body: { healthCheck: true },
         });
