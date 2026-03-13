@@ -24,5 +24,3 @@ dist-ssr
 *.sln
 *.sw?
 bun.lockb
-node_modules/
-dist/
