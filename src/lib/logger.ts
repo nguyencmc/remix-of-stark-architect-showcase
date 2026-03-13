@@ -44,7 +44,6 @@ function log(level: LogLevel, message: string, context?: string, data?: unknown)
     // In production, only surface errors and warnings to console.
     // Extend here to push entries to an external observability service.
     if (level === "error" || level === "warn") {
-      // eslint-disable-next-line no-console
       console[level](formatEntry(entry), data ?? "");
     }
     return;
@@ -54,19 +53,15 @@ function log(level: LogLevel, message: string, context?: string, data?: unknown)
   const formatted = formatEntry(entry);
   switch (level) {
     case "debug":
-      // eslint-disable-next-line no-console
       console.debug(formatted, data ?? "");
       break;
     case "info":
-      // eslint-disable-next-line no-console
       console.info(formatted, data ?? "");
       break;
     case "warn":
-      // eslint-disable-next-line no-console
       console.warn(formatted, data ?? "");
       break;
     case "error":
-      // eslint-disable-next-line no-console
       console.error(formatted, data ?? "");
       break;
   }

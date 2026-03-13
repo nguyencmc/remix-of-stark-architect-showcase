@@ -10,7 +10,6 @@ import { Progress } from '@/components/ui/progress';
 import { AIExplanation } from '@/components/exam/AIExplanation';
 import { CameraPreview } from '@/components/exam/CameraPreview';
 import { useExamProctoring } from '@/hooks/useExamProctoring';
-import { HtmlContent } from '@/components/ui/HtmlContent';
 import { 
   Clock, 
   ChevronLeft, 
@@ -92,7 +91,7 @@ const ExamTaking = () => {
     queryFn: async () => {
       if (isPracticeMode) {
         // Fetch from question_sets table - try slug first, then ID
-        let query = supabase
+        const query = supabase
           .from('question_sets')
           .select('*')
           .eq('slug', slug)
