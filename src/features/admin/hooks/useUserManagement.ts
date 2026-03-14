@@ -287,9 +287,9 @@ export function useUserManagement(canView: boolean) {
     }
   };
 
-  const handleCSVUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCSVUpload = async (event: React.ChangeEvent<HTMLInputElement>): Promise<boolean> => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) return false;
 
     setImporting(true);
     try {

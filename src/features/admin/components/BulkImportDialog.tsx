@@ -14,7 +14,7 @@ import { Upload, Download } from 'lucide-react';
 interface BulkImportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCSVUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onCSVUpload: (event: React.ChangeEvent<HTMLInputElement>) => Promise<boolean>;
   onDownloadTemplate: () => void;
   importing: boolean;
   fileInputRef: RefObject<HTMLInputElement | null>;
