@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
@@ -130,16 +130,10 @@ const UserManagement = () => {
     }
   }, [canView, roleLoading, navigate, toast]);
 
-  useEffect(() => {
-    if (canView && session) {
-      fetchUsers();
-    }
-  }, [canView, session]);
-
   const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
   const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const url = new URL(`${SUPABASE_URL}/functions/v1/admin-users`);
@@ -172,7 +166,13 @@ const UserManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [SUPABASE_URL, SUPABASE_ANON_KEY, session, toast]);
+
+  useEffect(() => {
+    if (canView && session) {
+      fetchUsers();
+    }
+  }, [canView, session, fetchUsers]);
 
   const callAdminFunction = async (action: string, body: object) => {
     const url = new URL(`${SUPABASE_URL}/functions/v1/admin-users`);

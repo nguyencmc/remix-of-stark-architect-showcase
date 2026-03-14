@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback} from 'react';
 import {
     Dialog,
     DialogContent,
@@ -41,13 +41,7 @@ export function ExamLeaderboardModal({
     const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (open && examId) {
-            fetchLeaderboard();
-        }
-    }, [open, examId]);
-
-    const fetchLeaderboard = async () => {
+    const fetchLeaderboard = useCallback(async () => {
         setLoading(true);
         try {
             const { data: attempts, error } = await supabase
@@ -96,7 +90,13 @@ export function ExamLeaderboardModal({
         } finally {
             setLoading(false);
         }
-    };
+    }, [examId]);
+
+    useEffect(() => {
+        if (open && examId) {
+            fetchLeaderboard();
+        }
+    }, [open, examId, fetchLeaderboard]);
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);

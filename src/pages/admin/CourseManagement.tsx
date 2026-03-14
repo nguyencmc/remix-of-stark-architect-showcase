@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
@@ -116,13 +116,7 @@ const CourseManagement = () => {
     }
   }, [canView, roleLoading, navigate, toast]);
 
-  useEffect(() => {
-    if (canView) {
-      fetchData();
-    }
-  }, [canView]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     
     let coursesQuery = supabase
@@ -143,7 +137,13 @@ const CourseManagement = () => {
     setCourses(coursesData || []);
     setCategories(categoriesData || []);
     setLoading(false);
-  };
+  }, [isAdmin, hasPermission, user]);
+
+  useEffect(() => {
+    if (canView) {
+      fetchData();
+    }
+  }, [canView, fetchData]);
 
   const handleDelete = async (courseId: string) => {
     // Get course info for audit log

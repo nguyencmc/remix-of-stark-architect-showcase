@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -94,19 +94,7 @@ const PodcastEditor = () => {
     }
   }, [hasAccess, roleLoading, navigate]);
 
-  useEffect(() => {
-    fetchCategories();
-    if (isEditing) {
-      fetchPodcast();
-    }
-  }, [id]);
-
-  const fetchCategories = async () => {
-    const { data } = await supabase.from('podcast_categories').select('id, name');
-    setCategories(data || []);
-  };
-
-  const fetchPodcast = async () => {
+  const fetchPodcast = useCallback(async () => {
     setLoading(true);
     
     const { data: podcast, error } = await supabase
@@ -141,6 +129,18 @@ const PodcastEditor = () => {
     setDurationSeconds(totalSeconds % 60);
     
     setLoading(false);
+  }, [id, toast, navigate]);
+
+  useEffect(() => {
+    fetchCategories();
+    if (isEditing) {
+      fetchPodcast();
+    }
+  }, [isEditing, fetchPodcast]);
+
+  const fetchCategories = async () => {
+    const { data } = await supabase.from('podcast_categories').select('id, name');
+    setCategories(data || []);
   };
 
   const generateSlug = (text: string) => {

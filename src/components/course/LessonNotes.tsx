@@ -50,19 +50,7 @@ export const LessonNotes = ({ lessonId, lessonTitle, courseId }: LessonNotesProp
   const [deleting, setDeleting] = useState(false);
   const [activeTab, setActiveTab] = useState<'current' | 'all'>('current');
 
-  useEffect(() => {
-    if (user && lessonId) {
-      fetchNote();
-    }
-  }, [user, lessonId]);
-
-  useEffect(() => {
-    if (user && courseId && activeTab === 'all') {
-      fetchAllNotes();
-    }
-  }, [user, courseId, activeTab]);
-
-  const fetchNote = async () => {
+  const fetchNote = useCallback(async () => {
     if (!user) return;
     
     setLoading(true);
@@ -88,9 +76,21 @@ export const LessonNotes = ({ lessonId, lessonTitle, courseId }: LessonNotesProp
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, lessonId]);
 
-  const fetchAllNotes = async () => {
+  useEffect(() => {
+    if (user && lessonId) {
+      fetchNote();
+    }
+  }, [user, lessonId, fetchNote]);
+
+  useEffect(() => {
+    if (user && courseId && activeTab === 'all') {
+      fetchAllNotes();
+    }
+  }, [user, courseId, activeTab, fetchAllNotes]);
+
+  const fetchAllNotes = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -126,7 +126,7 @@ export const LessonNotes = ({ lessonId, lessonTitle, courseId }: LessonNotesProp
     } catch (error) {
       log.error('Error fetching all notes', error);
     }
-  };
+  }, [user, courseId]);
 
   const handleSave = useCallback(async () => {
     if (!user || !content.trim()) {

@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useArticle, useArticleComments, useArticles } from '../hooks';
 import { ArticleCard, ArticleSidebar } from '../components';
-import { PageHeader } from '@/components/PageHeader';
+import { PageHeader } from '@/components/layouts/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';

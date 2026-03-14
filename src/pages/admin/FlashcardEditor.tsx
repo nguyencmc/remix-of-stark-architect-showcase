@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
@@ -76,13 +76,7 @@ const FlashcardEditor = () => {
     }
   }, [hasAccess, roleLoading, navigate]);
 
-  useEffect(() => {
-    if (isEditing) {
-      fetchSet();
-    }
-  }, [id]);
-
-  const fetchSet = async () => {
+  const fetchSet = useCallback(async () => {
     setLoading(true);
     
     const { data: set, error } = await supabase
@@ -115,7 +109,13 @@ const FlashcardEditor = () => {
 
     setCards(cardsData || []);
     setLoading(false);
-  };
+  }, [id, toast, navigate]);
+
+  useEffect(() => {
+    if (isEditing) {
+      fetchSet();
+    }
+  }, [isEditing, fetchSet]);
 
   const addCard = () => {
     setCards([

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
@@ -117,26 +117,7 @@ const CourseEditor = () => {
     }
   }, [hasAccess, roleLoading, navigate, toast]);
 
-  useEffect(() => {
-    if (hasAccess) {
-      fetchCategories();
-      if (isEditing) {
-        fetchCourse();
-      } else {
-        setLoading(false);
-      }
-    }
-  }, [hasAccess, id]);
-
-  const fetchCategories = async () => {
-    const { data } = await supabase
-      .from('course_categories')
-      .select('id, name, slug')
-      .order('display_order');
-    setCategories(data || []);
-  };
-
-  const fetchCourse = async () => {
+  const fetchCourse = useCallback(async () => {
     setLoading(true);
 
     const { data: course, error } = await supabase
@@ -226,6 +207,25 @@ const CourseEditor = () => {
     }
 
     setLoading(false);
+  }, [id, toast, navigate, isAdmin, user]);
+
+  useEffect(() => {
+    if (hasAccess) {
+      fetchCategories();
+      if (isEditing) {
+        fetchCourse();
+      } else {
+        setLoading(false);
+      }
+    }
+  }, [hasAccess, isEditing, fetchCourse]);
+
+  const fetchCategories = async () => {
+    const { data } = await supabase
+      .from('course_categories')
+      .select('id, name, slug')
+      .order('display_order');
+    setCategories(data || []);
   };
 
   const generateSlug = (title: string) => {

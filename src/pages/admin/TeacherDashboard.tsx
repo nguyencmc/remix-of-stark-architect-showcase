@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
@@ -103,13 +103,7 @@ const TeacherDashboard = () => {
     }
   }, [hasAccess, roleLoading, navigate, toast]);
 
-  useEffect(() => {
-    if (hasAccess && user) {
-      fetchData();
-    }
-  }, [hasAccess, user]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     
     // Fetch all stats in parallel
@@ -186,7 +180,13 @@ const TeacherDashboard = () => {
 
     setRecentItems(items);
     setLoading(false);
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (hasAccess && user) {
+      fetchData();
+    }
+  }, [hasAccess, user, fetchData]);
 
   if (roleLoading) {
     return (

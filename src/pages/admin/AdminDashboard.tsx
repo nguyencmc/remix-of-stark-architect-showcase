@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
@@ -147,34 +147,7 @@ const AdminDashboard = () => {
     }
   }, [isAdmin, roleLoading, navigate, toast]);
 
-  useEffect(() => {
-    if (isAdmin) {
-      fetchAllData();
-    }
-  }, [isAdmin]);
-
-  const fetchAllData = async () => {
-    setLoading(true);
-    await Promise.all([
-      fetchStats(),
-      fetchDailyStats(),
-      fetchUsers(),
-    ]);
-    setLastUpdated(new Date());
-    setLoading(false);
-  };
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await fetchAllData();
-    setRefreshing(false);
-    toast({
-      title: "Đã cập nhật",
-      description: "Dữ liệu đã được làm mới",
-    });
-  };
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
@@ -230,9 +203,9 @@ const AdminDashboard = () => {
       totalEnrollments: enrollmentsCount || 0,
       completedCourses: completedCoursesCount || 0,
     });
-  };
+  }, []);
 
-  const fetchDailyStats = async () => {
+  const fetchDailyStats = useCallback(async () => {
     // Generate mock daily stats for the last 7 days
     // In production, this should come from analytics tables
     const days = [];
@@ -247,9 +220,9 @@ const AdminDashboard = () => {
       });
     }
     setDailyStats(days);
-  };
+  }, []);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
       .select('*')
@@ -282,6 +255,33 @@ const AdminDashboard = () => {
     }));
 
     setUsers(usersWithRoles);
+  }, []);
+
+  const fetchAllData = useCallback(async () => {
+    setLoading(true);
+    await Promise.all([
+      fetchStats(),
+      fetchDailyStats(),
+      fetchUsers(),
+    ]);
+    setLastUpdated(new Date());
+    setLoading(false);
+  }, [fetchStats, fetchDailyStats, fetchUsers]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchAllData();
+    }
+  }, [isAdmin, fetchAllData]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchAllData();
+    setRefreshing(false);
+    toast({
+      title: "Đã cập nhật",
+      description: "Dữ liệu đã được làm mới",
+    });
   };
 
   const filteredUsers = useMemo(() => {

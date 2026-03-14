@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback} from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -33,13 +33,7 @@ export function DashboardSuggestions({
   const { user } = useAuth();
   const [dueFlashcards, setDueFlashcards] = useState(0);
 
-  useEffect(() => {
-    if (user) {
-      fetchNotifications();
-    }
-  }, [user]);
-
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     // Fetch due flashcards count
     const { count: dueCount } = await supabase
       .from('user_flashcard_progress')
@@ -48,7 +42,13 @@ export function DashboardSuggestions({
       .lte('next_review_at', new Date().toISOString());
 
     setDueFlashcards(dueCount || 0);
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications();
+    }
+  }, [user, fetchNotifications]);
 
   // Calculate streak reward milestones
   const nextStreakMilestone = Math.ceil(streak / 7) * 7;

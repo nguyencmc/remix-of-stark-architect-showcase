@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
@@ -78,13 +78,7 @@ const QuestionSetManagement = () => {
     }
   }, [canView, roleLoading, navigate, toast]);
 
-  useEffect(() => {
-    if (canView && user) {
-      fetchData();
-    }
-  }, [canView, user]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     
     // Admin sees all question sets, others see only their own
@@ -105,7 +99,13 @@ const QuestionSetManagement = () => {
       setQuestionSets(data || []);
     }
     setLoading(false);
-  };
+  }, [isAdmin, user, toast]);
+
+  useEffect(() => {
+    if (canView && user) {
+      fetchData();
+    }
+  }, [canView, user, fetchData]);
 
   const handleDelete = async (setId: string) => {
     // Get question set info for audit log

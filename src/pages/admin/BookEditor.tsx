@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -84,21 +84,9 @@ const BookEditor = () => {
                 variant: "destructive",
             });
         }
-    }, [hasAccess, roleLoading, navigate]);
+    }, [hasAccess, roleLoading, navigate, toast, isEditing]);
 
-    useEffect(() => {
-        fetchCategories();
-        if (isEditing) {
-            fetchBook();
-        }
-    }, [id]);
-
-    const fetchCategories = async () => {
-        const { data } = await supabase.from('book_categories').select('id, name');
-        setCategories(data || []);
-    };
-
-    const fetchBook = async () => {
+    const fetchBook = useCallback(async () => {
         setLoading(true);
 
         const { data: book, error } = await supabase
@@ -144,6 +132,18 @@ const BookEditor = () => {
         }
 
         setLoading(false);
+    }, [id, toast, navigate]);
+
+    useEffect(() => {
+        fetchCategories();
+        if (isEditing) {
+            fetchBook();
+        }
+    }, [isEditing, fetchBook]);
+
+    const fetchCategories = async () => {
+        const { data } = await supabase.from('book_categories').select('id, name');
+        setCategories(data || []);
     };
 
     const generateSlug = (text: string) => {

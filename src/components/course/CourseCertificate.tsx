@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { getErrorMessage } from '@/lib/utils';
@@ -42,14 +42,7 @@ export const CourseCertificate = ({
   const [userProfile, setUserProfile] = useState<{ full_name: string | null } | null>(null);
   const certificateRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (user) {
-      fetchCertificate();
-      fetchUserProfile();
-    }
-  }, [user, courseId]);
-
-  const fetchCertificate = async () => {
+  const fetchCertificate = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -67,9 +60,9 @@ export const CourseCertificate = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, courseId]);
 
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = useCallback(async () => {
     if (!user) return;
     
     const { data } = await supabase
@@ -79,7 +72,14 @@ export const CourseCertificate = ({
       .maybeSingle();
     
     setUserProfile(data);
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchCertificate();
+      fetchUserProfile();
+    }
+  }, [user, courseId, fetchCertificate, fetchUserProfile]);
 
   const generateCertificateNumber = () => {
     const date = format(new Date(), "yyyyMMdd");

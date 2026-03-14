@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback} from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { getErrorMessage } from '@/lib/utils';
@@ -47,11 +47,7 @@ export const CourseReviews = ({ courseId, isEnrolled, onRatingUpdate }: CourseRe
   const [newComment, setNewComment] = useState("");
   const [isEditing, setIsEditing] = useState(false);
 
-  useEffect(() => {
-    fetchReviews();
-  }, [courseId]);
-
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -96,7 +92,11 @@ export const CourseReviews = ({ courseId, isEnrolled, onRatingUpdate }: CourseRe
       log.error("Error fetching reviews", error);
     }
     setLoading(false);
-  };
+  }, [courseId, user, onRatingUpdate]);
+
+  useEffect(() => {
+    fetchReviews();
+  }, [fetchReviews]);
 
   const handleSubmitReview = async () => {
     if (!user || newRating === 0) {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback} from 'react';
 import {
     Dialog,
     DialogContent,
@@ -46,13 +46,7 @@ export function ExamPreviewModal({
     const [totalQuestions, setTotalQuestions] = useState(0);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (open && examId) {
-            fetchQuestions();
-        }
-    }, [open, examId]);
-
-    const fetchQuestions = async () => {
+    const fetchQuestions = useCallback(async () => {
         setLoading(true);
         try {
             if (source === 'question_set') {
@@ -85,7 +79,13 @@ export function ExamPreviewModal({
         } finally {
             setLoading(false);
         }
-    };
+    }, [examId, source]);
+
+    useEffect(() => {
+        if (open && examId) {
+            fetchQuestions();
+        }
+    }, [open, examId, fetchQuestions]);
 
     const handleStartExam = () => {
         onOpenChange(false);

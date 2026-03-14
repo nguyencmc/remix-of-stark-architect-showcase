@@ -98,27 +98,7 @@ export const CourseTestTaking = ({ lessonId, onComplete }: CourseTestTakingProps
   } | null>(null);
   const [previousAttempts, setPreviousAttempts] = useState<TestAttempt[]>([]);
 
-  useEffect(() => {
-    fetchTestData();
-  }, [lessonId]);
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (testState === 'taking' && timeRemaining > 0) {
-      timer = setInterval(() => {
-        setTimeRemaining(prev => {
-          if (prev <= 1) {
-            handleSubmitTest();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [testState, timeRemaining]);
-
-  const fetchTestData = async () => {
+  const fetchTestData = useCallback(async () => {
     setLoading(true);
     try {
       // Fetch test info
@@ -171,7 +151,27 @@ export const CourseTestTaking = ({ lessonId, onComplete }: CourseTestTakingProps
     } finally {
       setLoading(false);
     }
-  };
+  }, [lessonId, user]);
+
+  useEffect(() => {
+    fetchTestData();
+  }, [fetchTestData]);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (testState === 'taking' && timeRemaining > 0) {
+      timer = setInterval(() => {
+        setTimeRemaining(prev => {
+          if (prev <= 1) {
+            handleSubmitTest();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [testState, timeRemaining, handleSubmitTest]);
 
   const handleStartTest = () => {
     if (!user) {

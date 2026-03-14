@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
@@ -83,11 +83,7 @@ const ExamManagement = () => {
     }
   }, [canView, roleLoading, navigate, toast]);
 
-  useEffect(() => {
-    if (canView && user) fetchData();
-  }, [canView, user]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     let q = supabase.from('exams').select('*').order('created_at', { ascending: false });
     if (!isAdmin && hasPermission('exams.edit_own')) q = q.eq('creator_id', user?.id);
@@ -98,7 +94,11 @@ const ExamManagement = () => {
     setExams((examsData || []).map(e => ({ ...e, is_proctored: (e as Record<string, unknown>).is_proctored as boolean ?? false })));
     setCategories(catsData || []);
     setLoading(false);
-  };
+  }, [isAdmin, hasPermission, user]);
+
+  useEffect(() => {
+    if (canView && user) fetchData();
+  }, [canView, user, fetchData]);
 
   const handleDelete = async (examId: string) => {
     const examToDelete = exams.find(e => e.id === examId);

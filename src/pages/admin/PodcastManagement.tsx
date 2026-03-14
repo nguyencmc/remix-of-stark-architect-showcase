@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
@@ -82,13 +82,7 @@ const PodcastManagement = () => {
     }
   }, [canView, roleLoading, navigate, toast]);
 
-  useEffect(() => {
-    if (canView && user) {
-      fetchData();
-    }
-  }, [canView, user]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     
     // Admin sees all podcasts, others see only their own
@@ -105,7 +99,13 @@ const PodcastManagement = () => {
     setPodcasts(podcastsData || []);
     setCategories(categoriesData || []);
     setLoading(false);
-  };
+  }, [isAdmin, hasPermission, user]);
+
+  useEffect(() => {
+    if (canView && user) {
+      fetchData();
+    }
+  }, [canView, user, fetchData]);
 
   const handleDelete = async (podcastId: string) => {
     // Get podcast info for audit log

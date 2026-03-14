@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback} from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,13 +32,7 @@ export function MyClassesSection() {
   const [memberships, setMemberships] = useState<ClassMember[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (user) {
-      fetchMyClasses();
-    }
-  }, [user]);
-
-  const fetchMyClasses = async () => {
+  const fetchMyClasses = useCallback(async () => {
     setLoading(true);
     
     const { data, error } = await supabase
@@ -67,7 +61,13 @@ export function MyClassesSection() {
     }
     
     setLoading(false);
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchMyClasses();
+    }
+  }, [user, fetchMyClasses]);
 
   const activeClasses = memberships.filter(m => m.status === 'active');
   const pendingClasses = memberships.filter(m => m.status === 'pending');

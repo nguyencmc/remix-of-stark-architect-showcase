@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getErrorMessage } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 
@@ -46,7 +46,7 @@ export const SmartRecommendations: React.FC = () => {
   const navigate = useNavigate();
 
   // Load cached recommendations or fetch new ones if first login today
-  const loadRecommendations = async () => {
+  const loadRecommendations = useCallback(async () => {
     if (!user) return;
     
     setIsLoading(true);
@@ -73,10 +73,10 @@ export const SmartRecommendations: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, generateNewRecommendations]);
 
   // Generate new AI recommendations and cache them
-  const generateNewRecommendations = async () => {
+  const generateNewRecommendations = useCallback(async () => {
     if (!user) return;
     
     setIsLoading(true);
@@ -115,7 +115,7 @@ export const SmartRecommendations: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, toast]);
 
   // Manual refresh handler
   const handleManualRefresh = async () => {
@@ -130,7 +130,7 @@ export const SmartRecommendations: React.FC = () => {
     if (user) {
       loadRecommendations();
     }
-  }, [user]);
+  }, [user, loadRecommendations]);
 
   const getTypeIcon = (type: string) => {
     switch (type) {
