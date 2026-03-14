@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -66,19 +66,7 @@ const ExamEditor = () => {
     }
   }, [hasAccess, roleLoading, navigate]);
 
-  useEffect(() => {
-    fetchCategories();
-    if (isEditing) {
-      fetchExam();
-    }
-  }, [id]);
-
-  const fetchCategories = async () => {
-    const { data } = await supabase.from('exam_categories').select('id, name');
-    setCategories(data || []);
-  };
-
-  const fetchExam = async () => {
+  const fetchExam = useCallback(async () => {
     setLoading(true);
 
     const { data: exam, error } = await supabase
@@ -120,6 +108,18 @@ const ExamEditor = () => {
       option_h: q.option_h || '',
     })) || []);
     setLoading(false);
+  }, [id, toast, navigate]);
+
+  useEffect(() => {
+    fetchCategories();
+    if (isEditing) {
+      fetchExam();
+    }
+  }, [isEditing, fetchExam]);
+
+  const fetchCategories = async () => {
+    const { data } = await supabase.from('exam_categories').select('id, name');
+    setCategories(data || []);
   };
 
   const _generateSlug = (text: string) => {

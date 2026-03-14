@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { usePermissionsContext } from '@/contexts/PermissionsContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -73,22 +73,7 @@ const QuestionSetEditor = () => {
     }
   }, [hasAccess, roleLoading, navigate, toast]);
 
-  useEffect(() => {
-    if (hasAccess) {
-      fetchCategories();
-      if (isEditMode && id) {
-        fetchData();
-      }
-    }
-  }, [hasAccess, isEditMode, id]);
-
-  const fetchCategories = async () => {
-    const { data } = await supabase.from('exam_categories').select('id, name').order('name');
-    setCategories(data || []);
-  };
-
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     
     // Fetch question set
@@ -142,6 +127,20 @@ const QuestionSetEditor = () => {
     }
 
     setLoading(false);
+  }, [id, toast, navigate]);
+
+  useEffect(() => {
+    if (hasAccess) {
+      fetchCategories();
+      if (isEditMode && id) {
+        fetchData();
+      }
+    }
+  }, [hasAccess, isEditMode, id, fetchData]);
+
+  const fetchCategories = async () => {
+    const { data } = await supabase.from('exam_categories').select('id, name').order('name');
+    setCategories(data || []);
   };
 
   // ── Image upload handler: lưu lên Supabase Storage "question-images" ───────
