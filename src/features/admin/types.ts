@@ -41,3 +41,23 @@ export interface UserWithRole {
 }
 
 export type AdminTab = 'overview' | 'users' | 'content' | 'system';
+
+export interface ImportResultItem {
+  success: boolean;
+  email?: string;
+  error?: string;
+}
+
+export interface EnrichedUser {
+  id: string;
+  email: string;
+  created_at: string;
+  profile?: {
+    user_id: string;
+    expires_at: string | null;
+    full_name: string | null;
+    username: string | null;
+    email: string | null;
+  };
+  roles: string[];
+}

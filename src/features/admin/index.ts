@@ -1,6 +1,12 @@
 export { useAdminData } from './hooks/useAdminData';
+export { useUserManagement } from './hooks/useUserManagement';
 export { AdminOverviewTab } from './components/AdminOverviewTab';
 export { AdminUsersTab } from './components/AdminUsersTab';
 export { AdminContentTab } from './components/AdminContentTab';
 export { AdminSystemTab } from './components/AdminSystemTab';
-export type { Stats, DailyStats, ContentDistribution, UserWithRole, AdminTab } from './types';
+export { CreateUserDialog } from './components/CreateUserDialog';
+export { BulkImportDialog } from './components/BulkImportDialog';
+export { UsersTable } from './components/UsersTable';
+export { ChangePasswordDialog } from './components/ChangePasswordDialog';
+export { DeleteUserDialog } from './components/DeleteUserDialog';
+export type { Stats, DailyStats, ContentDistribution, UserWithRole, AdminTab, EnrichedUser, ImportResultItem } from './types';
