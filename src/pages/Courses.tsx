@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/select";
 import { useWishlist } from "@/hooks/useWishlist";
 import { WishlistButton } from "@/components/course/WishlistButton";
-import PageHeader from "@/components/PageHeader";
+import PageHeader from "@/components/layouts/PageHeader";
 import { logger } from '@/lib/logger';
 
 const log = logger('Courses');

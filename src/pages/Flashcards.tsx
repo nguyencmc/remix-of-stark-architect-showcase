@@ -17,7 +17,7 @@ import {
   ArrowLeft
 } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
-import PageHeader from "@/components/PageHeader";
+import PageHeader from "@/components/layouts/PageHeader";
 
 interface FlashcardSet {
   id: string;

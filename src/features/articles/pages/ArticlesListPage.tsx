@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useArticles, useArticleCategories } from '../hooks';
 import { ArticleCard, ArticleSidebar } from '../components';
-import { PageHeader } from '@/components/PageHeader';
+import { PageHeader } from '@/components/layouts/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';

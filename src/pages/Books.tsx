@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Search, BookOpen, Star, Eye, User } from "lucide-react";
-import PageHeader from "@/components/PageHeader";
+import PageHeader from "@/components/layouts/PageHeader";
 import { logger } from '@/lib/logger';
 
 const log = logger('Books');

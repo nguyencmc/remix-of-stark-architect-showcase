@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import PageHeader from "@/components/PageHeader";
+import PageHeader from "@/components/layouts/PageHeader";
 
 interface PodcastCategory {
   id: string;

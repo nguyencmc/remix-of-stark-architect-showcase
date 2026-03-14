@@ -21,7 +21,7 @@ import {
   Upload,
   Trash2
 } from "lucide-react";
-import PageHeader from "@/components/PageHeader";
+import PageHeader from "@/components/layouts/PageHeader";
 import { logger } from '@/lib/logger';
 
 const log = logger('Settings');

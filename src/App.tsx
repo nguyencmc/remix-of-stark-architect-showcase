@@ -9,7 +9,7 @@ import { PermissionsProvider } from "@/contexts/PermissionsContext";
 import { MiniPlayerProvider } from "@/contexts/MiniPlayerContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { MiniPlayer } from "@/components/podcast/MiniPlayer";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorBoundary } from "@/components/layouts/ErrorBoundary";
 
 // Lazy load pages
 const Index = lazy(() => import("./pages/Index"));
