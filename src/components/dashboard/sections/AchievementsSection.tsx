@@ -23,7 +23,7 @@ import {
 import { useAchievements } from '@/hooks/useAchievements';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback} from 'react';
 
 interface LeaderboardEntry {
   user_id: string;
@@ -59,22 +59,12 @@ export function AchievementsSection() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
 
-  useEffect(() => {
-    loadProgress();
-  }, []);
-
-  useEffect(() => {
-    if (activeTab === 'leaderboard') {
-      fetchLeaderboard();
-    }
-  }, [activeTab]);
-
-  const loadProgress = async () => {
+  const loadProgress = useCallback(async () => {
     const p = await getUserProgress();
     setProgress(p);
-  };
+  }, [getUserProgress]);
 
-  const fetchLeaderboard = async () => {
+  const fetchLeaderboard = useCallback(async () => {
     if (leaderboard.length > 0) return; // Already loaded
     
     setLeaderboardLoading(true);
@@ -89,7 +79,17 @@ export function AchievementsSection() {
     } finally {
       setLeaderboardLoading(false);
     }
-  };
+  }, [leaderboard.length]);
+
+  useEffect(() => {
+    loadProgress();
+  }, [loadProgress]);
+
+  useEffect(() => {
+    if (activeTab === 'leaderboard') {
+      fetchLeaderboard();
+    }
+  }, [activeTab, fetchLeaderboard]);
 
   const totalPoints = earnedAchievements.reduce((acc, a) => acc + (a.points_reward || 0), 0);
 

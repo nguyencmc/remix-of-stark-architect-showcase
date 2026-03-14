@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback} from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -128,13 +128,7 @@ export function OverviewSection({
     }
   }, [user]);
 
-  useEffect(() => {
-    if (user) {
-      fetchContinueLearning();
-    }
-  }, [user]);
-
-  const fetchContinueLearning = async () => {
+  const fetchContinueLearning = useCallback(async () => {
     // Fetch recent course enrollments
     const { data: enrollments } = await supabase
       .from('user_course_enrollments')
@@ -173,7 +167,13 @@ export function OverviewSection({
     }
 
     setContinueLearning(items);
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchContinueLearning();
+    }
+  }, [user, fetchContinueLearning]);
 
   const formatLastActivity = (dateString: string) => {
     const date = new Date(dateString);

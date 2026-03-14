@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback} from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/lib/logger';
 
@@ -51,11 +51,7 @@ export function UserGrowthChart() {
   const [range, setRange] = useState<'7' | '14' | '30'>('7');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchUserGrowth();
-  }, [range]);
-
-  const fetchUserGrowth = async () => {
+  const fetchUserGrowth = useCallback(async () => {
     setLoading(true);
     const days = parseInt(range);
     const startDate = new Date();
@@ -106,7 +102,11 @@ export function UserGrowthChart() {
 
     setData(chartData);
     setLoading(false);
-  };
+  }, [range]);
+
+  useEffect(() => {
+    fetchUserGrowth();
+  }, [fetchUserGrowth]);
 
   return (
     <Card className="border-border/50">

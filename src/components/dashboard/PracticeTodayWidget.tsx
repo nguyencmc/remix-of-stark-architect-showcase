@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback} from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -148,7 +148,7 @@ export const PracticeTodayWidget = () => {
   const [smartSummary, setSmartSummary] = useState('');
   const [smartLoading, setSmartLoading] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const { data: sessions } = await supabase
@@ -178,6 +178,7 @@ export const PracticeTodayWidget = () => {
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false })
         .limit(1);
+      let foundLastSet = false;
       if (recentAttempts && recentAttempts.length > 0) {
         const { data: question } = await supabase
           .from('practice_questions')
@@ -190,11 +191,14 @@ export const PracticeTodayWidget = () => {
             .select('id, title')
             .eq('id', question.set_id)
             .maybeSingle();
-          if (set) setLastPracticeSet(set);
+          if (set) {
+            setLastPracticeSet(set);
+            foundLastSet = true;
+          }
         }
       }
 
-      if (!lastPracticeSet) {
+      if (!foundLastSet) {
         const { data: fallbackSet } = await supabase
           .from('question_sets')
           .select('id, title')
@@ -207,9 +211,9 @@ export const PracticeTodayWidget = () => {
       log.error('Error fetching practice today data', error);
     }
     setLoading(false);
-  };
+  }, [user]);
 
-  const computeSmartRecommendations = async () => {
+  const computeSmartRecommendations = useCallback(async () => {
     if (!user) return;
     setSmartLoading(true);
     try {
@@ -294,7 +298,7 @@ export const PracticeTodayWidget = () => {
     } finally {
       setSmartLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (user) {
@@ -303,7 +307,7 @@ export const PracticeTodayWidget = () => {
     } else {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, fetchData, computeSmartRecommendations]);
 
   const handleContinueExam = () => {
     if (inProgressSession) navigate(`/practice/exam/${inProgressSession.set_id}`, { state: { sessionId: inProgressSession.id } });

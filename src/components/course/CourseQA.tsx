@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback} from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { logger } from '@/lib/logger';
@@ -73,11 +73,7 @@ export const CourseQA = ({ courseId, lessonId, instructorId }: CourseQAProps) =>
   const [newAnswer, setNewAnswer] = useState<Record<string, string>>({});
   const [submittingAnswer, setSubmittingAnswer] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
-    fetchQuestions();
-  }, [courseId, lessonId]);
-
-  const fetchQuestions = async () => {
+  const fetchQuestions = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -119,7 +115,11 @@ export const CourseQA = ({ courseId, lessonId, instructorId }: CourseQAProps) =>
     } finally {
       setLoading(false);
     }
-  };
+  }, [courseId, lessonId]);
+
+  useEffect(() => {
+    fetchQuestions();
+  }, [fetchQuestions]);
 
   const fetchAnswers = async (questionId: string) => {
     try {

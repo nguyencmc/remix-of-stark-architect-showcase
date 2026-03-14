@@ -104,10 +104,8 @@ export const SyncedTranscript = ({
     
     // Update active line whenever currentTime changes
     const newActiveId = currentLine?.id ?? null;
-    if (newActiveId !== activeLineId) {
-      setActiveLineId(newActiveId);
-    }
-  }, [currentTime, lines]); // Remove activeLineId from dependencies to avoid stale closure
+    setActiveLineId(prev => prev !== newActiveId ? newActiveId : prev);
+  }, [currentTime, lines]);
 
   // Auto-scroll to active line
   useEffect(() => {

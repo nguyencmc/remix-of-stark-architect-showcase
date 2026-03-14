@@ -132,21 +132,21 @@ export const AchievementsBadgeDisplay: React.FC<AchievementsBadgeDisplayProps> =
   
   const [progress, setProgress] = React.useState<Record<string, number>>({});
 
+  const fetchProgress = React.useCallback(async () => {
+    const userProgress = await getUserProgress();
+    setProgress({
+      exams_completed: userProgress.exams_completed,
+      perfect_score: userProgress.perfect_scores,
+      streak_days: userProgress.streak_days,
+      questions_answered: userProgress.questions_answered,
+      points_earned: userProgress.points_earned,
+      flashcards_mastered: userProgress.flashcards_mastered,
+    });
+  }, [getUserProgress]);
+
   React.useEffect(() => {
-    const fetchProgress = async () => {
-      const userProgress = await getUserProgress();
-      setProgress({
-        exams_completed: userProgress.exams_completed,
-        perfect_score: userProgress.perfect_scores,
-        streak_days: userProgress.streak_days,
-        questions_answered: userProgress.questions_answered,
-        points_earned: userProgress.points_earned,
-        flashcards_mastered: userProgress.flashcards_mastered,
-      });
-    };
-    
     if (user) fetchProgress();
-  }, [user]);
+  }, [user, fetchProgress]);
 
   if (!user) {
     return (

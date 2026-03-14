@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback} from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { getErrorMessage } from '@/lib/utils';
 import { logger } from '@/lib/logger';
@@ -73,13 +73,7 @@ export const CourseTestEditor = ({ lessonId, lessonTitle }: CourseTestEditorProp
   });
   const [questions, setQuestions] = useState<TestQuestion[]>([]);
 
-  useEffect(() => {
-    if (open) {
-      fetchTestData();
-    }
-  }, [open, lessonId]);
-
-  const fetchTestData = async () => {
+  const fetchTestData = useCallback(async () => {
     setLoading(true);
     try {
       // Fetch test

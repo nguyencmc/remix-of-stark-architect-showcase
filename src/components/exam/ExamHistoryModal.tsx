@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback} from 'react';
 import {
     Dialog,
     DialogContent,
@@ -43,13 +43,7 @@ export function ExamHistoryModal({
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (open && examId && user) {
-            fetchHistory();
-        }
-    }, [open, examId, user]);
-
-    const fetchHistory = async () => {
+    const fetchHistory = useCallback(async () => {
         if (!user) return;
 
         setLoading(true);
@@ -70,7 +64,13 @@ export function ExamHistoryModal({
         } finally {
             setLoading(false);
         }
-    };
+    }, [user, examId]);
+
+    useEffect(() => {
+        if (open && examId && user) {
+            fetchHistory();
+        }
+    }, [open, examId, user, fetchHistory]);
 
     const formatTime = (seconds: number) => {
         const mins = Math.floor(seconds / 60);

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback} from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, LogOut, User, History, Settings, Trophy, LayoutDashboard, Shield, GraduationCap } from "lucide-react";
 import logo from "@/assets/logo.png";
@@ -43,15 +43,7 @@ export const Header = () => {
   const navigate = useNavigate();
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
-  useEffect(() => {
-    if (user) {
-      fetchProfile();
-    } else {
-      setProfile(null);
-    }
-  }, [user]);
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!user) return;
     
     const { data } = await supabase
@@ -63,7 +55,15 @@ export const Header = () => {
     if (data) {
       setProfile(data);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    } else {
+      setProfile(null);
+    }
+  }, [user, fetchProfile]);
 
   const handleSignOut = async () => {
     await signOut();

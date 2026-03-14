@@ -29,6 +29,7 @@ export function useExamSession({
   const [isStarted, setIsStarted] = useState(false);
   const timerRef = useRef<NodeJS.Timeout>();
   const startTimeRef = useRef<Record<string, number>>({});
+  const handleSubmitRef = useRef<(() => Promise<void>) | undefined>(undefined);
 
   // Initialize answers state
   useEffect(() => {
@@ -47,13 +48,13 @@ export function useExamSession({
 
   // Timer
   useEffect(() => {
-    if (!isStarted || timeLeft <= 0) return;
+    if (!isStarted) return;
 
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timerRef.current);
-          handleSubmit();
+          handleSubmitRef.current?.();
           return 0;
         }
         return prev - 1;
@@ -72,9 +73,10 @@ export function useExamSession({
       startTimeRef.current[currentQuestionId] = Date.now();
     }
 
+    const startTimes = startTimeRef.current;
     return () => {
-      if (currentQuestionId && startTimeRef.current[currentQuestionId]) {
-        const spent = Math.floor((Date.now() - startTimeRef.current[currentQuestionId]) / 1000);
+      if (currentQuestionId && startTimes[currentQuestionId]) {
+        const spent = Math.floor((Date.now() - startTimes[currentQuestionId]) / 1000);
         setAnswers((prev) => ({
           ...prev,
           [currentQuestionId]: {
@@ -169,6 +171,8 @@ export function useExamSession({
       setIsSubmitting(false);
     }
   }, [user, session, questions, answers, isSubmitting, onComplete]);
+
+  handleSubmitRef.current = handleSubmit;
 
   const goToQuestion = useCallback((index: number) => {
     if (index >= 0 && index < questions.length) {

@@ -122,7 +122,7 @@ export const VideoPlayer = forwardRef<VideoPlayerRef, VideoPlayerProps>(({
       videoRef.current.play().catch(() => {});
       setIsPlaying(true);
     }
-  }, [autoPlay, src]);
+  }, [autoPlay, src, videoInfo.type]);
 
   const togglePlay = () => {
     if (videoRef.current) {
