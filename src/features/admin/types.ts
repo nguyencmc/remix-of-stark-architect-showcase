@@ -61,3 +61,35 @@ export interface EnrichedUser {
   };
   roles: string[];
 }
+
+export type ViewMode = 'timeline' | 'table';
+
+export interface AuditLogStatsData {
+  todayCount: number;
+  permissionChanges: number;
+  roleChanges: number;
+  criticalActions: number;
+}
+
+export interface GroupedLogEntry {
+  date: string;
+  label: string;
+  logs: import('@/hooks/useAuditLogs').AuditLog[];
+}
+
+export interface ActionConfigItem {
+  label: string;
+  icon: React.ReactNode;
+  bgColor: string;
+  textColor: string;
+}
+
+export interface EntityLabelItem {
+  label: string;
+  icon: React.ReactNode;
+}
+
+export interface TimeFilterOption {
+  value: string;
+  label: string;
+}
