@@ -165,6 +165,34 @@ VITE_SUPABASE_PUBLISHABLE_KEY=<auto-configured>
 VITE_SUPABASE_PROJECT_ID=<auto-configured>
 ```
 
+## 🌐 Deploy lên DigitalOcean App Platform
+
+### Triển khai lần đầu
+1. Truy cập [DigitalOcean App Platform](https://cloud.digitalocean.com/apps) → **Create App**
+2. Chọn **Import from GitHub** và chọn repository `nguyencmc/ai-learn-and-exams-online-11921`
+3. DigitalOcean sẽ tự động nhận diện file `.do/app.yaml`
+4. Thêm các biến môi trường BUILD_TIME trong App Settings:
+   - `VITE_SUPABASE_URL` — URL dự án Supabase
+   - `VITE_SUPABASE_ANON_KEY` — Anon key của Supabase
+5. Nhấn **Deploy**
+
+### Khắc phục lỗi deploy sau khi đổi tên repository trên GitHub
+
+> ⚠️ **Lưu ý quan trọng**: Khi bạn đổi tên repository trên GitHub, DigitalOcean App Platform sẽ **ngừng nhận webhook** từ GitHub. Điều này khiến `deploy_on_push` không còn hoạt động và các commit mới sẽ không được deploy tự động.
+
+**Cách khắc phục:**
+1. Truy cập [DigitalOcean App Platform](https://cloud.digitalocean.com/apps) → chọn app của bạn
+2. Vào **Settings** → cuộn đến phần **App Source**
+3. Nhấn **Edit** bên cạnh source repository
+4. Chọn lại repository với tên mới từ danh sách GitHub
+   - Nếu không thấy repo, có thể cần cấp lại quyền cho DigitalOcean GitHub App tại [GitHub Settings → Applications](https://github.com/settings/installations)
+5. Lưu và trigger **Force Rebuild & Deploy**
+
+**Cách thay thế** — tạo app mới:
+1. Xóa app cũ trên DigitalOcean
+2. Tạo app mới từ repository đã đổi tên (DigitalOcean sẽ tự nhận `.do/app.yaml`)
+3. Thêm lại các biến môi trường BUILD_TIME
+
 ## 📦 Scripts
 
 ```bash

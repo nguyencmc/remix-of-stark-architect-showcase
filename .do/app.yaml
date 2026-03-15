@@ -8,6 +8,17 @@
 #      - VITE_SUPABASE_URL (your Supabase project URL)
 #      - VITE_SUPABASE_ANON_KEY (your Supabase anon/publishable key)
 #   5. Deploy!
+#
+# TROUBLESHOOTING - Deployment stopped after GitHub repo rename:
+#   If you renamed the repository on GitHub, DigitalOcean will stop receiving
+#   push events and deploy_on_push will no longer work. To fix:
+#   1. Go to https://cloud.digitalocean.com/apps → select your app
+#   2. Go to Settings → scroll to "App Source"
+#   3. Click "Edit" next to the source repository
+#   4. Re-select the repository with its new name from the GitHub list
+#      (you may need to re-authorize the DigitalOcean GitHub App)
+#   5. Save and trigger a manual deploy
+#   Alternatively, delete the old app and create a new one from the renamed repo.
 
 name: ai-exam-cloud
 region: sgp
