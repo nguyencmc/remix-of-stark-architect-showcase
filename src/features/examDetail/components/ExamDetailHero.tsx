@@ -6,6 +6,17 @@ import {
 import { cn } from "@/lib/utils";
 import type { ExamData, DifficultyConfig } from "../types";
 
+function stripHtml(html: string): string {
+  const TAG_RE = /<[^>]*>/g;
+  let prev = html;
+  let result = html.replace(TAG_RE, '');
+  while (result !== prev) {
+    prev = result;
+    result = result.replace(TAG_RE, '');
+  }
+  return result.replace(/&nbsp;/g, ' ');
+}
+
 interface ExamDetailHeroProps {
   exam: ExamData;
   isPracticeMode: boolean;
@@ -50,7 +61,7 @@ export function ExamDetailHero({ exam, isPracticeMode, totalQ, diffCfg, onBack, 
 
             {exam.description && (
               <p className="text-muted-foreground text-base md:text-lg max-w-2xl line-clamp-2">
-                {exam.description.replace(/<[^>]*>/g, '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ')}
+                {stripHtml(exam.description)}
               </p>
             )}
 
