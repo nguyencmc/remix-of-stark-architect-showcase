@@ -50,7 +50,7 @@ export function ExamDetailHero({ exam, isPracticeMode, totalQ, diffCfg, onBack, 
 
             {exam.description && (
               <p className="text-muted-foreground text-base md:text-lg max-w-2xl line-clamp-2">
-                {exam.description.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ')}
+                {exam.description.replace(/<[^>]*>/g, '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ')}
               </p>
             )}
 
