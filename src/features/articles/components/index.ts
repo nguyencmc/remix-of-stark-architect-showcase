@@ -1,3 +1,10 @@
 export { ArticleCard } from './ArticleCard';
 export { ArticleSidebar } from './ArticleSidebar';
 export { PopularTagsBar } from './PopularTagsBar';
+export { ArticleHeader } from './ArticleHeader';
+export { ArticleContent } from './ArticleContent';
+export { ArticleShareButtons } from './ArticleShareButtons';
+export { ArticleRelatedSection } from './ArticleRelatedSection';
+export { ArticleCommentSection } from './ArticleCommentSection';
+export { ArticleCommentItem } from './ArticleCommentItem';
+export { BackToTopButton } from './BackToTopButton';
