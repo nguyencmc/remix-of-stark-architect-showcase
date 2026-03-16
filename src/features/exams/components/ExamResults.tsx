@@ -130,7 +130,7 @@ export function ExamResults({
           <div className="text-center mb-4">
             <div
               className={`text-6xl font-bold mb-1 ${
-                scorePercent >= 80
+                scorePercent >= 70
                   ? "text-green-500"
                   : scorePercent >= 50
                     ? "text-yellow-500"
@@ -146,13 +146,7 @@ export function ExamResults({
           <Progress value={scorePercent} className="h-2.5 mb-6" />
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="rounded-xl bg-primary/10 p-4 text-center">
-              <div className="text-2xl font-bold text-primary">
-                {scorePercent}%
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">Điểm số</div>
-            </div>
+          <div className="grid grid-cols-3 gap-3">
             <div className="rounded-xl bg-green-500/10 p-4 text-center">
               <div className="text-2xl font-bold text-green-600">
                 {correctCount}
