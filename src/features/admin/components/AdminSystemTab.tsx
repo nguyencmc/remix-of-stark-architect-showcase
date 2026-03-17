@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { DatabaseBackup } from '@/components/admin/DatabaseBackup';
+import { DatabaseBackup } from '@/components/admin/databaseBackup';
 import { SystemHealthCheck } from '@/components/admin/SystemHealthCheck';
 import { Card, CardContent } from '@/components/ui/card';
 import {

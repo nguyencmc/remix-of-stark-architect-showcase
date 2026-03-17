@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CourseTestTaking } from '@/components/course/CourseTestTaking';
 import { LessonNotes } from '@/components/course/LessonNotes';
-import { CourseQA } from '@/components/course/CourseQA';
+import { CourseQA } from '@/components/course/courseQA';
 import { FileText, MessageSquare, BookOpen, Download, File, ClipboardList } from 'lucide-react';
 import type { Course, Lesson } from '../types';
 

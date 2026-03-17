@@ -11,8 +11,8 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Plus, Trash2, GripVertical, Video } from 'lucide-react';
-import { LessonEditor } from '@/components/admin/course/LessonEditor';
-import { CourseTestEditor } from '@/components/admin/course/CourseTestEditor';
+import { LessonEditor } from '@/components/admin/course/lessonEditor';
+import { CourseTestEditor } from '@/components/admin/course/courseTestEditor';
 import type { CourseSection, CourseLesson } from '@/features/courseEditor/types';
 
 interface CourseCurriculumProps {

@@ -1,4 +1,4 @@
-import type { CourseLesson } from '@/components/admin/course/LessonEditor';
+import type { CourseLesson } from '@/components/admin/course/lessonEditor';
 
 export type { CourseLesson };
 

@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';import {
   Zap,
   Trophy,
 } from 'lucide-react';
-import { PracticeTodayWidget } from '@/components/dashboard/PracticeTodayWidget';
+import { PracticeTodayWidget } from '@/components/dashboard/practiceTodayWidget';
 import { PracticeStatsWidget } from '@/components/dashboard/PracticeStatsWidget';
 import { cn } from '@/lib/utils';
 
