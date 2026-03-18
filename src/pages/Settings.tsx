@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { User, Save, Loader2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { User, Save, Loader2, Shield } from "lucide-react";
 import PageHeader from "@/components/layouts/PageHeader";
 import {
   useSettings,
@@ -9,6 +10,7 @@ import {
   ProfileFormFields,
   ProfileStatsDisplay,
   ViewProfileCard,
+  SecurityForm,
 } from "@/features/settings";
 
 const Settings = () => {
@@ -59,60 +61,79 @@ const Settings = () => {
         />
         <div>
           <h1 className="text-2xl font-bold text-foreground">Thiết lập tài khoản</h1>
-          <p className="text-muted-foreground mt-1">Quản lý thông tin cá nhân của bạn</p>
+          <p className="text-muted-foreground mt-1">Quản lý thông tin cá nhân và bảo mật của bạn</p>
         </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="w-5 h-5" />
-                Thông tin cá nhân
-              </CardTitle>
-              <CardDescription>
-                Cập nhật ảnh đại diện và thông tin hiển thị công khai
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <AvatarSection
-                avatarUrl={avatarUrl}
-                uploading={uploading}
-                fallbackChar={fallbackChar}
-                onUpload={handleAvatarUpload}
-                onRemove={handleRemoveAvatar}
-              />
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="profile">
+              <User className="w-4 h-4 mr-2" />
+              Hồ sơ cá nhân
+            </TabsTrigger>
+            <TabsTrigger value="security">
+              <Shield className="w-4 h-4 mr-2" />
+              Bảo mật
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="profile" className="space-y-6 mt-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  Thông tin cá nhân
+                </CardTitle>
+                <CardDescription>
+                  Cập nhật ảnh đại diện và thông tin hiển thị công khai
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <AvatarSection
+                  avatarUrl={avatarUrl}
+                  uploading={uploading}
+                  fallbackChar={fallbackChar}
+                  onUpload={handleAvatarUpload}
+                  onRemove={handleRemoveAvatar}
+                />
 
-              <Separator />
+                <Separator />
 
-              <ProfileFormFields
-                fullName={fullName}
-                onFullNameChange={setFullName}
-                username={username}
-                onUsernameChange={setUsername}
-                email={user?.email || ""}
-                bio={bio}
-                onBioChange={setBio}
-              />
+                <ProfileFormFields
+                  fullName={fullName}
+                  onFullNameChange={setFullName}
+                  username={username}
+                  onUsernameChange={setUsername}
+                  email={user?.email || ""}
+                  bio={bio}
+                  onBioChange={setBio}
+                />
 
-              <Separator />
+                <Separator />
 
-              {profile && <ProfileStatsDisplay profile={profile} />}
+                {profile && <ProfileStatsDisplay profile={profile} />}
 
-              <div className="flex justify-end">
-                <Button onClick={handleSave} disabled={saving} className="min-w-32">
-                  {saving ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  ) : (
-                    <Save className="w-4 h-4 mr-2" />
-                  )}
-                  Lưu thay đổi
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                <div className="flex justify-end">
+                  <Button onClick={handleSave} disabled={saving} className="min-w-32">
+                    {saving ? (
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    ) : (
+                      <Save className="w-4 h-4 mr-2" />
+                    )}
+                    Lưu thay đổi
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
-          {username && (
-            <ViewProfileCard username={username} onNavigate={navigate} />
-          )}
+            {username && (
+              <ViewProfileCard username={username} onNavigate={navigate} />
+            )}
+          </TabsContent>
+
+          <TabsContent value="security" className="space-y-6 mt-0">
+            <SecurityForm />
+          </TabsContent>
+        </Tabs>
       </div>
     </main>
   );

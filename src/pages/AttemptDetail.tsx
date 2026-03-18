@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,6 +19,8 @@ import {
   FileText,
   RefreshCcw,
   MinusCircle,
+  BookOpen,
+  Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -55,8 +59,10 @@ const PASS_THRESHOLD = 70;
 export default function AttemptDetail() {
   const { attemptId } = useParams<{ attemptId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(0);
+  const [creatingPractice, setCreatingPractice] = useState(false);
 
   const { data: attempt, isLoading: attemptLoading } = useQuery({
     queryKey: ["attempt", attemptId],
@@ -167,6 +173,80 @@ export default function AttemptDetail() {
 
   const currentQuestion = questions?.[selectedQuestionIndex];
 
+  // Get wrong + unanswered questions for practice
+  const wrongAndUnansweredQuestions = questions?.filter((q) => {
+    const userAnswer = answers[q.id];
+    return !userAnswer || userAnswer !== q.correct_answer;
+  }) || [];
+
+  const handleCreatePractice = async () => {
+    if (!user?.id) {
+      toast.error("Vui lòng đăng nhập để tạo bài luyện tập");
+      return;
+    }
+    if (wrongAndUnansweredQuestions.length === 0) return;
+
+    setCreatingPractice(true);
+    try {
+      const examTitle = attempt?.exam?.title || "Đề thi";
+      const title = `Ôn tập câu sai - ${examTitle}`;
+      const slug = title
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '') + '-' + Date.now();
+
+      // 1. Create question_set
+      const { data: newSet, error: setError } = await supabase
+        .from("question_sets")
+        .insert({
+          title,
+          slug,
+          description: `Bộ đề ôn tập ${wrongAndUnansweredQuestions.length} câu sai/chưa làm từ bài thi "${examTitle}"`,
+          level: attempt?.exam?.difficulty || "medium",
+          is_published: false,
+          question_count: wrongAndUnansweredQuestions.length,
+          creator_id: user.id,
+        })
+        .select()
+        .single();
+
+      if (setError) throw setError;
+
+      // 2. Insert wrong/unanswered questions as practice_questions
+      const practiceQuestions = wrongAndUnansweredQuestions.map((q, index) => ({
+        set_id: newSet.id,
+        question_text: q.question_text,
+        option_a: q.option_a,
+        option_b: q.option_b,
+        option_c: q.option_c || null,
+        option_d: q.option_d || null,
+        correct_answer: q.correct_answer,
+        explanation: q.explanation || null,
+        question_order: index + 1,
+        creator_id: user.id,
+      }));
+
+      const { error: questionsError } = await supabase
+        .from("practice_questions")
+        .insert(practiceQuestions);
+
+      if (questionsError) throw questionsError;
+
+      toast.success(
+        `Đã tạo bộ đề luyện tập ${wrongAndUnansweredQuestions.length} câu thành công!`,
+      );
+      navigate(`/practice/setup/${newSet.id}`);
+    } catch (error: any) {
+      console.error("Error creating practice set:", error);
+      toast.error(error.message || "Có lỗi xảy ra khi tạo bộ đề luyện tập");
+    } finally {
+      setCreatingPractice(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-muted/30">
       {lightboxSrc && (
@@ -213,6 +293,21 @@ export default function AttemptDetail() {
                 <RefreshCcw className="w-3.5 h-3.5" />
                 Làm lại
               </Button>
+              {wrongAndUnansweredQuestions.length > 0 && user && (
+                <Button
+                  size="sm"
+                  className="h-8 px-4 rounded-xl gap-1.5 text-xs bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
+                  onClick={handleCreatePractice}
+                  disabled={creatingPractice}
+                >
+                  {creatingPractice ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <BookOpen className="w-3.5 h-3.5" />
+                  )}
+                  Luyện tập câu sai
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -339,6 +434,7 @@ export default function AttemptDetail() {
                   })}
                 </div>
               </div>
+
             </div>
 
             {/* ── Right Column (70%): Details ── */}
