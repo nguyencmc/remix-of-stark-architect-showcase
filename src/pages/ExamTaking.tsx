@@ -29,6 +29,7 @@ const ExamTaking = () => {
 
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
+  const [attemptId, setAttemptId] = useState<string | null>(null);
 
   // --- Data fetching ---
   const { exam, questions: allQuestions, isLoading } = useExamData({
@@ -98,13 +99,15 @@ const ExamTaking = () => {
   const handleSubmit = useCallback(async () => {
     setIsSubmitted(true);
     setShowSubmitDialog(false);
-    await submit();
+    const id = await submit();
+    if (id) setAttemptId(id);
   }, [submit]);
 
   // --- Timer ---
-  const onTimeUp = useCallback(() => {
+  const onTimeUp = useCallback(async () => {
     setIsSubmitted(true);
-    submit();
+    const id = await submit();
+    if (id) setAttemptId(id);
   }, [submit]);
 
   const { timeLeft, durationSeconds } = useExamTimer({
@@ -150,6 +153,8 @@ const ExamTaking = () => {
         questions={questions}
         answers={answers}
         violationCount={proctoring.violationCount}
+        unansweredCount={unansweredCount}
+        attemptId={attemptId}
       />
     );
   }

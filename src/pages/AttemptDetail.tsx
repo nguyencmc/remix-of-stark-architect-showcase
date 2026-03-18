@@ -3,20 +3,20 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { HtmlContent } from "@/components/ui/HtmlContent";
 import { ImageLightbox } from "@/components/ui/ImageLightbox";
+import { AIExplanation } from "@/components/exam/AIExplanation";
 import {
   ArrowLeft,
   Clock,
-  Trophy,
   Calendar,
   CheckCircle2,
   XCircle,
   FileText,
   RefreshCcw,
+  MinusCircle,
 } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -50,10 +50,13 @@ interface ExamAttempt {
   };
 }
 
-const AttemptDetail = () => {
+const PASS_THRESHOLD = 70;
+
+export default function AttemptDetail() {
   const { attemptId } = useParams<{ attemptId: string }>();
   const navigate = useNavigate();
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(0);
 
   const { data: attempt, isLoading: attemptLoading } = useQuery({
     queryKey: ["attempt", attemptId],
@@ -64,7 +67,7 @@ const AttemptDetail = () => {
           *,
           exam:exams(id, title, slug, difficulty)
         `)
-        .eq("id", attemptId)
+        .eq("id", attemptId!)
         .maybeSingle();
 
       if (error) throw error;
@@ -96,20 +99,14 @@ const AttemptDetail = () => {
     return `${mins} phút ${secs} giây`;
   };
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-500";
-    if (score >= 60) return "text-yellow-500";
-    return "text-red-500";
-  };
-
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "easy":
-        return "bg-green-500/10 text-green-500 border-green-500/20";
+        return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
       case "medium":
-        return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
+        return "bg-amber-500/10 text-amber-600 border-amber-500/20";
       case "hard":
-        return "bg-red-500/10 text-red-500 border-red-500/20";
+        return "bg-red-500/10 text-red-600 border-red-500/20";
       default:
         return "bg-muted text-muted-foreground";
     }
@@ -129,21 +126,16 @@ const AttemptDetail = () => {
   };
 
   const getOptionLabel = (option: string) => {
-    const labels: Record<string, string> = {
-      A: "A",
-      B: "B",
-      C: "C",
-      D: "D",
-    };
+    const labels: Record<string, string> = { A: "A", B: "B", C: "C", D: "D" };
     return labels[option] || option;
   };
 
-  const answers = attempt?.answers as Record<string, string> || {};
+  const answers = (attempt?.answers as Record<string, string>) || {};
 
   if (!attemptLoading && !attempt) {
     return (
       <div className="min-h-screen bg-background">
-<div className="container mx-auto px-4 py-20 text-center">
+        <div className="container mx-auto px-4 py-20 text-center">
           <div className="max-w-md mx-auto">
             <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-6">
               <FileText className="w-10 h-10 text-muted-foreground" />
@@ -160,229 +152,326 @@ const AttemptDetail = () => {
             </Link>
           </div>
         </div>
-</div>
+      </div>
     );
   }
 
+  // Calculate stats
+  const total = attempt?.total_questions || 0;
+  const correct = attempt?.correct_answers || 0;
+  const answeredCount = Object.keys(answers).length;
+  const unanswered = total - answeredCount;
+  const wrong = answeredCount - correct;
+  const scorePercent = attempt?.score || 0;
+  const isPassed = scorePercent >= PASS_THRESHOLD;
+
+  const currentQuestion = questions?.[selectedQuestionIndex];
+
   return (
-    <div className="min-h-screen bg-background">
-      {lightboxSrc && <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />}
-      {/* Header Section */}
-      <section className="bg-gradient-to-br from-primary/10 via-background to-accent/10 py-8">
-        <div className="container mx-auto px-4">
-          <Button
-            variant="ghost"
-            className="mb-4"
-            onClick={() => navigate("/history")}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Quay lại lịch sử
-          </Button>
+    <div className="min-h-screen bg-muted/30">
+      {lightboxSrc && (
+        <ImageLightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+      )}
 
-          {isLoading ? (
-            <div className="space-y-4">
-              <Skeleton className="h-8 w-2/3" />
-              <Skeleton className="h-4 w-1/2" />
-            </div>
-          ) : attempt ? (
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl md:text-3xl font-bold">
-                  {attempt.exam?.title || "Đề thi"}
-                </h1>
-                {attempt.exam?.difficulty && (
-                  <Badge
-                    variant="outline"
-                    className={getDifficultyColor(attempt.exam.difficulty)}
-                  >
-                    {getDifficultyLabel(attempt.exam.difficulty)}
-                  </Badge>
-                )}
-              </div>
-
-              <div className="flex flex-wrap items-center gap-4 text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  <span>
-                    {format(new Date(attempt.completed_at), "dd/MM/yyyy HH:mm", {
-                      locale: vi,
-                    })}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  <span>{formatDuration(attempt.time_spent_seconds)}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Trophy className="w-4 h-4" />
-                  <span className={`font-semibold ${getScoreColor(attempt.score)}`}>
-                    {attempt.score}% ({attempt.correct_answers}/{attempt.total_questions} câu đúng)
-                  </span>
-                </div>
-              </div>
-
-              {attempt.exam?.slug && (
-                <div className="flex gap-3 mt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate(`/exam/${attempt.exam?.slug}`)}
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    Xem đề thi
-                  </Button>
-                  <Button onClick={() => navigate(`/exam/${attempt.exam?.slug}/take`)}>
-                    <RefreshCcw className="w-4 h-4 mr-2" />
-                    Làm lại
-                  </Button>
-                </div>
+      {/* ── Header ── */}
+      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur border-b border-border/50 shadow-sm">
+        <div className="max-w-[1400px] mx-auto flex items-center justify-between px-6 h-14">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-xl"
+              onClick={() => navigate("/history")}
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            <div className="leading-tight">
+              <h1 className="text-sm font-bold">Lịch sử bài làm</h1>
+              {attempt?.exam && (
+                <p className="text-[11px] text-muted-foreground">
+                  {attempt.exam.title}
+                </p>
               )}
             </div>
-          ) : null}
-        </div>
-      </section>
-
-      {/* Questions Review */}
-      <section className="py-8">
-        <div className="container mx-auto px-4">
-          {isLoading ? (
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <Card key={i}>
-                  <CardContent className="p-6">
-                    <Skeleton className="h-6 w-full mb-4" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-10 w-full" />
-                      <Skeleton className="h-10 w-full" />
-                      <Skeleton className="h-10 w-full" />
-                      <Skeleton className="h-10 w-full" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : questions && questions.length > 0 ? (
-            <div className="space-y-6">
-              {questions.map((question, index) => {
-                const userAnswer = answers[question.id];
-                const isCorrect = userAnswer === question.correct_answer;
-                const options = [
-                  { key: "A", value: question.option_a },
-                  { key: "B", value: question.option_b },
-                  ...(question.option_c ? [{ key: "C", value: question.option_c }] : []),
-                  ...(question.option_d ? [{ key: "D", value: question.option_d }] : []),
-                ];
-
-                return (
-                  <Card
-                    key={question.id}
-                    className={`border-2 ${
-                      isCorrect
-                        ? "border-green-500/30 bg-green-500/5"
-                        : userAnswer
-                        ? "border-red-500/30 bg-red-500/5"
-                        : "border-yellow-500/30 bg-yellow-500/5"
-                    }`}
-                  >
-                    <CardContent className="p-6">
-                      {/* Question Header */}
-                      <div className="flex items-start justify-between gap-4 mb-4">
-                        <div className="flex items-start gap-3">
-                          <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                              isCorrect
-                                ? "bg-green-500 text-white"
-                                : userAnswer
-                                ? "bg-red-500 text-white"
-                                : "bg-yellow-500 text-white"
-                            }`}
-                          >
-                            {index + 1}
-                          </div>
-                          <HtmlContent html={question.question_text} className="font-medium text-lg [&_img]:cursor-zoom-in [&_img]:rounded-md [&_img]:hover:opacity-80 [&_img]:transition-opacity" onClickImage={setLightboxSrc} />
-                        </div>
-                        <div className="flex-shrink-0">
-                          {isCorrect ? (
-                            <Badge className="bg-green-500/10 text-green-500 border-green-500/20">
-                              <CheckCircle2 className="w-3 h-3 mr-1" />
-                              Đúng
-                            </Badge>
-                          ) : userAnswer ? (
-                            <Badge className="bg-red-500/10 text-red-500 border-red-500/20">
-                              <XCircle className="w-3 h-3 mr-1" />
-                              Sai
-                            </Badge>
-                          ) : (
-                            <Badge className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">
-                              Bỏ qua
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Options */}
-                      <div className="space-y-2 mb-4">
-                        {options.map((option) => {
-                          const isUserChoice = userAnswer === option.key;
-                          const isCorrectOption = question.correct_answer === option.key;
-
-                          return (
-                            <div
-                              key={option.key}
-                              className={`p-3 rounded-lg border-2 flex items-center gap-3 ${
-                                isCorrectOption
-                                  ? "border-green-500 bg-green-500/10"
-                                  : isUserChoice && !isCorrect
-                                  ? "border-red-500 bg-red-500/10"
-                                  : "border-border bg-muted/30"
-                              }`}
-                            >
-                              <div
-                                className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold flex-shrink-0 ${
-                                  isCorrectOption
-                                    ? "bg-green-500 text-white"
-                                    : isUserChoice && !isCorrect
-                                    ? "bg-red-500 text-white"
-                                    : "bg-muted text-muted-foreground"
-                                }`}
-                              >
-                                {getOptionLabel(option.key)}
-                              </div>
-                              <HtmlContent html={option.value} className="flex-1" />
-                              {isCorrectOption && (
-                                <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
-                              )}
-                              {isUserChoice && !isCorrect && (
-                                <XCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      {/* Explanation */}
-                      {question.explanation && (
-                        <div className="p-4 rounded-lg bg-primary/5 border border-primary/20">
-                          <div className="flex items-center gap-2 text-primary font-medium mb-2">
-                            <FileText className="w-4 h-4" />
-                            Giải thích
-                          </div>
-                          <HtmlContent html={question.explanation} className="text-muted-foreground [&_img]:cursor-zoom-in [&_img]:rounded-md [&_img]:hover:opacity-80 [&_img]:transition-opacity" onClickImage={setLightboxSrc} />
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-16">
-              <p className="text-muted-foreground">Không có câu hỏi nào</p>
+          </div>
+          {attempt?.exam?.slug && (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-4 rounded-xl gap-1.5 text-xs"
+                onClick={() => navigate(`/exam/${attempt.exam?.slug}`)}
+              >
+                <FileText className="w-3.5 h-3.5" />
+                Xem đề thi
+              </Button>
+              <Button
+                size="sm"
+                className="h-8 px-4 rounded-xl gap-1.5 text-xs"
+                onClick={() => navigate(`/exam/${attempt.exam?.slug}/take`)}
+              >
+                <RefreshCcw className="w-3.5 h-3.5" />
+                Làm lại
+              </Button>
             </div>
           )}
         </div>
-      </section>
-</div>
-  );
-};
+      </header>
 
-export default AttemptDetail;
+      <div className="max-w-[1400px] mx-auto px-4 lg:px-6 py-6">
+        {isLoading ? (
+          <div className="grid lg:grid-cols-[300px_1fr] gap-6">
+            <Skeleton className="h-[600px] rounded-2xl" />
+            <Skeleton className="h-[600px] rounded-2xl" />
+          </div>
+        ) : (
+          <div className="grid lg:grid-cols-[300px_1fr] gap-6 items-start">
+            {/* ── Left Column (30%): Info, Stats, grid ── */}
+            <div className="sticky top-20 bg-background rounded-2xl border border-border/50 p-5 shadow-sm space-y-6">
+              {/* Exam Info */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="font-bold text-base leading-tight">
+                    {attempt?.exam?.title}
+                  </h2>
+                  {attempt?.exam?.difficulty && (
+                    <Badge
+                      variant="outline"
+                      className={`text-[10px] px-1.5 shrink-0 ${getDifficultyColor(
+                        attempt.exam.difficulty
+                      )}`}
+                    >
+                      {getDifficultyLabel(attempt.exam.difficulty)}
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex flex-col gap-1.5 text-xs text-muted-foreground font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5" />
+                    {attempt?.completed_at &&
+                      format(new Date(attempt.completed_at), "dd/MM/yyyy HH:mm", {
+                        locale: vi,
+                      })}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5" />
+                    {formatDuration(attempt?.time_spent_seconds || 0)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Pass/Fail % */}
+              <div className="flex items-center gap-4 py-3 border-y border-border/50">
+                <div
+                  className={`flex-1 shrink-0 px-3 py-2 rounded-xl border text-center ${
+                    isPassed
+                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                      : "bg-orange-500/10 border-orange-500/20 text-orange-600 dark:text-orange-400"
+                  }`}
+                >
+                  <div className="text-2xl font-black">{scorePercent}%</div>
+                  <div className="text-[10px] font-bold tracking-wide mt-0.5 flex items-center justify-center gap-1">
+                    {isPassed ? (
+                      <>
+                        <CheckCircle2 className="w-3 h-3" /> ĐẠT
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="w-3 h-3" /> CHƯA ĐẠT
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="flex-1 space-y-2">
+                  <div className="flex justify-between items-center text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                    <span>Đúng</span>
+                    <span>{correct}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs font-semibold text-red-600 dark:text-red-400">
+                    <span>Sai</span>
+                    <span>{wrong < 0 ? 0 : wrong}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs font-semibold text-muted-foreground">
+                    <span>Chưa làm</span>
+                    <span>{unanswered < 0 ? 0 : unanswered}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Question list (4 columns) */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-[10px] font-bold tracking-widest text-muted-foreground/70 uppercase">
+                    Danh sách câu hỏi
+                  </p>
+                  <span className="text-xs font-semibold">{total} câu</span>
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {questions?.map((q, idx) => {
+                    const userAnswer = answers[q.id];
+                    const isCorrect = userAnswer === q.correct_answer;
+                    const isActive = selectedQuestionIndex === idx;
+
+                    let bgClass = "bg-muted text-muted-foreground hover:bg-muted/80"; // Unanswered
+                    if (userAnswer) {
+                      bgClass = isCorrect
+                        ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/25"
+                        : "bg-red-500/15 text-red-700 dark:text-red-400 hover:bg-red-500/25";
+                    }
+
+                    return (
+                      <button
+                        key={q.id}
+                        onClick={() => setSelectedQuestionIndex(idx)}
+                        className={`h-10 rounded-lg flex flex-col items-center justify-center text-xs font-bold border transition-all ${
+                          isActive
+                            ? "border-primary shadow-md scale-105 opacity-100"
+                            : "border-transparent opacity-80"
+                        } ${bgClass}`}
+                      >
+                        <span className="text-[13px]">{idx + 1}</span>
+                        {/* Hiển thị đáp án đúng bên trong ô */}
+                        <span className="text-[9px] opacity-70 leading-none mt-0.5">
+                          {q.correct_answer}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* ── Right Column (70%): Details ── */}
+            <div className="bg-background rounded-2xl border border-border/50 shadow-sm min-h-[600px]">
+              {!currentQuestion ? (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  Chọn câu hỏi bên trái để xem chi tiết
+                </div>
+              ) : (
+                <div className="flex flex-col h-full">
+                  {/* Header of right col */}
+                  <div className="px-6 py-4 border-b border-border/50 flex items-center justify-between">
+                    <h3 className="font-bold text-lg flex items-center gap-2">
+                      <span className="text-muted-foreground font-medium">Câu</span>
+                      {selectedQuestionIndex + 1}
+                    </h3>
+                    {(() => {
+                      const ans = answers[currentQuestion.id];
+                      if (!ans) {
+                        return (
+                          <Badge className="bg-muted text-muted-foreground hover:bg-muted">
+                            <MinusCircle className="w-3.5 h-3.5 mr-1.5" /> Chưa làm
+                          </Badge>
+                        );
+                      }
+                      if (ans === currentQuestion.correct_answer) {
+                        return (
+                          <Badge className="bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/15 border-emerald-500/20">
+                            <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" /> Trả lời đúng
+                          </Badge>
+                        );
+                      }
+                      return (
+                        <Badge className="bg-red-500/15 text-red-600 hover:bg-red-500/15 border-red-500/20">
+                          <XCircle className="w-3.5 h-3.5 mr-1.5" /> Trả lời sai
+                        </Badge>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Body */}
+                  <div className="p-6 space-y-6 flex-1">
+                    {/* Question text */}
+                    <div className="text-[15px] font-medium leading-relaxed">
+                      <HtmlContent
+                        html={currentQuestion.question_text}
+                        onClickImage={setLightboxSrc}
+                        className="[&_img]:max-h-64 [&_img]:rounded-xl [&_img]:mx-auto [&_p]:mb-2 last:[&_p]:mb-0"
+                      />
+                    </div>
+
+                    {/* Options list */}
+                    <div className="space-y-2.5">
+                      {[
+                        { key: "A", value: currentQuestion.option_a },
+                        { key: "B", value: currentQuestion.option_b },
+                        ...(currentQuestion.option_c
+                          ? [{ key: "C", value: currentQuestion.option_c }]
+                          : []),
+                        ...(currentQuestion.option_d
+                          ? [{ key: "D", value: currentQuestion.option_d }]
+                          : []),
+                      ].map((opt) => {
+                        const isCorrectOption =
+                          currentQuestion.correct_answer === opt.key;
+                        const isUserChoice =
+                          answers[currentQuestion.id] === opt.key;
+
+                        let ringClass = "border-border/40 bg-muted/20"; // Normal
+                        if (isCorrectOption) {
+                          ringClass = "border-emerald-500/40 bg-emerald-500/10";
+                        } else if (isUserChoice) {
+                          ringClass = "border-red-500/40 bg-red-500/10";
+                        }
+
+                        return (
+                          <div
+                            key={opt.key}
+                            className={`flex items-start gap-3 p-3.5 rounded-xl border-2 transition-all ${ringClass}`}
+                          >
+                            <div
+                              className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold ${
+                                isCorrectOption
+                                  ? "bg-emerald-500 text-white"
+                                  : isUserChoice
+                                  ? "bg-red-500 text-white"
+                                  : "bg-muted text-muted-foreground"
+                              }`}
+                            >
+                              {getOptionLabel(opt.key)}
+                            </div>
+                            <HtmlContent
+                              html={opt.value}
+                              className="flex-1 mt-1 text-sm leading-snug [&_p]:mb-0"
+                            />
+                            {isCorrectOption && (
+                              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                            )}
+                            {isUserChoice && !isCorrectOption && (
+                              <XCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Explanation */}
+                    {currentQuestion.explanation && (
+                      <div className="bg-primary/5 border border-primary/20 rounded-xl p-5 mt-8">
+                        <div className="flex items-center gap-2 text-primary font-bold text-sm mb-3">
+                          <FileText className="w-4 h-4" />
+                          Giải thích chi tiết
+                        </div>
+                        <HtmlContent
+                          html={currentQuestion.explanation}
+                          className="text-sm text-muted-foreground leading-relaxed [&_img]:max-h-64 [&_img]:rounded-lg"
+                          onClickImage={setLightboxSrc}
+                        />
+                      </div>
+                    )}
+
+                    {/* AI Explanation */}
+                    <AIExplanation
+                      question={currentQuestion}
+                      userAnswer={answers[currentQuestion.id]}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

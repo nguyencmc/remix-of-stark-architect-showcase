@@ -22,14 +22,16 @@ export function useExamSubmission({
 }: UseExamSubmissionOptions) {
   const startTime = useRef(Date.now());
 
-  const submit = useCallback(async () => {
-    if (!questions.length || !exam) return;
+  const submit = useCallback(async (): Promise<string | null> => {
+    if (!questions.length || !exam) return null;
 
     const timeSpent = Math.floor((Date.now() - startTime.current) / 1000);
     const correctCount = questions.filter((q) =>
       isAnswerCorrect(q, answers[q.id]),
     ).length;
     const score = Math.round((correctCount / questions.length) * 100);
+
+    let attemptId: string | null = null;
 
     if (isPracticeMode && userId) {
       const { data: session } = await supabase
@@ -60,7 +62,7 @@ export function useExamSubmission({
         await supabase.from("practice_attempts").insert(attempts);
       }
     } else {
-      await supabase.from("exam_attempts").insert({
+      const { data: attempt } = await supabase.from("exam_attempts").insert({
         exam_id: exam.id,
         user_id: userId || null,
         score,
@@ -68,10 +70,13 @@ export function useExamSubmission({
         correct_answers: correctCount,
         time_spent_seconds: timeSpent,
         answers: answers,
-      });
+      }).select('id').single();
+
+      attemptId = attempt?.id ?? null;
     }
 
     await endProctoringSession();
+    return attemptId;
   }, [questions, exam, answers, userId, isPracticeMode, endProctoringSession]);
 
   return { submit };
