@@ -173,9 +173,9 @@ export default function AttemptDetail() {
   // Calculate stats
   const total = attempt?.total_questions || 0;
   const correct = attempt?.correct_answers || 0;
-  const answeredCount = Object.keys(answers).length;
-  const unanswered = total - answeredCount;
-  const wrong = answeredCount - correct;
+  const answeredCount = Math.min(Object.keys(answers).length, total);
+  const unanswered = Math.max(total - answeredCount, 0);
+  const wrong = Math.max(answeredCount - correct, 0);
   const scorePercent = attempt?.score || 0;
   const isPassed = scorePercent >= PASS_THRESHOLD;
 
@@ -392,11 +392,11 @@ export default function AttemptDetail() {
                   </div>
                   <div className="flex justify-between items-center text-xs font-semibold text-red-600 dark:text-red-400">
                     <span>Sai</span>
-                    <span>{wrong < 0 ? 0 : wrong}</span>
+                    <span>{wrong}</span>
                   </div>
                   <div className="flex justify-between items-center text-xs font-semibold text-muted-foreground">
                     <span>Chưa làm</span>
-                    <span>{unanswered < 0 ? 0 : unanswered}</span>
+                    <span>{unanswered}</span>
                   </div>
                 </div>
               </div>
@@ -409,10 +409,9 @@ export default function AttemptDetail() {
                   </p>
                   <span className="text-xs font-semibold">{total} câu</span>
                 </div>
-                <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-4 gap-2">
                   {questions?.map((q, idx) => {
                     const userAnswer = answers[q.id];
-                    const isCorrect = userAnswer === q.correct_answer;
                     const isActive = selectedQuestionIndex === idx;
 
                     const bgClass = getQuestionStateClass(userAnswer, q.correct_answer);
@@ -470,11 +469,11 @@ export default function AttemptDetail() {
                       <div className="text-[10px] text-muted-foreground">Đúng</div>
                     </div>
                     <div className="rounded-lg bg-red-500/10 py-2">
-                      <div className="text-sm font-bold text-red-600 dark:text-red-400">{wrong < 0 ? 0 : wrong}</div>
+                      <div className="text-sm font-bold text-red-600 dark:text-red-400">{wrong}</div>
                       <div className="text-[10px] text-muted-foreground">Sai</div>
                     </div>
                     <div className="rounded-lg bg-muted py-2">
-                      <div className="text-sm font-bold">{unanswered < 0 ? 0 : unanswered}</div>
+                      <div className="text-sm font-bold">{unanswered}</div>
                       <div className="text-[10px] text-muted-foreground">Chưa làm</div>
                     </div>
                   </div>
@@ -526,7 +525,7 @@ export default function AttemptDetail() {
               <div className="bg-background rounded-2xl border border-border/50 shadow-sm min-h-[600px]">
               {!currentQuestion ? (
                 <div className="flex items-center justify-center h-full text-muted-foreground">
-                  Chọn câu hỏi bên trái để xem chi tiết
+                  Chọn một câu hỏi để xem chi tiết
                 </div>
               ) : (
                 <div className="flex flex-col h-full">
