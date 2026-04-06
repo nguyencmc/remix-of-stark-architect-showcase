@@ -14,6 +14,7 @@ export const useClassAssignments = (classId: string | undefined) => {
     queryKey: ['class-assignments', classId],
     queryFn: async () => {
       if (!classId) return [];
+      if (!user) return [];
       
       const { data, error } = await supabase
         .from('class_assignments')
@@ -25,20 +26,21 @@ export const useClassAssignments = (classId: string | undefined) => {
       
       // Fetch submissions for current user
       const assignments = data as ClassAssignment[];
-      if (user && assignments.length > 0) {
-        const { data: membership } = await supabase
-          .from('class_members')
-          .select('role')
-          .eq('class_id', classId)
-          .eq('user_id', user.id)
-          .eq('status', 'active')
-          .single();
-
-        const { data: classInfo } = await supabase
-          .from('classes')
-          .select('creator_id')
-          .eq('id', classId)
-          .single();
+      if (assignments.length > 0) {
+        const [{ data: membership }, { data: classInfo }] = await Promise.all([
+          supabase
+            .from('class_members')
+            .select('role')
+            .eq('class_id', classId)
+            .eq('user_id', user.id)
+            .eq('status', 'active')
+            .single(),
+          supabase
+            .from('classes')
+            .select('creator_id')
+            .eq('id', classId)
+            .single(),
+        ]);
 
         const isManager =
           classInfo?.creator_id === user.id ||
@@ -49,15 +51,14 @@ export const useClassAssignments = (classId: string | undefined) => {
           ? assignments
           : assignments.filter((a) => a.is_published !== false);
 
-        if (visibleAssignments.length === 0) {
-          return [];
-        }
-
-        const { data: submissions } = await supabase
-          .from('assignment_submissions')
-          .select('*')
-          .eq('user_id', user.id)
-          .in('assignment_id', visibleAssignments.map(a => a.id));
+        const assignmentIds = visibleAssignments.map(a => a.id);
+        const { data: submissions } = assignmentIds.length > 0
+          ? await supabase
+              .from('assignment_submissions')
+              .select('*')
+              .eq('user_id', user.id)
+              .in('assignment_id', assignmentIds)
+          : { data: [] };
         
         const submissionMap = new Map(submissions?.map(s => [s.assignment_id, s]) || []);
         return visibleAssignments.map(a => ({
@@ -66,7 +67,7 @@ export const useClassAssignments = (classId: string | undefined) => {
         }));
       }
       
-      return assignments.filter((a) => a.is_published !== false);
+      return assignments;
     },
     enabled: !!classId,
   });

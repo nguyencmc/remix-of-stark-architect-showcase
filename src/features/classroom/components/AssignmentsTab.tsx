@@ -102,13 +102,13 @@ const AssignmentsTab = ({ classId, isManager }: AssignmentsTabProps) => {
               <DialogHeader>
                 <DialogTitle>Tạo bài tập mới</DialogTitle>
               </DialogHeader>
-                <div className="space-y-4">
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30 p-3">
-                    <p className="text-xs text-amber-700 dark:text-amber-300">
-                      Bài tập mới sẽ ở trạng thái nháp (chưa hiển thị cho học viên) để bạn kiểm tra trước khi đăng.
-                    </p>
-                  </div>
-                  <div>
+              <div className="space-y-4">
+                <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30 p-3">
+                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                    Bài tập mới sẽ ở trạng thái nháp (chưa hiển thị cho học viên) để bạn kiểm tra trước khi đăng.
+                  </p>
+                </div>
+                <div>
                   <Label>Tên bài tập *</Label>
                   <Input
                     placeholder="VD: Bài kiểm tra chương 1"
