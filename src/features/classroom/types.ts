@@ -99,5 +99,6 @@ export interface CreateAssignmentInput {
   type: AssignmentType;
   ref_id: string;
   due_at?: string;
+  is_published?: boolean;
   settings?: Record<string, unknown>;
 }

@@ -1,4 +1,4 @@
-import { Users, Crown, UserMinus, Loader2, UserPlus } from 'lucide-react';
+import { Users, Crown, UserMinus, Loader2, UserPlus, UserRoundCog } from 'lucide-react';
 import { useClassMembers, useRemoveMember, useUpdateMemberRole } from '../hooks';
 import { ClassMemberRole } from '../types';
 import { Button } from '@/components/ui/button';
@@ -55,7 +55,7 @@ const MembersTab = ({ classId, isManager }: MembersTabProps) => {
     await updateRole.mutateAsync({ classId, userId, role: 'assistant' });
   };
 
-  const _handleSetStudent = async (userId: string) => {
+  const handleSetStudent = async (userId: string) => {
     await updateRole.mutateAsync({ classId, userId, role: 'student' });
   };
 
@@ -99,22 +99,36 @@ const MembersTab = ({ classId, isManager }: MembersTabProps) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {teachers.map((member) => (
             <Card key={member.id}>
-              <CardContent className="flex items-center justify-between p-4">
-                <div className="flex items-center gap-3">
-                  <Avatar>
-                    <AvatarImage src={member.profile?.avatar_url || undefined} />
-                    <AvatarFallback>
-                      {member.profile?.full_name?.[0] || '?'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium">{member.profile?.full_name || 'Chưa đặt tên'}</p>
-                    <p className="text-sm text-muted-foreground">{member.profile?.email}</p>
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarImage src={member.profile?.avatar_url || undefined} />
+                      <AvatarFallback>
+                        {member.profile?.full_name?.[0] || '?'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">{member.profile?.full_name || 'Chưa đặt tên'}</p>
+                      <p className="text-sm text-muted-foreground">{member.profile?.email}</p>
+                    </div>
                   </div>
+                  <Badge variant={roleBadgeVariants[member.role]}>
+                    {roleLabels[member.role]}
+                  </Badge>
                 </div>
-                <Badge variant={roleBadgeVariants[member.role]}>
-                  {roleLabels[member.role]}
-                </Badge>
+                {isManager && member.role === 'assistant' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => handleSetStudent(member.user_id)}
+                    disabled={updateRole.isPending}
+                  >
+                    <UserRoundCog className="mr-2 h-4 w-4" />
+                    Chuyển về học viên
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ))}
