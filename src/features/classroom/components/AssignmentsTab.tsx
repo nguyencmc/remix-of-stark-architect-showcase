@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Plus, Trash2, FileText, BookOpen, Headphones, ClipboardList, Loader2, Calendar } from 'lucide-react';
+import { Plus, Trash2, FileText, BookOpen, Headphones, ClipboardList, Loader2, Calendar, Eye, EyeOff } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { useClassAssignments, useCreateAssignment, useDeleteAssignment } from '../hooks';
+import { useClassAssignments, useCreateAssignment, useDeleteAssignment, useToggleAssignmentPublish } from '../hooks';
 import { useRefData } from '../hooks/useRefData';
 import { AssignmentType } from '../types';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 
 interface AssignmentsTabProps {
   classId: string;
@@ -46,6 +47,7 @@ const AssignmentsTab = ({ classId, isManager }: AssignmentsTabProps) => {
   const { data: refData } = useRefData(type);
   const createAssignment = useCreateAssignment();
   const deleteAssignment = useDeleteAssignment();
+  const togglePublish = useToggleAssignmentPublish();
 
   const handleCreate = async () => {
     if (!title.trim() || !refId) return;
@@ -57,6 +59,7 @@ const AssignmentsTab = ({ classId, isManager }: AssignmentsTabProps) => {
       type,
       ref_id: refId,
       due_at: dueAt || undefined,
+      is_published: false,
     });
     
     // Reset form
@@ -70,6 +73,10 @@ const AssignmentsTab = ({ classId, isManager }: AssignmentsTabProps) => {
 
   const handleDelete = async (assignmentId: string) => {
     await deleteAssignment.mutateAsync({ assignmentId, classId });
+  };
+
+  const handleTogglePublish = async (assignmentId: string, isPublished: boolean) => {
+    await togglePublish.mutateAsync({ assignmentId, classId, isPublished });
   };
 
   if (isLoading) {
@@ -96,6 +103,11 @@ const AssignmentsTab = ({ classId, isManager }: AssignmentsTabProps) => {
                 <DialogTitle>Tạo bài tập mới</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
+                <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30 p-3">
+                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                    Bài tập mới sẽ ở trạng thái nháp (chưa hiển thị cho học viên) để bạn kiểm tra trước khi đăng.
+                  </p>
+                </div>
                 <div>
                   <Label>Tên bài tập *</Label>
                   <Input
@@ -194,6 +206,21 @@ const AssignmentsTab = ({ classId, isManager }: AssignmentsTabProps) => {
                       <CardTitle className="text-base">{assignment.title}</CardTitle>
                       <CardDescription className="flex items-center gap-2 mt-1">
                         <Badge variant="outline">{typeLabels[assignment.type]}</Badge>
+                        {isManager && (
+                          <Badge variant={assignment.is_published ? 'default' : 'secondary'} className="gap-1">
+                            {assignment.is_published ? (
+                              <>
+                                <Eye className="h-3 w-3" />
+                                Đã đăng
+                              </>
+                            ) : (
+                              <>
+                                <EyeOff className="h-3 w-3" />
+                                Nháp
+                              </>
+                            )}
+                          </Badge>
+                        )}
                         {assignment.due_at && (
                           <span className="flex items-center gap-1 text-xs">
                             <Calendar className="h-3 w-3" />
@@ -204,14 +231,27 @@ const AssignmentsTab = ({ classId, isManager }: AssignmentsTabProps) => {
                     </div>
                   </div>
                   {isManager && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => handleDelete(assignment.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 pr-2 border-r">
+                        <Switch
+                          checked={assignment.is_published ?? false}
+                          onCheckedChange={(checked) => handleTogglePublish(assignment.id, checked)}
+                          disabled={togglePublish.isPending}
+                          aria-label={assignment.is_published ? 'Ẩn bài tập' : 'Đăng bài tập'}
+                        />
+                        <span className="text-xs text-muted-foreground hidden sm:inline">
+                          {assignment.is_published ? 'Đang hiển thị' : 'Đang ẩn'}
+                        </span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => handleDelete(assignment.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   )}
                 </div>
               </CardHeader>

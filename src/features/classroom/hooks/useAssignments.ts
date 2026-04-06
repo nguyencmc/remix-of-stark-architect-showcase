@@ -14,6 +14,7 @@ export const useClassAssignments = (classId: string | undefined) => {
     queryKey: ['class-assignments', classId],
     queryFn: async () => {
       if (!classId) return [];
+      if (!user) return [];
       
       const { data, error } = await supabase
         .from('class_assignments')
@@ -25,15 +26,42 @@ export const useClassAssignments = (classId: string | undefined) => {
       
       // Fetch submissions for current user
       const assignments = data as ClassAssignment[];
-      if (user && assignments.length > 0) {
-        const { data: submissions } = await supabase
-          .from('assignment_submissions')
-          .select('*')
-          .eq('user_id', user.id)
-          .in('assignment_id', assignments.map(a => a.id));
+      if (assignments.length > 0) {
+        const [{ data: membership }, { data: classInfo }] = await Promise.all([
+          supabase
+            .from('class_members')
+            .select('role')
+            .eq('class_id', classId)
+            .eq('user_id', user.id)
+            .eq('status', 'active')
+            .single(),
+          supabase
+            .from('classes')
+            .select('creator_id')
+            .eq('id', classId)
+            .single(),
+        ]);
+
+        const isManager =
+          classInfo?.creator_id === user.id ||
+          membership?.role === 'teacher' ||
+          membership?.role === 'assistant';
+
+        const visibleAssignments = isManager
+          ? assignments
+          : assignments.filter((a) => a.is_published !== false);
+
+        const assignmentIds = visibleAssignments.map(a => a.id);
+        const { data: submissions } = assignmentIds.length > 0
+          ? await supabase
+              .from('assignment_submissions')
+              .select('*')
+              .eq('user_id', user.id)
+              .in('assignment_id', assignmentIds)
+          : { data: [] };
         
         const submissionMap = new Map(submissions?.map(s => [s.assignment_id, s]) || []);
-        return assignments.map(a => ({
+        return visibleAssignments.map(a => ({
           ...a,
           my_submission: submissionMap.get(a.id) as AssignmentSubmission | undefined,
         }));
@@ -61,6 +89,7 @@ export const useCreateAssignment = () => {
         type: input.type,
         ref_id: input.ref_id,
         due_at: input.due_at || null,
+        is_published: input.is_published ?? false,
         settings: (input.settings || {}) as Database['public']['Tables']['class_assignments']['Insert']['settings'],
         created_by: user.id,
       };
@@ -100,6 +129,39 @@ export const useDeleteAssignment = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['class-assignments', variables.classId] });
       toast({ title: 'Đã xóa bài tập' });
+    },
+    onError: (error) => {
+      toast({ title: 'Lỗi', description: error.message, variant: 'destructive' });
+    },
+  });
+};
+
+export const useToggleAssignmentPublish = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({
+      assignmentId,
+      classId: _classId,
+      isPublished,
+    }: {
+      assignmentId: string;
+      classId: string;
+      isPublished: boolean;
+    }) => {
+      const { error } = await supabase
+        .from('class_assignments')
+        .update({ is_published: isPublished })
+        .eq('id', assignmentId);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['class-assignments', variables.classId] });
+      toast({
+        title: variables.isPublished ? 'Đã đăng bài tập' : 'Đã ẩn bài tập',
+      });
     },
     onError: (error) => {
       toast({ title: 'Lỗi', description: error.message, variant: 'destructive' });
