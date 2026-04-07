@@ -18,7 +18,7 @@ serve(async (req) => {
     const apiKey = Deno.env.get('NVIDIA_API_KEY') ?? Deno.env.get('GEMINI_API_KEY');
     if (!apiKey) {
       return new Response(
-        JSON.stringify({ error: 'NVIDIA_API_KEY chưa được cấu hình. Vui lòng liên hệ quản trị viên.' }),
+        JSON.stringify({ error: 'NVIDIA_API_KEY hoặc GEMINI_API_KEY chưa được cấu hình. Vui lòng liên hệ quản trị viên.' }),
         { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
